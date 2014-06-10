@@ -112,6 +112,12 @@ namespace Grader.gui {
             onlyKMN = layout.Add("Только КМН?", new CheckBox());
 
             strikeKMN = layout.Add("Пометить КМН", new CheckBox());
+            ToolTip strikeKMNtooltip = new ToolTip();
+            strikeKMNtooltip.ShowAlways = true;
+            strikeKMNtooltip.InitialDelay = 500;
+            strikeKMNtooltip.ReshowDelay = 500;
+            strikeKMNtooltip.SetToolTip(strikeKMN, "\"Представлен на экзамен в составе уч. гр. кандидатов на должности МК\"");
+            strikeKMNtooltip.SetToolTip(layout.LabelForControl(strikeKMN), "\"Представлен на экзамен в составе уч. гр. кандидатов на должности МК\"");
 
             layout.AddSpacer(10);
 

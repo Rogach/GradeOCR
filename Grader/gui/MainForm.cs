@@ -37,7 +37,6 @@ namespace Grader.gui {
             this.Controls.Add(menuStrip);
             this.MainMenuStrip = menuStrip;
 
-
             tabs = new TabControl();
             tabs.SuspendLayout();
             tabs.Location = new Point(0, 24);
@@ -46,7 +45,7 @@ namespace Grader.gui {
             tabs.Size = new System.Drawing.Size(1200, 776);
 
             AddTab(tabs, new RegisterGenerationTab(dataAccess));
-            AddTab(tabs, new TabPage("Внесение ведомостей"));
+            AddTab(tabs, new RegisterImportTab(dataAccess));
             AddTab(tabs, new TabPage("Просмотр оценок"));
             AddTab(tabs, new TabPage("Анализ оценок"));
 
