@@ -1,0 +1,5 @@
+*.laccdb
+Grades.accdb
+bin/
+obj/
+*.suo
