@@ -68,6 +68,8 @@ namespace Grader.gui {
             subunitSelector = layout.Add("Подразделение", new ComboBox());
             subunitSelector.Items.AddRange(dc.GetTable<Подразделение>().ToListTimed().ToArray());
             subunitSelector.SelectedIndex = 0;
+            subunitSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            subunitSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
 
             forAllPlatoons = layout.Add("", new CheckBox());
             forAllPlatoons.Text = "Все взвода?";
@@ -79,12 +81,16 @@ namespace Grader.gui {
 
             studyType = layout.Add("Тип обучения", new ComboBox());
             studyType.PopulateComboBox(typeof(StudyType));
+            studyType.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            studyType.AutoCompleteSource = AutoCompleteSource.ListItems;
 
             vusSelector = layout.Add("ВУС", new ComboBox());
             string[] possibleVuses =
                 dc.GetTable<Военнослужащий>().Select(v => v.ВУС).Distinct().ToListTimed()
                 .Where(v => v != 0).Select(v => v.ToString()).ToArray();
             vusSelector.Items.AddRange(possibleVuses);
+            vusSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            vusSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
             
             registerDate = layout.Add("Дата", new DateTimePicker());
             registerDate.Value = DateTime.Now;
@@ -112,9 +118,13 @@ namespace Grader.gui {
             registerSubjectSelect = layout.Add("ведомость:", new ComboBox());
             registerSubjectSelect.Items.AddRange(registerSpecs);
             registerSubjectSelect.SelectedIndex = 0;
+            registerSubjectSelect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            registerSubjectSelect.AutoCompleteSource = AutoCompleteSource.ListItems;
 
             registerTypeSelect = layout.Add("Тип ведомости", new ComboBox());
             registerTypeSelect.PopulateComboBox(typeof(RegisterType));
+            registerTypeSelect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            registerTypeSelect.AutoCompleteSource = AutoCompleteSource.ListItems;
 
             generateRegisterButton = layout.AddFullRow(new Button());
             generateRegisterButton.Text = "создать ведомость";
