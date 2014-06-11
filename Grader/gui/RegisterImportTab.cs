@@ -68,9 +68,11 @@ namespace Grader.gui {
                     ListViewItem item = registerList.Items[registerList.SelectedIndices[0]];
                     RegisterDesc rd = (RegisterDesc) item.Tag;
                     if (CheckForUnsavedChanges()) {
+                        SetRegisterPanelEnabled(false);
                         SelectRegisterInList(rd.id);
                         Register r = RegisterLoad.LoadRegister(rd.id, dataAccess.GetDataContext());
                         registerEditor.SetRegister(r);
+                        changesPending = false;
                         SetRegisterPanelEnabled(true);
                     }
                 }

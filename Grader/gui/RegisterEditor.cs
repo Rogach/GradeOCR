@@ -233,6 +233,20 @@ namespace Grader.gui {
                 RegisterEdited(this, null);
             });
 
+            registerDataGridView.ColumnAdded += new DataGridViewColumnEventHandler(delegate(object e, DataGridViewColumnEventArgs args) {
+                args.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                if (args.Column.Index == 0) {
+                    args.Column.Width = 45;
+                } else if (args.Column.Index == 1) {
+                    args.Column.Width = 100;
+                } else if (args.Column.Index == 2) {
+                    args.Column.Width = 150;
+                } else {
+                    args.Column.Width = 40;
+                    args.Column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                }
+            });
+
             this.Controls.Add(registerDataGridView);
         }
 
@@ -279,6 +293,7 @@ namespace Grader.gui {
                 cells.Add(record.soldier.Код.ToString());
                 cells.Add(record.soldier.Звание.Название);
                 cells.Add(record.soldier.ФИО);
+
                 foreach (int subjectId in register.subjectIds) {
                     Option<Оценка> markOpt = record.marks.FindOption(g => g.КодПредмета == subjectId);
                     if (markOpt.IsEmpty()) {
@@ -298,19 +313,6 @@ namespace Grader.gui {
             registerDataGridView.DataSource = registerDataSet;
             registerDataGridView.DataMember = "register";
             registerDataGridView.Refresh();
-            registerDataGridView.ColumnAdded += new DataGridViewColumnEventHandler(delegate (object e, DataGridViewColumnEventArgs args) {
-                args.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
-                if (args.Column.Index == 0) {
-                    args.Column.Width = 45;
-                } else if (args.Column.Index == 1) {
-                    args.Column.Width = 100;
-                } else if (args.Column.Index == 2) {
-                    args.Column.Width = 150;
-                } else {
-                    args.Column.Width = 40;
-                    args.Column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                }
-            });
         }
 
         public Register GetRegister() {
