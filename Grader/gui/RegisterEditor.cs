@@ -15,10 +15,22 @@ using System.Data.Linq;
 namespace Grader.gui {
     public class RegisterEditor : Panel {
         DataAccess dataAccess;
+        Dictionary<string, int> subjectNameToId;
+        Dictionary<int, string> subjectIdToName;
 
         public RegisterEditor(DataAccess dataAccess) {
             this.dataAccess = dataAccess;
             this.InitializeComponent();
+            subjectNameToId = 
+                dataAccess.GetDataContext().GetTable<Предмет>()
+                .Select(s => new { id = s.Код, name = s.Название })
+                .ToListTimed()
+                .ToDictionary(s => s.name, s => s.id);
+            subjectIdToName =
+                dataAccess.GetDataContext().GetTable<Предмет>()
+                .Select(s => new { id = s.Код, name = s.Название })
+                .ToListTimed()
+                .ToDictionary(s => s.id, s => s.name);
         }
 
         private Register currentRegister;
@@ -224,7 +236,7 @@ namespace Grader.gui {
                 tags = new List<string>(),
                 virt = false,
                 enabled = true,
-                subjects = new List<string>(),
+                subjectIds = new List<int>(),
                 records = new List<RegisterRecord>()
             };
         }
@@ -246,8 +258,8 @@ namespace Grader.gui {
             registerDataTable.Columns.Add(new DataColumn("Звание"));
             registerDataTable.Columns.Add(new DataColumn("Фамилия И.О."));
 
-            foreach (string subject in register.subjects) {
-                registerDataTable.Columns.Add(new DataColumn(subject));
+            foreach (int subjectId in register.subjectIds) {
+                registerDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
             }
 
             foreach (RegisterRecord record in register.records) {
@@ -255,16 +267,16 @@ namespace Grader.gui {
                 cells.Add(record.soldier.Код.ToString());
                 cells.Add(record.soldier.Звание.Название);
                 cells.Add(record.soldier.ФИО);
-                foreach (string subject in register.subjects) {
-                    Option<Mark> markOpt = record.marks.GetOption(subject);
+                foreach (int subjectId in register.subjectIds) {
+                    Option<Оценка> markOpt = record.marks.FindOption(g => g.КодПредмета == subjectId);
                     if (markOpt.IsEmpty()) {
                         cells.Add("");
                     }
-                    record.marks.GetOption(subject).ForEach(mark => {
-                        if (mark is Grade) {
-                            cells.Add(((Grade) mark).value.ToString());
-                        } else if (mark is Comment) {
-                            cells.Add(((Comment) mark).comment.ToString());
+                    markOpt.ForEach(grade => {
+                        if (grade.ЭтоКомментарий) {
+                            cells.Add(grade.Текст);
+                        } else {
+                            cells.Add(grade.Значение.ToString());
                         }
                     });
                 }
@@ -290,7 +302,10 @@ namespace Grader.gui {
         }
 
         public Register GetRegister() {
-            List<string> subjects = registerDataGridView.Columns.ToNormalList<DataGridViewColumn>().Skip(3).Select(col => col.Name).ToList();
+            List<int> subjectIds = 
+                registerDataGridView.Columns
+                .ToNormalList<DataGridViewColumn>().Skip(3)
+                .Select(col => subjectNameToId[col.Name]).ToList();
             return new Register {
                 id = currentRegister.id,
                 name = registerName.Text,
@@ -300,26 +315,41 @@ namespace Grader.gui {
                 tags = registerTags.Text.Split(new char[] { ' ' }).Where(t => t.Trim().Length > 0).ToList(),
                 virt = registerVirtual.Checked,
                 enabled = registerEnabled.Checked,
-                subjects = subjects,
+                subjectIds = subjectIds,
                 records = 
                     registerDataGridView.Rows.ToNormalList<DataGridViewRow>()
                     .Where(row => row.Cells[0].Value.ToString().Trim().Length > 0)
                     .Select(row => {
-                        Dictionary<string, Mark> marks = new Dictionary<string, Mark>();
+                        Военнослужащий soldier = dataAccess.GetDataContext().GetTable<Военнослужащий>()
+                                .Where(v => v.Код == Int32.Parse(row.Cells[0].Value.ToString()))
+                                .ToListTimed().First();
+                        List<Оценка> marks = new List<Оценка>();
                         for (int col = 3; col < registerDataGridView.Columns.Count; col++) {
-                            Util.ParseInt(row.Cells[col].Value.ToString()).Map(g => {
-                                marks.Add(subjects[col - 3], new Grade { value = g });
+                            Оценка g = new Оценка {
+                                Код = -1,
+                                КодПроверяемого = soldier.Код,
+                                КодПредмета = subjectIds[col - 3],
+                                КодПодразделения = soldier.КодПодразделения,
+                                ВУС = soldier.ВУС,
+                                ТипВоеннослужащего = soldier.ТипВоеннослужащего,
+                                КодЗвания = soldier.КодЗвания,
+                                КодВедомости = -1
+                            };
+                            Util.ParseInt(row.Cells[col].Value.ToString()).Map(v => {
+                                g.ЭтоКомментарий = false;
+                                g.Значение = v;
+                                g.Текст = "";
                                 return true;
                             }).GetOrElse(() => {
-                                marks.Add(subjects[col - 3], new Comment { comment = row.Cells[col].Value.ToString() });
+                                g.ЭтоКомментарий = true;
+                                g.Текст = row.Cells[col].Value.ToString();
+                                g.Значение = 0;
                                 return true;
                             });
+                            marks.Add(g);
                         }
                         return new RegisterRecord {
-                            soldier = 
-                                dataAccess.GetDataContext().GetTable<Военнослужащий>()
-                                .Where(v => v.Код == Int32.Parse(row.Cells[0].Value.ToString()))
-                                .ToListTimed().First(),
+                            soldier = soldier,
                             marks = marks
                         };
                     }).ToList()

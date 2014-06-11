@@ -95,7 +95,11 @@ namespace Grader {
         [Column]
         public int КодПредмета { get; set; }
         [Column]
+        public bool ЭтоКомментарий { get; set; }
+        [Column]
         public int Значение { get; set; }
+        [Column]
+        public string Текст { get; set; }
         [Column]
         public DateTime ДатаОценки { get; set; }
         [Column]
@@ -106,6 +110,8 @@ namespace Grader {
         public string ТипВоеннослужащего { get; set; }
         [Column]
         public int КодЗвания { get; set; }
+        [Column]
+        public int КодВедомости { get; set; }
     }
 
     [Table]
@@ -168,6 +174,59 @@ namespace Grader {
         [Column]
         public bool ДЗД { get; set; }
     }
+
+    [Table]
+    public class Ведомость {
+        [Column(IsPrimaryKey = true)]
+        public int Код { get; set; }
+        [Column]
+        public string Название { get; set; }
+        [Column]
+        public DateTime ДатаЗаполнения { get; set; }
+        [Column]
+        public DateTime ДатаВнесения { get; set; }
+        [Column]
+        public DateTime ДатаИзменения { get; set; }
+        [Column]
+        public bool Виртуальния { get; set; }
+        [Column]
+        public bool Включена { get; set; }
+    }
+
+    [Table]
+    public class ВедомостьЗапись {
+        [Column(IsPrimaryKey = true)]
+        public int Код { get; set; }
+        [Column]
+        public int КодВоеннослужащего { get; set; }
+        [Column]
+        public int КодВедомости { get; set; }
+        [Column]
+        public int Порядок { get; set; }
+    }
+
+    [Table]
+    public class ВедомостьПредмет {
+        [Column(IsPrimaryKey = true)]
+        public int Код { get; set; }
+        [Column]
+        public int КодПредмета { get; set; }
+        [Column]
+        public int КодВедомости { get; set; }
+        [Column]
+        public int Порядок { get; set; }
+    }
+
+    [Table]
+    public class ВедомостьТег {
+        [Column(IsPrimaryKey = true)]
+        public int Код { get; set; }
+        [Column]
+        public string Тег { get; set; }
+        [Column]
+        public int КодВедомости { get; set; }
+    }
+
 
     // ACCESS-SIDE QUERIES
 
