@@ -128,11 +128,6 @@ namespace Grader.gui {
                             registerDataGridView.CurrentCell = registerDataGridView.Rows[registerDataGridView.Rows.Count - 1].Cells[minX];
                             registerDataGridView.CurrentCell.Selected = true;
                         }
-                        //if (minY + 1 <= registerDataGridView.Rows.Count) {
-                        //    registerDataGridView.ClearSelection();
-                        //    registerDataGridView.Rows[minY + 1].Cells[minX].Selected = true;
-                        //    registerDataGridView.CurrentCell = registerDataGridView.Rows[minY + 1].Cells[minX];
-                        //}
                         afterGradeType = true;
                     }
                 }

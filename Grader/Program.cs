@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Grader.gui;
+using System.IO;
+using System.Xml;
+using LibUtil;
 
 namespace Grader {
     public static class Program {
@@ -10,16 +13,12 @@ namespace Grader {
         static void Main() {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm(new DataAccess(GetDbLocation())));
+            Settings.Load().ForEach(settings => {
+                ApplicationContext ctx = new ApplicationContext();
+                MainForm mainForm = new MainForm(settings, ctx);
+                ctx.MainForm = mainForm;
+                Application.Run(ctx);
+            });
         }
-
-        public static string GetDbLocation() {
-            return "E:/Pronko/prj/Grader/Grades.accdb";
-        }
-
-        public static string GetTemplateLocation(string template) {
-            return "E:/Pronko/prj/Grader/templates/" + template;
-        }
-
     }
 }

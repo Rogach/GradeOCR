@@ -185,7 +185,7 @@ namespace Grader.gui {
         }
 
         private void MakeRegister(string templateName, Action<ExcelWorksheet> format) {
-            var rwb = ExcelTemplates.LoadExcelTemplate(Program.GetTemplateLocation(templateName));
+            var rwb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
             ExcelWorksheet rsh = rwb.Worksheets.First();
             format(rsh);
             rwb.Saved = true;
@@ -195,7 +195,7 @@ namespace Grader.gui {
 
         private void MakeRegistersForPlatoons(DataContext dc, string templateName,
                 Action<ExcelWorksheet, int, List<ВоеннослужащийПоПодразделениям>> format) {
-            var rwb = ExcelTemplates.LoadExcelTemplate(Program.GetTemplateLocation(templateName));
+            var rwb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
             ExcelWorksheet templateSheet = rwb.Worksheets.First();
             var platoonIds =
                 Querying.GetSubunitsByType(dc, "взвод").Select(s => s.Код);

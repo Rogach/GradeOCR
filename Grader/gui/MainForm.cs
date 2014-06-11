@@ -8,10 +8,14 @@ using System.Drawing;
 namespace Grader.gui {
     public class MainForm : Form {
 
+        private ApplicationContext context;
         private DataAccess dataAccess;
+        private Settings settings;
 
-        public MainForm(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public MainForm(Settings settings, ApplicationContext context) {
+            this.settings = settings;
+            this.dataAccess = new DataAccess(settings.dbLocation);
+            this.context = context;
             this.InitializeComponent();
         }
 
@@ -26,11 +30,38 @@ namespace Grader.gui {
 
             ToolStripMenuItem menu_file = new ToolStripMenuItem("Файл");
 
-            ToolStripMenuItem menu_file_select_base = new ToolStripMenuItem("Выбрать базу...");
+            ToolStripMenuItem menu_file_select_base = new ToolStripMenuItem("Выбрать базу");
             menu_file_select_base.Click += new EventHandler(delegate {
-                throw new NotImplementedException();
+                Settings.AskForDbLocation().ForEach(newDbLocation => {
+                    context.MainForm = null;
+                    this.Dispose();
+
+                    settings.dbLocation = newDbLocation;
+                    MainForm newMainForm = new MainForm(settings, context);
+                    context.MainForm = newMainForm;
+                    newMainForm.Show();
+                });
             });
             menu_file.DropDownItems.Add(menu_file_select_base);
+
+            ToolStripMenuItem menu_file_reload_base = new ToolStripMenuItem("Перезагрузить базу");
+            menu_file_reload_base.Click += new EventHandler(delegate {
+                context.MainForm = null;
+                this.Dispose();
+
+                MainForm newMainForm = new MainForm(settings, context);
+                context.MainForm = newMainForm;
+                newMainForm.Show();
+            });
+            menu_file.DropDownItems.Add(menu_file_reload_base);
+
+            menu_file.DropDownItems.Add(new ToolStripSeparator());
+
+            ToolStripMenuItem menu_file_exit = new ToolStripMenuItem("Выход");
+            menu_file_exit.Click += new EventHandler(delegate {
+                Environment.Exit(0);
+            });
+            menu_file.DropDownItems.Add(menu_file_exit);
 
             menuStrip.Items.Add(menu_file);
 
