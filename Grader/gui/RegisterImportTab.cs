@@ -9,13 +9,15 @@ namespace Grader.gui {
     class RegisterImportTab : TabPage {
         private DataAccess dataAccess;
 
+        private static string TAB_NAME = "Внесение ведомостей";
+
         public RegisterImportTab(DataAccess dataAccess) {
             this.dataAccess = dataAccess;
             this.InitializeComponent();
         }
 
         private void InitializeComponent() {
-            this.Text = "Внесение ведомостей";
+            this.Text = TAB_NAME;
             this.Size = new Size(1200, 800);
 
             Button newRegisterButton = new Button();
@@ -25,13 +27,11 @@ namespace Grader.gui {
             this.Controls.Add(newRegisterButton);
 
             ListBox registerList = new ListBox();
-            registerList.Items.Add(new RegisterDesc("asdf", 1));
-            registerList.Items.Add(new RegisterDesc("aoeu", 2));
             registerList.Location = new Point(3, 30);
             registerList.Size = new Size(150, 770);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
             registerList.DoubleClick += new EventHandler(delegate {
-                Console.WriteLine(((RegisterDesc) registerList.Items[registerList.SelectedIndex]).id);
+
             });
             this.Controls.Add(registerList);
 
@@ -43,55 +43,27 @@ namespace Grader.gui {
 
             RegisterEditor registerEditor = new RegisterEditor(dataAccess);
             registerEditor.Location = new Point(170, 0);
-            registerEditor.Size = new Size(1030, 800);
+            registerEditor.Size = new Size(1020, 770);
             registerEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             this.Controls.Add(registerEditor);
+            
+            Button saveRegister = new Button();
+            saveRegister.Text = "Сохранить";
+            saveRegister.Location = new Point(170, 775);
+            saveRegister.Size = new Size(100, 25);
+            saveRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            this.Controls.Add(saveRegister);
 
-            model.RegisterRecord rec1 = new model.RegisterRecord {
-                soldier = new Военнослужащий {
-                    Фамилия = "Александров",
-                    Имя = "Александр",
-                    Отчество = "Александрович",
-                    Код = 1,
-                    Звание = new Звание {
-                        Название = "рядовой"
-                    }
-                },
-                marks = new Dictionary<string, model.Mark> {
-                            {"OGN", new model.Grade { value = 4 }},
-                            {"STR", new model.Comment { comment = "ab" }}
-                        }
-            };
-            model.RegisterRecord rec2 = new model.RegisterRecord {
-                soldier = new Военнослужащий {
-                    Фамилия = "Белов",
-                    Имя = "Билык",
-                    Отчество = "Биарутдинович",
-                    Код = 2,
-                    Звание = new Звание {
-                        Название = "рядовой"
-                    }
-                },
-                marks = new Dictionary<string, model.Mark> {
-                            {"OGN", new model.Grade { value = 5 }}
-                        }
-            };
+            Button cancelRegister = new Button();
+            cancelRegister.Text = "Отменить";
+            cancelRegister.Location = new Point(280, 775);
+            cancelRegister.Size = new Size(100, 25);
+            cancelRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            this.Controls.Add(cancelRegister);
 
-            model.Register reg = new model.Register {
-                name = "alpha",
-                fillDate = DateTime.Now,
-                importDate = DateTime.Now,
-                editDate = DateTime.Now,
-                tags = new List<string> { "a", "b" },
-                subjects = new List<string> { "OGN", "STR" },
-                records = new List<model.RegisterRecord> {
-                    rec1, rec2
-                }
-            };
-
-            registerEditor.SetRegister(reg);
-
-            //registerEditor.Visible = false;
+            registerEditor.Enabled = false;
+            saveRegister.Enabled = false;
+            cancelRegister.Enabled = false;
         }
 
         class RegisterDesc {

@@ -7,22 +7,29 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Data;
 using LibUtil;
+using System.Threading;
+using Grader.util;
+using System.Text.RegularExpressions;
+using System.Data.Linq;
 
 namespace Grader.gui {
     public class RegisterEditor : Panel {
         DataAccess dataAccess;
-        Register currentRegister = null;
 
         public RegisterEditor(DataAccess dataAccess) {
             this.dataAccess = dataAccess;
             this.InitializeComponent();
         }
 
+        private Register currentRegister;
+
         private TextBox registerName;
         private DateTimePicker registerFillDate;
         private Label registerImportDate;
         private Label registerEditDate;
-        private TextBox tags;
+        private TextBox registerTags;
+        private CheckBox registerVirtual;
+        private CheckBox registerEnabled;
 
         private DataSet registerDataSet;
         private DataTable registerDataTable;
@@ -34,6 +41,7 @@ namespace Grader.gui {
             
             registerName = layout.Add("Имя ведомости", new TextBox());
             
+            
             registerFillDate = layout.Add("Дата заполнения", new DateTimePicker());
             registerFillDate.Value = DateTime.Now;
 
@@ -41,11 +49,22 @@ namespace Grader.gui {
 
             registerEditDate = layout.Add("Дата изменения", new Label());
 
-            tags = layout.Add("Тэги", new TextBox());
+            registerTags = layout.Add("Тэги", new TextBox());
 
             layout.AddSpacer(10);
 
             layout.PerformLayout();
+
+            FormLayout secondaryOptions = new FormLayout(this, x: layout.GetX() + 30);
+
+            registerVirtual = secondaryOptions.Add("виртуальная?", new CheckBox());
+            GuiUtils.SetToolTip(secondaryOptions, registerVirtual, "Физически ведомости не существует - оценки были внесены без документа");
+
+            registerEnabled = secondaryOptions.Add("включена?", new CheckBox());
+            registerEnabled.Checked = true;
+            GuiUtils.SetToolTip(secondaryOptions, registerEnabled, "Ведомость учитывается при анализе?");
+
+            secondaryOptions.PerformLayout();
 
             registerDataGridView = new DataGridView();
             registerDataGridView.Location = new Point(0, layout.GetY());
@@ -58,9 +77,23 @@ namespace Grader.gui {
             registerDataGridView.AllowUserToOrderColumns = false;
             registerDataGridView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
 
+            registerDataGridView.PreviewKeyDown +=new PreviewKeyDownEventHandler(delegate (object sender, PreviewKeyDownEventArgs args) {
+                if (args.KeyCode == Keys.D2 || args.KeyCode == Keys.NumPad2) {
+                    int minX = Int32.MaxValue;
+                    int minY = Int32.MaxValue;
+                    foreach (DataGridViewCell sc in registerDataGridView.SelectedCells) {
+                        minX = Math.Min(minX, sc.ColumnIndex);
+                        minY = Math.Min(minY, sc.RowIndex);
+                    }
+                    registerDataGridView.Rows[minY].Cells[minX].Value = "2";
+                    if (minY + 1 < registerDataGridView.Rows.Count) {
+                        registerDataGridView.ClearSelection();
+                        registerDataGridView.Rows[minY + 1].Cells[minX].Selected = true;
+                    }
+                }
+            });
             registerDataGridView.KeyDown += new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
                 if (e.KeyCode == Keys.V && e.Control) {
-                    DataGridViewCell c = registerDataGridView.SelectedCells[0];
                     int minX = Int32.MaxValue;
                     int minY = Int32.MaxValue;
                     foreach (DataGridViewCell sc in registerDataGridView.SelectedCells) {
@@ -77,25 +110,12 @@ namespace Grader.gui {
                     int clipX = copiedData.Select(line => line.Count).Max();
                     int clipY = copiedData.Count;
 
-                    Console.WriteLine("minX = {0}, minY = {0}", minX, minY);
-                    Console.WriteLine("clipX = {0}, clipY = {0}", clipX, clipY);
-
-                    foreach (var line in copiedData) {
-                        Console.WriteLine("paste line: " + line.MkString(","));
-                    }
-
-                    Console.WriteLine(registerDataGridView.Rows.Count);
-
                     for (int row = 0; row < clipY; row++) {
                         if (row >= registerDataGridView.Rows.Count - 1) {
-                            Console.WriteLine("Adding");
-                            Console.WriteLine("Before add " + registerDataGridView.Rows.Count);
                             registerDataTable.Rows.Add(new object[] {});
-                            Console.WriteLine("After add " + registerDataGridView.Rows.Count);
                         }
                         for (int col = 0; col < clipX; col++) {
                             if (minX + col < registerDataGridView.Columns.Count) {
-                                Console.WriteLine("row = {0}, col = {1}", row, col);
                                 registerDataGridView.Rows[minY + row].Cells[minX + col].Value = copiedData[row][col];
                             }
                         }
@@ -104,51 +124,120 @@ namespace Grader.gui {
                 }
             });
 
-            //registerDataGridView.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(delegate(object sender, DataGridViewCellMouseEventArgs e) {
-            //    if (e.Button == MouseButtons.Right) {
-            //        int x = 0;
-            //        x += registerDataGridView.RowHeadersWidth;
-            //        for (int ci = 0; ci < e.ColumnIndex; ci++) {
-            //            x += registerDataGridView.Columns[ci].Width;
-            //        }
-            //        x += e.X;
+            registerDataGridView.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(delegate(object sender, DataGridViewCellMouseEventArgs e) {
+                if (e.Button == MouseButtons.Right && e.ColumnIndex > 1) {
+                    int x = 0;
+                    x += registerDataGridView.RowHeadersWidth;
+                    for (int ci = 0; ci < e.ColumnIndex; ci++) {
+                        x += registerDataGridView.Columns[ci].Width;
+                    }
+                    x += e.X;
 
-            //        MenuItem deleteColumnAction = new MenuItem("delete column");
-            //        deleteColumnAction.Click += new EventHandler(delegate {
-            //            registerDataGridView.Columns.Remove(registerDataGridView.Columns[e.ColumnIndex]);
-            //        });
+                    MenuItem deleteColumnAction = new MenuItem("Удалить предмет");
+                    deleteColumnAction.Click += new EventHandler(delegate {
+                        registerDataGridView.Columns.Remove(registerDataGridView.Columns[e.ColumnIndex]);
+                    });
 
-            //        MenuItem addColumnAction = new MenuItem("add column");
-            //        addColumnAction.Click += new EventHandler(delegate {
-            //            DataGridViewColumn newCol = new DataGridViewColumn();
-            //            newCol.Name = "new col";
+                    MenuItem addColumnAction = new MenuItem("Добавить предмет");
+                    addColumnAction.Click += new EventHandler(delegate {
+                        DataGridViewColumn newCol = new DataGridViewColumn();
+                        
+                        newCol.Name = "FP";
 
-            //            newCol.CellTemplate = new DataGridViewTextBoxCell();
-            //            newCol.CellTemplate.Style.BackColor = Color.AliceBlue;
+                        newCol.CellTemplate = new DataGridViewTextBoxCell();
 
-            //            // insert after current column
-            //            registerDataGridView.Columns.Insert(e.ColumnIndex + 1, newCol);
-            //        });
+                        // insert after current column
+                        registerDataGridView.Columns.Insert(e.ColumnIndex + 1, newCol);
+                    });
 
-            //        ContextMenu ctx;
-            //        if (e.ColumnIndex > 0) {
-            //            ctx = new ContextMenu(new MenuItem[] { deleteColumnAction, addColumnAction });
-            //        } else {
-            //            ctx = new ContextMenu(new MenuItem[] { addColumnAction });
-            //        }
-            //        ctx.Show(registerDataGridView, new Point(x, e.Y));
-            //    }
-            //});
+                    ContextMenu ctx;
+                    if (e.ColumnIndex > 2) {
+                        ctx = new ContextMenu(new MenuItem[] { deleteColumnAction, addColumnAction });
+                    } else  {
+                        ctx = new ContextMenu(new MenuItem[] { addColumnAction });
+                    }
+                    ctx.Show(registerDataGridView, new Point(x, e.Y));
+                }
+            });
+
+            List<string> autocompleteRanks = 
+                dataAccess.GetDataContext().GetTable<Звание>().Select(r => r.Название).ToListTimed();
+            List<string> autocompleteNames =
+                dataAccess.GetDataContext().GetTable<Военнослужащий>()
+                .Where(v => v.Убыл == false)
+                .Select(v => v.ФИО).ToListTimed();
+
+            registerDataGridView.EditingControlShowing += 
+                new DataGridViewEditingControlShowingEventHandler(delegate(object sender, DataGridViewEditingControlShowingEventArgs args) {
+                    TextBox ed = (TextBox) registerDataGridView.EditingControl;
+                    if (registerDataGridView.CurrentCell.ColumnIndex == 1) {
+                        ed.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                        ed.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                        ed.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+                        ed.AutoCompleteCustomSource.AddRange(autocompleteRanks.ToArray());
+                    } else if (registerDataGridView.CurrentCell.ColumnIndex == 2) {
+                        ed.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+                        ed.AutoCompleteSource = AutoCompleteSource.CustomSource;
+                        ed.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+                        ed.AutoCompleteCustomSource.AddRange(autocompleteNames.ToArray());
+                    } else {
+                        ed.AutoCompleteCustomSource = null;
+                    }
+            });
+
+            registerDataGridView.CellValueChanged += new DataGridViewCellEventHandler(delegate(object sender, DataGridViewCellEventArgs e) {
+                if (e.ColumnIndex == 2) {
+                    Regex nameRegex = new Regex(@"(\w+) (\w).(\w).");
+                    Match match = nameRegex.Match(registerDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
+                    if (match.Success) {
+                        string surname = match.Groups[1].Value;
+                        string name = match.Groups[2].Value;
+                        string patronymic = match.Groups[3].Value;
+                        DataContext dc = dataAccess.GetDataContext();
+                        var query =
+                            from v in dc.GetTable<Военнослужащий>()
+                            where v.Убыл == false
+                            where v.Фамилия == surname
+                            where v.Имя.StartsWith(name)
+                            where v.Отчество.StartsWith(patronymic)
+                            join r in dc.GetTable<Звание>() on v.КодЗвания equals r.Код
+                            select new { id = v.Код, rank = r.Название };
+                        var soldierList = query.ToListTimed();
+                        if (soldierList.Count == 1) {
+                            registerDataGridView.Rows[e.RowIndex].Cells[0].Value = soldierList[0].id.ToString();
+                            registerDataGridView.Rows[e.RowIndex].Cells[1].Value = soldierList[0].rank;
+                        }
+                    }
+                }
+            });
 
             this.Controls.Add(registerDataGridView);
         }
 
+        public Register GetEmptyRegister() {
+            return new model.Register {
+                id = -1,
+                name = "",
+                fillDate = DateTime.Now,
+                importDate = DateTime.Now,
+                editDate = DateTime.Now,
+                tags = new List<string>(),
+                virt = false,
+                enabled = true,
+                subjects = new List<string>(),
+                records = new List<RegisterRecord>()
+            };
+        }
+
         public void SetRegister(Register register) {
+            currentRegister = register;
             registerName.Text = register.name;
             registerFillDate.Value = register.fillDate;
             registerImportDate.Text = register.importDate.ToOption().Map(d => d.ToLongDateString()).GetOrElse("");
             registerEditDate.Text = register.editDate.ToOption().Map(d => d.ToLongDateString()).GetOrElse("");
-            tags.Text = register.tags.MkString(" ");
+            registerTags.Text = register.tags.MkString(" ");
+            registerVirtual.Checked = register.virt;
+            registerEnabled.Checked = register.enabled;
             registerDataSet = new DataSet("register");
             registerDataTable = new DataTable("register");
             registerDataSet.Tables.Add(registerDataTable);
@@ -187,7 +276,7 @@ namespace Grader.gui {
             registerDataGridView.Refresh();
             registerDataGridView.ColumnAdded += new DataGridViewColumnEventHandler(delegate (object e, DataGridViewColumnEventArgs args) {
                 if (args.Column.Index == 0) {
-                    args.Column.Width = 30;
+                    args.Column.Width = 45;
                 } else if (args.Column.Index == 1) {
                     args.Column.Width = 100;
                 } else if (args.Column.Index == 2) {
@@ -200,7 +289,40 @@ namespace Grader.gui {
         }
 
         public Register GetRegister() {
-            throw new NotImplementedException();
+            List<string> subjects = registerDataGridView.Columns.ToNormalList<DataGridViewColumn>().Skip(3).Select(col => col.Name).ToList();
+            return new Register {
+                id = currentRegister.id,
+                name = registerName.Text,
+                fillDate = registerFillDate.Value,
+                importDate = currentRegister.importDate.ToOption().GetOrElse(DateTime.Now),
+                editDate = DateTime.Now,
+                tags = registerTags.Text.Split(new char[] { ' ' }).Where(t => t.Trim().Length > 0).ToList(),
+                virt = registerVirtual.Checked,
+                enabled = registerEnabled.Checked,
+                subjects = subjects,
+                records = 
+                    registerDataGridView.Rows.ToNormalList<DataGridViewRow>()
+                    .Where(row => row.Cells[0].Value.ToString().Trim().Length > 0)
+                    .Select(row => {
+                        Dictionary<string, Mark> marks = new Dictionary<string, Mark>();
+                        for (int col = 3; col < registerDataGridView.Columns.Count; col++) {
+                            Util.ParseInt(row.Cells[col].Value.ToString()).Map(g => {
+                                marks.Add(subjects[col - 3], new Grade { value = g });
+                                return true;
+                            }).GetOrElse(() => {
+                                marks.Add(subjects[col - 3], new Comment { comment = row.Cells[col].Value.ToString() });
+                                return true;
+                            });
+                        }
+                        return new RegisterRecord {
+                            soldier = 
+                                dataAccess.GetDataContext().GetTable<Военнослужащий>()
+                                .Where(v => v.Код == Int32.Parse(row.Cells[0].Value.ToString()))
+                                .ToListTimed().First(),
+                            marks = marks
+                        };
+                    }).ToList()
+            };
         }
     }
 }

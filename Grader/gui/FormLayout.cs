@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using LibUtil;
 
 namespace Grader.gui {
-    class FormLayout {
+    public class FormLayout {
         private Control control;
         private List<LayoutUnit> rows = new List<LayoutUnit>();
         private int controlWidth;
@@ -51,10 +52,11 @@ namespace Grader.gui {
             }
             control.ResumeLayout(false);
             control.PerformLayout();
+            this.x += maxLabelWidth + 5 + controlWidth;
         }
 
-        public Label LabelForControl(Control control) {
-            return labelForControl[control];
+        public Option<Label> LabelForControl(Control control) {
+            return labelForControl.GetOption(control);
         }
 
         public int GetY() {
@@ -74,8 +76,13 @@ namespace Grader.gui {
             public Label label { get; set; }
             public int height { get; set; }
             public void Layout(FormLayout layout) {
-                control.Location = new Point(layout.x + layout.maxLabelWidth + 5, layout.y);
-                control.Size = new Size(layout.controlWidth, control.PreferredSize.Height);
+                if (control is Label) {
+                    control.Location = new Point(layout.x + layout.maxLabelWidth + 5, layout.y + 2);
+                    control.Size = new Size(layout.controlWidth, control.PreferredSize.Height);
+                } else {
+                    control.Location = new Point(layout.x + layout.maxLabelWidth + 5, layout.y);
+                    control.Size = new Size(layout.controlWidth, control.PreferredSize.Height);
+                }
                 layout.control.Controls.Add(control);
                 label.Location = new Point(layout.x, layout.y + 2);
                 label.Size = new Size(layout.maxLabelWidth, label.PreferredHeight);
