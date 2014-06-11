@@ -92,9 +92,6 @@ namespace Grader.gui {
             vusSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             vusSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
             
-            registerDate = layout.Add("Дата", new DateTimePicker());
-            registerDate.Value = DateTime.Now;
-
             layout.AddSpacer(13);
 
             selectCadets = layout.Add("", new CheckBox(), thin: true);
@@ -115,6 +112,9 @@ namespace Grader.gui {
             GuiUtils.SetToolTip(layout, strikeKMN, "\"Представлен на экзамен в составе уч. гр. кандидатов на должности МК\"");
 
             layout.AddSpacer(10);
+
+            registerDate = layout.Add("Дата", new DateTimePicker());
+            registerDate.Value = DateTime.Now;
 
             registerSubjectSelect = layout.Add("ведомость:", new ComboBox());
             registerSubjectSelect.Items.AddRange(registerSpecs);
