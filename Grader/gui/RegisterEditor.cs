@@ -50,18 +50,25 @@ namespace Grader.gui {
         private void InitializeComponent() {
             this.Size = new Size(600, 600);
             FormLayout layout = new FormLayout(this);
+
+            EventHandler changeHandler = new EventHandler(delegate {
+                RegisterEdited(this, null);
+            });
             
             registerName = layout.Add("Имя ведомости", new TextBox());
+            registerName.TextChanged += changeHandler;
             
             
             registerFillDate = layout.Add("Дата заполнения", new DateTimePicker());
             registerFillDate.Value = DateTime.Now;
+            registerFillDate.ValueChanged += changeHandler;
 
             registerImportDate = layout.Add("Дата внесения", new Label());
 
             registerEditDate = layout.Add("Дата изменения", new Label());
 
             registerTags = layout.Add("Тэги", new TextBox());
+            registerTags.TextChanged += changeHandler;
 
             layout.AddSpacer(10);
 
@@ -71,10 +78,12 @@ namespace Grader.gui {
 
             registerVirtual = secondaryOptions.Add("виртуальная?", new CheckBox());
             GuiUtils.SetToolTip(secondaryOptions, registerVirtual, "Физически ведомости не существует - оценки были внесены без документа");
+            registerVirtual.CheckedChanged += changeHandler;
 
             registerEnabled = secondaryOptions.Add("включена?", new CheckBox());
             registerEnabled.Checked = true;
             GuiUtils.SetToolTip(secondaryOptions, registerEnabled, "Ведомость учитывается при анализе?");
+            registerEnabled.CheckedChanged += changeHandler;
 
             secondaryOptions.PerformLayout();
 
@@ -221,10 +230,13 @@ namespace Grader.gui {
                         }
                     }
                 }
+                RegisterEdited(this, null);
             });
 
             this.Controls.Add(registerDataGridView);
         }
+
+        public event EventHandler RegisterEdited;
 
         public Register GetEmptyRegister() {
             return new model.Register {

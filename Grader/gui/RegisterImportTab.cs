@@ -16,17 +16,38 @@ namespace Grader.gui {
             this.InitializeComponent();
         }
 
+        private ListBox registerList;
+        private RegisterEditor registerEditor;
+        private Button newRegisterButton;
+        private Button saveRegister;
+        private Button cancelRegister;
+
+        private bool _changesPending = false;
+        private bool changesPending {
+            get {
+                return changesPending;
+            }
+            set {
+                if (value) {
+                    this.Text = TAB_NAME + " *";
+                } else {
+                    this.Text = TAB_NAME;
+                }
+                _changesPending = value;
+            }
+        }
+
         private void InitializeComponent() {
             this.Text = TAB_NAME;
             this.Size = new Size(1200, 800);
 
-            Button newRegisterButton = new Button();
+            newRegisterButton = new Button();
             newRegisterButton.Text = "Новая ведомость";
             newRegisterButton.Location = new Point(3, 3);
             newRegisterButton.Size = new Size(150, 25);
             this.Controls.Add(newRegisterButton);
 
-            ListBox registerList = new ListBox();
+            registerList = new ListBox();
             registerList.Location = new Point(3, 30);
             registerList.Size = new Size(150, 770);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
@@ -34,6 +55,7 @@ namespace Grader.gui {
 
             });
             this.Controls.Add(registerList);
+            UpdateRegisterList();
 
             Separator sep = new Separator(Separator.Direction.Vertical);
             sep.Location = new Point(160, 0);
@@ -41,40 +63,59 @@ namespace Grader.gui {
             sep.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
             this.Controls.Add(sep);
 
-            RegisterEditor registerEditor = new RegisterEditor(dataAccess);
+            registerEditor = new RegisterEditor(dataAccess);
             registerEditor.Location = new Point(170, 0);
             registerEditor.Size = new Size(1020, 770);
             registerEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            registerEditor.RegisterEdited += new EventHandler(delegate {
+                changesPending = true;
+            });
             this.Controls.Add(registerEditor);
             
-            Button saveRegister = new Button();
+            saveRegister = new Button();
             saveRegister.Text = "Сохранить";
             saveRegister.Location = new Point(170, 775);
             saveRegister.Size = new Size(100, 25);
             saveRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
             this.Controls.Add(saveRegister);
 
-            Button cancelRegister = new Button();
+            cancelRegister = new Button();
             cancelRegister.Text = "Отменить";
             cancelRegister.Location = new Point(280, 775);
             cancelRegister.Size = new Size(100, 25);
             cancelRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
             this.Controls.Add(cancelRegister);
 
-            registerEditor.Enabled = false;
-            saveRegister.Enabled = false;
-            cancelRegister.Enabled = false;
+            SetRegisterPanelEnabled(false);
+        }
+
+        public void UpdateRegisterList() {
+            registerList.Items.Clear();
+            dataAccess.GetDataContext().GetTable<Ведомость>()
+                .OrderByDescending(r => r.ДатаВнесения)
+                .Select(r => new RegisterDesc(r.Название, r.Код, r.ДатаВнесения))
+                .ToList().ForEach(rd => {
+                    registerList.Items.Add(rd);
+                });
+        }
+
+        public void SetRegisterPanelEnabled(bool enabled) {
+            registerEditor.Enabled = enabled;
+            saveRegister.Enabled = enabled;
+            cancelRegister.Enabled = enabled;
         }
 
         class RegisterDesc {
             public string name;
+            public DateTime fillDate;
             public int id;
-            public RegisterDesc(string name, int id) {
+            public RegisterDesc(string name, int id, DateTime fillDate) {
                 this.name = name;
                 this.id = id;
+                this.fillDate = fillDate;
             }
             public override string ToString() {
-                return name;
+                return String.Format("{0} ({1}, {2})", name, fillDate.ToString("dd.MM.yyyy"));
             }
         }
     }
