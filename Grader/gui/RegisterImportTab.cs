@@ -45,7 +45,7 @@ namespace Grader.gui {
             newRegisterButton = new Button();
             newRegisterButton.Text = "Новая ведомость";
             newRegisterButton.Location = new Point(3, 3);
-            newRegisterButton.Size = new Size(150, 25);
+            newRegisterButton.Size = new Size(200, 25);
             newRegisterButton.Click += new EventHandler(delegate {
                 if (CheckForUnsavedChanges()) {
                     DeselectRegisterInList();
@@ -61,7 +61,7 @@ namespace Grader.gui {
             registerList.MultiSelect = false;
             registerList.FullRowSelect = true;
             registerList.Location = new Point(3, 30);
-            registerList.Size = new Size(150, 770);
+            registerList.Size = new Size(200, 770);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
             registerList.DoubleClick += new EventHandler(delegate {
                 if (registerList.SelectedIndices.Count > 0) {
@@ -81,14 +81,14 @@ namespace Grader.gui {
             UpdateRegisterList();
 
             Separator sep = new Separator(Separator.Direction.Vertical);
-            sep.Location = new Point(160, 0);
+            sep.Location = new Point(210, 0);
             sep.Size = new Size(4, 800);
             sep.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
             this.Controls.Add(sep);
 
             registerEditor = new RegisterEditor(dataAccess);
-            registerEditor.Location = new Point(170, 0);
-            registerEditor.Size = new Size(1020, 770);
+            registerEditor.Location = new Point(220, 0);
+            registerEditor.Size = new Size(970, 770);
             registerEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             registerEditor.RegisterEdited += new EventHandler(delegate {
                 changesPending = true;
@@ -97,26 +97,28 @@ namespace Grader.gui {
             
             saveRegister = new Button();
             saveRegister.Text = "Сохранить";
-            saveRegister.Location = new Point(170, 775);
+            saveRegister.Location = new Point(220, 775);
             saveRegister.Size = new Size(100, 25);
             saveRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
             saveRegister.Click += new EventHandler(delegate {
+                SetRegisterPanelEnabled(false);
                 Register register = registerEditor.GetRegister();
                 RegisterLoad.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
                 changesPending = false;
                 UpdateRegisterList();
                 SelectRegisterInList(register.id);
+                SetRegisterPanelEnabled(true);
             });
             this.Controls.Add(saveRegister);
 
             cancelRegister = new Button();
             cancelRegister.Text = "Отменить";
-            cancelRegister.Location = new Point(280, 775);
+            cancelRegister.Location = new Point(330, 775);
             cancelRegister.Size = new Size(100, 25);
             cancelRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
             cancelRegister.Click += new EventHandler(delegate {
-                registerEditor.SetRegister(registerEditor.GetEmptyRegister());
                 SetRegisterPanelEnabled(false);
+                registerEditor.SetRegister(registerEditor.GetEmptyRegister());
                 changesPending = false;
                 DeselectRegisterInList();
             });
@@ -148,27 +150,50 @@ namespace Grader.gui {
             registerList.Items.Clear();
             dataAccess.GetDataContext().GetTable<Ведомость>()
                 .OrderByDescending(r => r.ДатаВнесения)
-                .Select(r => new RegisterDesc(r.Название, r.Код, r.ДатаВнесения))
+                .Select(r => new RegisterDesc { 
+                    id = r.Код, 
+                    name = r.Название,
+                    fillDate = r.ДатаВнесения, 
+                    virt = r.Виртуальная, 
+                    enabled = r.Включена 
+                })
                 .ToList().ForEach(rd => {
                     ListViewItem item = new ListViewItem(rd.ToString());
                     item.Tag = rd;
                     registerList.Items.Add(item);
                 });
+            UpdateRegisterListColors();
         }
 
         public void DeselectRegisterInList() {
             registerList.SelectedIndices.Clear();
+            UpdateRegisterListColors();
+        }
+
+        public void UpdateRegisterListColors() {
             foreach (ListViewItem item in registerList.Items) {
-                item.BackColor = Color.White;
+                RegisterDesc rd = (RegisterDesc) item.Tag;
+                if (rd.virt) {
+                    if (rd.enabled) {
+                        item.BackColor = Color.FromArgb(171, 191, 255);
+                    } else {
+                        item.BackColor = Color.FromArgb(250, 250, 150);
+                    }
+                } else {
+                    if (!rd.enabled) {
+                        item.BackColor = Color.FromArgb(255, 200, 200);
+                    } else {
+                        item.BackColor = Color.White;
+                    }
+                }
             }
         }
 
         public void SelectRegisterInList(int registerId) {
+            UpdateRegisterListColors();
             foreach (ListViewItem item in registerList.Items) {
                 if (((RegisterDesc) item.Tag).id == registerId) {
                     item.BackColor = Color.LightGray;
-                } else {
-                    item.BackColor = Color.White;
                 }
             }
         }
@@ -180,14 +205,11 @@ namespace Grader.gui {
         }
 
         class RegisterDesc {
-            public string name;
-            public DateTime fillDate;
-            public int id;
-            public RegisterDesc(string name, int id, DateTime fillDate) {
-                this.name = name;
-                this.id = id;
-                this.fillDate = fillDate;
-            }
+            public int id { get; set; }
+            public string name { get; set; }
+            public DateTime fillDate { get; set; }
+            public bool virt { get; set; }
+            public bool enabled { get; set; }
             public override string ToString() {
                 return String.Format("{0} ({1})", name, fillDate.ToString("dd.MM.yyyy"));
             }
