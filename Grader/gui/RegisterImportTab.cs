@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using Grader.model;
 
 namespace Grader.gui {
     class RegisterImportTab : TabPage {
@@ -48,6 +49,7 @@ namespace Grader.gui {
             this.Controls.Add(newRegisterButton);
 
             registerList = new ListBox();
+            registerList.SelectionMode = SelectionMode.None;
             registerList.Location = new Point(3, 30);
             registerList.Size = new Size(150, 770);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
@@ -77,6 +79,13 @@ namespace Grader.gui {
             saveRegister.Location = new Point(170, 775);
             saveRegister.Size = new Size(100, 25);
             saveRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            saveRegister.Click += new EventHandler(delegate {
+                Register register = registerEditor.GetRegister();
+                RegisterLoad.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
+                changesPending = false;
+                UpdateRegisterList();
+                SelectRegisterInList(register.id);
+            });
             this.Controls.Add(saveRegister);
 
             cancelRegister = new Button();
@@ -84,6 +93,12 @@ namespace Grader.gui {
             cancelRegister.Location = new Point(280, 775);
             cancelRegister.Size = new Size(100, 25);
             cancelRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            cancelRegister.Click += new EventHandler(delegate {
+                registerEditor.SetRegister(registerEditor.GetEmptyRegister());
+                SetRegisterPanelEnabled(false);
+                changesPending = false;
+                DeselectRegisterInList();
+            });
             this.Controls.Add(cancelRegister);
 
             SetRegisterPanelEnabled(false);
@@ -97,6 +112,14 @@ namespace Grader.gui {
                 .ToList().ForEach(rd => {
                     registerList.Items.Add(rd);
                 });
+        }
+
+        public void DeselectRegisterInList() {
+            throw new NotImplementedException();
+        }
+
+        public void SelectRegisterInList(int registerId) {
+            throw new NotImplementedException();
         }
 
         public void SetRegisterPanelEnabled(bool enabled) {
