@@ -17,7 +17,7 @@ namespace Grader.gui {
             this.InitializeComponent();
         }
 
-        private ListBox registerList;
+        private ListView registerList;
         private RegisterEditor registerEditor;
         private Button newRegisterButton;
         private Button saveRegister;
@@ -48,8 +48,9 @@ namespace Grader.gui {
             newRegisterButton.Size = new Size(150, 25);
             this.Controls.Add(newRegisterButton);
 
-            registerList = new ListBox();
-            registerList.SelectionMode = SelectionMode.None;
+            registerList = new ListView();
+            registerList.MultiSelect = false;
+            registerList.FullRowSelect = true;
             registerList.Location = new Point(3, 30);
             registerList.Size = new Size(150, 770);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
@@ -110,16 +111,27 @@ namespace Grader.gui {
                 .OrderByDescending(r => r.ДатаВнесения)
                 .Select(r => new RegisterDesc(r.Название, r.Код, r.ДатаВнесения))
                 .ToList().ForEach(rd => {
-                    registerList.Items.Add(rd);
+                    ListViewItem item = new ListViewItem(rd.ToString());
+                    item.Tag = rd;
+                    registerList.Items.Add(item);
                 });
         }
 
         public void DeselectRegisterInList() {
-            throw new NotImplementedException();
+            registerList.SelectedIndices.Clear();
+            foreach (ListViewItem item in registerList.Items) {
+                item.BackColor = Color.White;
+            }
         }
 
         public void SelectRegisterInList(int registerId) {
-            throw new NotImplementedException();
+            foreach (ListViewItem item in registerList.Items) {
+                if (((RegisterDesc) item.Tag).id == registerId) {
+                    item.BackColor = Color.LightGray;
+                } else {
+                    item.BackColor = Color.White;
+                }
+            }
         }
 
         public void SetRegisterPanelEnabled(bool enabled) {
