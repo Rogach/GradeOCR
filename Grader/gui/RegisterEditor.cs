@@ -275,6 +275,7 @@ namespace Grader.gui {
             registerDataGridView.DataMember = "register";
             registerDataGridView.Refresh();
             registerDataGridView.ColumnAdded += new DataGridViewColumnEventHandler(delegate (object e, DataGridViewColumnEventArgs args) {
+                args.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
                 if (args.Column.Index == 0) {
                     args.Column.Width = 45;
                 } else if (args.Column.Index == 1) {
