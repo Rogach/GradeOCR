@@ -101,8 +101,6 @@ namespace Grader {
         [Column]
         public string Текст { get; set; }
         [Column]
-        public DateTime ДатаОценки { get; set; }
-        [Column]
         public int КодПодразделения { get; set; }
         [Column]
         public int ВУС { get; set; }
@@ -188,7 +186,7 @@ namespace Grader {
         [Column]
         public DateTime ДатаИзменения { get; set; }
         [Column]
-        public bool Виртуальния { get; set; }
+        public bool Виртуальная { get; set; }
         [Column]
         public bool Включена { get; set; }
     }

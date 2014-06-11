@@ -163,7 +163,7 @@ namespace Grader.gui {
                     addColumnAction.Click += new EventHandler(delegate {
                         DataGridViewColumn newCol = new DataGridViewColumn();
                         
-                        newCol.Name = "FP";
+                        newCol.Name = "ФП";
 
                         newCol.CellTemplate = new DataGridViewTextBoxCell();
 
@@ -243,8 +243,8 @@ namespace Grader.gui {
                 id = -1,
                 name = "",
                 fillDate = DateTime.Now,
-                importDate = DateTime.Now,
-                editDate = DateTime.Now,
+                importDate = null,
+                editDate = null,
                 tags = new List<string>(),
                 virt = false,
                 enabled = true,
@@ -330,7 +330,13 @@ namespace Grader.gui {
                 subjectIds = subjectIds,
                 records = 
                     registerDataGridView.Rows.ToNormalList<DataGridViewRow>()
-                    .Where(row => row.Cells[0].Value.ToString().Trim().Length > 0)
+                    .Where(row => {
+                        if (row.Cells[0].Value != null) {
+                            return row.Cells[0].Value.ToString().Trim().Length > 0;
+                        } else {
+                            return false;
+                        }
+                    })
                     .Select(row => {
                         Военнослужащий soldier = dataAccess.GetDataContext().GetTable<Военнослужащий>()
                                 .Where(v => v.Код == Int32.Parse(row.Cells[0].Value.ToString()))

@@ -28,7 +28,7 @@ namespace Grader.model {
                 importDate = r.ДатаВнесения,
                 editDate = r.ДатаИзменения,
                 tags = tags,
-                virt = r.Виртуальния,
+                virt = r.Виртуальная,
                 enabled = r.Включена,
                 subjectIds = subjectIds,
                 records = records
@@ -56,7 +56,7 @@ namespace Grader.model {
             }
             // save the register
             dc.ExecuteCommand(@"insert into Ведомость(Код, Название, ДатаЗаполнения, ДатаВнесения, ДатаИзменения, Виртуальная, Включена) 
-                                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6",
+                                values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)",
                               rid, register.name,
                               SqlTime(register.fillDate), SqlTime(register.importDate.Value), SqlTime(register.editDate.Value),
                               register.virt, register.enabled);
@@ -79,7 +79,7 @@ namespace Grader.model {
                                             КодПроверяемого, КодПредмета, ЭтоКомментарий, Значение, 
                                             Текст, КодПодразделения, ВУС, ТипВоеннослужащего, 
                                             КодЗвания, КодВедомости)
-                                        values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9",
+                                        values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)",
                                         grade.КодПроверяемого, grade.КодПредмета, grade.ЭтоКомментарий,
                                         grade.Значение, grade.Текст, grade.КодПодразделения,
                                         grade.ВУС, grade.ТипВоеннослужащего, grade.КодЗвания, grade.КодВедомости);

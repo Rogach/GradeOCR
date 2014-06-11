@@ -26,7 +26,7 @@ namespace Grader.gui {
         private bool _changesPending = false;
         private bool changesPending {
             get {
-                return changesPending;
+                return _changesPending;
             }
             set {
                 if (value) {
@@ -57,6 +57,7 @@ namespace Grader.gui {
             this.Controls.Add(newRegisterButton);
 
             registerList = new ListView();
+            registerList.View = View.List;
             registerList.MultiSelect = false;
             registerList.FullRowSelect = true;
             registerList.Location = new Point(3, 30);
@@ -186,7 +187,7 @@ namespace Grader.gui {
                 this.fillDate = fillDate;
             }
             public override string ToString() {
-                return String.Format("{0} ({1}, {2})", name, fillDate.ToString("dd.MM.yyyy"));
+                return String.Format("{0} ({1})", name, fillDate.ToString("dd.MM.yyyy"));
             }
         }
     }

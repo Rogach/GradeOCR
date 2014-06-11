@@ -86,7 +86,7 @@ namespace Grader.grades {
                 where maxRank.Название == maxRankName
                 where rank.order <= maxRank.order
 
-                where grade.ДатаОценки >= dateFrom.Date && grade.ДатаОценки <= dateTo.Date
+                //where grade.ДатаОценки >= dateFrom.Date && grade.ДатаОценки <= dateTo.Date
                 where (studyType == "все" || subunit.ТипОбучения == studyType)
                 where
                     (selectCadets && grade.ТипВоеннослужащего == "курсант") ||
@@ -108,10 +108,10 @@ namespace Grader.grades {
                 where g.КодПодразделения == subunit.Код
                 from rank in dc.GetTable<Звание>()
                 where g.КодЗвания == rank.Код
-                select new { grade = g.Значение, soldier, rank, subunit, g.ДатаОценки, subj = subj.Название };
+                select new { grade = g.Значение, soldier, rank, subunit, /*g.ДатаОценки,*/ subj = subj.Название };
             var gradeSets = new Dictionary<int, GradeSet>();
             foreach (var g in query.ToListTimed("GradeSets")) {
-                var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, g.ДатаОценки));
+                var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, DateTime.Now /*g.ДатаОценки*/));
                 gradeSet.AddGrade(g.subj, g.grade);
             }
             return gradeSets.Values.ToList();
