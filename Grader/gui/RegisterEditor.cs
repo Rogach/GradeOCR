@@ -47,6 +47,8 @@ namespace Grader.gui {
         private DataTable registerDataTable;
         private DataGridView registerDataGridView;
 
+        private bool afterGradeType = false;
+
         private void InitializeComponent() {
             this.Size = new Size(600, 600);
             FormLayout layout = new FormLayout(this);
@@ -99,20 +101,49 @@ namespace Grader.gui {
             registerDataGridView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
 
             registerDataGridView.PreviewKeyDown +=new PreviewKeyDownEventHandler(delegate (object sender, PreviewKeyDownEventArgs args) {
-                if (args.KeyCode == Keys.D2 || args.KeyCode == Keys.NumPad2) {
+                Dictionary<Keys, string> quickKeys = new Dictionary<Keys, string> {
+                    { Keys.D2, "2" }, { Keys.NumPad2, "2" },
+                    { Keys.D3, "3" }, { Keys.NumPad3, "3" },
+                    { Keys.D4, "4" }, { Keys.NumPad4, "4" },
+                    { Keys.D5, "5" }, { Keys.NumPad5, "5" }
+                };
+                if (quickKeys.ContainsKey(args.KeyCode)) {
                     int minX = Int32.MaxValue;
                     int minY = Int32.MaxValue;
                     foreach (DataGridViewCell sc in registerDataGridView.SelectedCells) {
                         minX = Math.Min(minX, sc.ColumnIndex);
                         minY = Math.Min(minY, sc.RowIndex);
                     }
-                    registerDataGridView.Rows[minY].Cells[minX].Value = "2";
-                    if (minY + 1 < registerDataGridView.Rows.Count) {
-                        registerDataGridView.ClearSelection();
-                        registerDataGridView.Rows[minY + 1].Cells[minX].Selected = true;
+                    if (minX > 2) {
+                        if (minY + 1 < registerDataGridView.Rows.Count) {
+                            registerDataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
+                            registerDataGridView.ClearSelection();
+                            registerDataGridView.Rows[minY + 1].Cells[minX].Selected = true;
+                            registerDataGridView.CurrentCell = registerDataGridView.Rows[minY + 1].Cells[minX];
+                        } else {
+                            DataRow row = registerDataTable.Rows.Add(new object[] { });
+                            row.SetField(registerDataTable.Columns[minX], quickKeys[args.KeyCode]);
+                            registerDataGridView.Rows.RemoveAt(registerDataGridView.Rows.Count - 2);
+                            registerDataGridView.ClearSelection();
+                            registerDataGridView.CurrentCell = registerDataGridView.Rows[registerDataGridView.Rows.Count - 1].Cells[minX];
+                            registerDataGridView.CurrentCell.Selected = true;
+                        }
+                        //if (minY + 1 <= registerDataGridView.Rows.Count) {
+                        //    registerDataGridView.ClearSelection();
+                        //    registerDataGridView.Rows[minY + 1].Cells[minX].Selected = true;
+                        //    registerDataGridView.CurrentCell = registerDataGridView.Rows[minY + 1].Cells[minX];
+                        //}
+                        afterGradeType = true;
                     }
                 }
             });
+            registerDataGridView.CellBeginEdit += new DataGridViewCellCancelEventHandler(delegate (object sender, DataGridViewCellCancelEventArgs e) {
+                if (afterGradeType) {
+                    e.Cancel = true;
+                    afterGradeType = false;
+                }
+            });
+            
             registerDataGridView.KeyDown += new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
                 if (e.KeyCode == Keys.V && e.Control) {
                     int minX = Int32.MaxValue;
