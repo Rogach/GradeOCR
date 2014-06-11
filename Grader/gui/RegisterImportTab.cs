@@ -46,6 +46,14 @@ namespace Grader.gui {
             newRegisterButton.Text = "Новая ведомость";
             newRegisterButton.Location = new Point(3, 3);
             newRegisterButton.Size = new Size(150, 25);
+            newRegisterButton.Click += new EventHandler(delegate {
+                if (CheckForUnsavedChanges()) {
+                    DeselectRegisterInList();
+                    changesPending = true;
+                    registerEditor.SetRegister(registerEditor.GetEmptyRegister());
+                    SetRegisterPanelEnabled(true);
+                }
+            });
             this.Controls.Add(newRegisterButton);
 
             registerList = new ListView();
@@ -55,7 +63,16 @@ namespace Grader.gui {
             registerList.Size = new Size(150, 770);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
             registerList.DoubleClick += new EventHandler(delegate {
-
+                if (registerList.SelectedIndices.Count > 0) {
+                    ListViewItem item = registerList.Items[registerList.SelectedIndices[0]];
+                    RegisterDesc rd = (RegisterDesc) item.Tag;
+                    if (CheckForUnsavedChanges()) {
+                        SelectRegisterInList(rd.id);
+                        Register r = RegisterLoad.LoadRegister(rd.id, dataAccess.GetDataContext());
+                        registerEditor.SetRegister(r);
+                        SetRegisterPanelEnabled(true);
+                    }
+                }
             });
             this.Controls.Add(registerList);
             UpdateRegisterList();
@@ -103,6 +120,25 @@ namespace Grader.gui {
             this.Controls.Add(cancelRegister);
 
             SetRegisterPanelEnabled(false);
+        }
+
+        public bool CheckForUnsavedChanges() {
+            if (changesPending) {
+                DialogResult result = MessageBox.Show("Сохранить изменения в текущей ведомости?", "Несохраненные изменения", MessageBoxButtons.YesNoCancel);
+                if (result == DialogResult.Cancel) {
+                    return false;
+                } else if (result == DialogResult.OK) {
+                    RegisterLoad.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
+                    changesPending = false;
+                    return true;
+                } else if (result == DialogResult.No) {
+                    return true;
+                } else {
+                    throw new Exception("Unexpected dialog result: " + result);
+                }
+            } else {
+                return true;
+            }
         }
 
         public void UpdateRegisterList() {
