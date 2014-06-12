@@ -211,7 +211,7 @@ namespace Grader.gui {
                 dataAccess.GetDataContext().GetTable<Звание>().Select(r => r.Название).ToListTimed();
             List<string> autocompleteNames =
                 dataAccess.GetDataContext().GetTable<Военнослужащий>()
-                .Where(v => v.Убыл == false)
+                .Where(v => v.Убыл == 0)
                 .Select(v => v.ФИО).ToListTimed();
 
             registerDataGridView.EditingControlShowing += 
@@ -243,7 +243,7 @@ namespace Grader.gui {
                         DataContext dc = dataAccess.GetDataContext();
                         var query =
                             from v in dc.GetTable<Военнослужащий>()
-                            where v.Убыл == false
+                            where v.Убыл == 0
                             where v.Фамилия == surname
                             where v.Имя.StartsWith(name)
                             where v.Отчество.StartsWith(patronymic)

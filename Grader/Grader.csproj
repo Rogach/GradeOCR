@@ -82,6 +82,9 @@
     <Compile Include="grades\PerDaySummaryGenerator.cs" />
     <Compile Include="gui\FormLayout.cs" />
     <Compile Include="gui\GuiUtils.cs" />
+    <Compile Include="gui\PersonFilter.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="gui\RegisterEditor.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -44,14 +44,11 @@ namespace Grader.gui {
             new GenericRegister("МП")
         };
 
-        private ComboBox subunitSelector;
-        private CheckBox forAllPlatoons;
-        private ComboBox vusSelector;
-        private ComboBox studyType;
+        private PersonFilter personFilter;
+        private RadioButton groupingNone;
+        private RadioButton groupingByPlatoon;
+        private RadioButton groupingByVus;
         private DateTimePicker registerDate;
-        private CheckBox selectCadets;
-        private CheckBox selectPermanent;
-        private CheckBox selectContract;
         private CheckBox onlyKMN;
         private CheckBox strikeKMN;
         private ComboBox registerSubjectSelect;
@@ -63,48 +60,18 @@ namespace Grader.gui {
 
             DataContext dc = dataAccess.GetDataContext();
 
-            FormLayout layout = new FormLayout(this);
+            FormLayout layout = new FormLayout(this, maxLabelWidth: 87);
 
-            subunitSelector = layout.Add("Подразделение", new ComboBox());
-            subunitSelector.Items.AddRange(dc.GetTable<Подразделение>().ToListTimed().ToArray());
-            subunitSelector.SelectedIndex = 0;
-            subunitSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            subunitSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
-
-            forAllPlatoons = layout.Add("", new CheckBox());
-            forAllPlatoons.Text = "Все взвода?";
-            forAllPlatoons.Checked = true;
-            forAllPlatoons.CheckedChanged += new EventHandler(delegate {
-                subunitSelector.Enabled = !forAllPlatoons.Checked;
-            });
-            subunitSelector.Enabled = !forAllPlatoons.Checked;
-
-            studyType = layout.Add("Тип обучения", new ComboBox());
-            studyType.PopulateComboBox(typeof(StudyType));
-            studyType.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            studyType.AutoCompleteSource = AutoCompleteSource.ListItems;
-
-            vusSelector = layout.Add("ВУС", new ComboBox());
-            string[] possibleVuses =
-                dc.GetTable<Военнослужащий>().Select(v => v.ВУС).Distinct().ToListTimed()
-                .Where(v => v != 0).Select(v => v.ToString()).ToArray();
-            vusSelector.Items.AddRange(possibleVuses);
-            vusSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            vusSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
-            
-            layout.AddSpacer(13);
-
-            selectCadets = layout.Add("", new CheckBox(), thin: true);
-            selectCadets.Text = "Курсанты?";
-            selectCadets.Checked = true;
-
-            selectPermanent = layout.Add("", new CheckBox(), thin: true);
-            selectPermanent.Text = "Постоянные срочники?";
-
-            selectContract = layout.Add("", new CheckBox(), thin: false);
-            selectContract.Text = "Контрактники?";
+            personFilter = layout.AddFullRow(new PersonFilter(dataAccess));
 
             layout.AddSpacer(5);
+
+            groupingNone = new RadioButton { Text = "нет", Checked = true };
+            groupingByPlatoon = new RadioButton { Text = "повзводно" };
+            groupingByVus = new RadioButton { Text = "повусно" };
+            layout.AddControlGroup("Сгруппировать", new List<Control> { groupingNone , groupingByPlatoon, groupingByVus });
+
+            layout.AddSpacer(8);
 
             onlyKMN = layout.Add("Только КМН?", new CheckBox());
 
@@ -136,87 +103,66 @@ namespace Grader.gui {
             layout.PerformLayout();
         }
 
+        private class SoldierGrouping {
+            public Func<ВоеннослужащийПоПодразделениям, int> keySelector { get; set; }
+            public Func<int, string> registerName { get; set; }
+            public Func<List<ВоеннослужащийПоПодразделениям>, Подразделение> subunit { get; set; }
+        }
+
+        private SoldierGrouping GetGrouping(DataContext dc) {
+            if (groupingNone.Checked) {
+                return new SoldierGrouping {
+                    keySelector = v => 0,
+                    registerName = _ => "ведомость",
+                    subunit = _ => (Подразделение) personFilter.subunitSelector.SelectedItem
+                };
+            } else if (groupingByPlatoon.Checked) {
+                return new SoldierGrouping {
+                    keySelector = v => v.КодПодразделения,
+                    registerName = subunitId => Querying.GetSubunitName(dc, subunitId),
+                    subunit = soldiers => dc.GetTable<Подразделение>().Where(s => s.Код == soldiers.First().КодПодразделения).ToListTimed().First()
+                };
+            } else if (groupingByVus.Checked) {
+                return new SoldierGrouping {
+                    keySelector = v => v.ВУС,
+                    registerName = vus => vus.ToString(),
+                    subunit = _ => (Подразделение) personFilter.subunitSelector.SelectedItem
+                };
+            } else {
+                throw new Exception("No valid grouping selected");
+            }
+        }
+
         private void GenerateRegister() {
             DataContext dc = dataAccess.GetDataContext();
             RegisterSpec spec = (RegisterSpec) registerSubjectSelect.SelectedItem;
-            RegisterSettings settings = new RegisterSettings { 
-                registerType = registerTypeSelect.GetComboBoxEnumValue<RegisterType>(), 
-                onlyKMN = onlyKMN.Checked, 
-                strikeKMN = strikeKMN.Checked, 
+            RegisterSettings settings = new RegisterSettings {
+                registerType = registerTypeSelect.GetComboBoxEnumValue<RegisterType>(),
+                onlyKMN = onlyKMN.Checked,
+                strikeKMN = strikeKMN.Checked,
                 registerDate = registerDate.Value
             };
-            Option<int> vus;
-            if (vusSelector.SelectedItem == null) {
-                vus = new None<int>();
-            } else {
-                vus = new Some<int>(Int32.Parse((string) vusSelector.SelectedItem));
+            List<ВоеннослужащийПоПодразделениям> soldiers =
+                personFilter.GetPersonQuery().ToListTimed();
+            if (onlyKMN.Checked) {
+                soldiers = soldiers.Where(v => v.КМН == 1).ToList();
             }
-            
-
-            if (forAllPlatoons.Checked) {
-                MakeRegistersForPlatoons(dc, spec.templateName, (sh, subunitId, soldiers) => {
-                    Подразделение subunit = (from s in dc.GetTable<Подразделение>() where s.Код == subunitId select s).ToListTimed().First();
-                    settings.subunit = subunit;
-                    settings.soldiers = soldiers.Where(s => vus.Map(v => v == s.ВУС).GetOrElse(true)).ToList();
-                    spec.Format(dc, sh, settings);
-                });
-            } else {
-                settings.subunit = (Подразделение) subunitSelector.SelectedItem;
-                var soldiers =
-                    Querying.GetSubunitSoldiers(dc, settings.subunit.Код, 
-                        Querying.GetSoldierQueryFilterByType(dc, 
-                            selectCadets: selectCadets.Checked, 
-                            selectPermanent: selectPermanent.Checked,
-                            selectContract: selectContract.Checked,
-                            studyType: studyType.GetComboBoxEnumValue<StudyType>()))
-                    .Where(s => vus.Map(v => v == s.ВУС).GetOrElse(true)).ToList();
-                if (onlyKMN.Checked) {
-                    soldiers = soldiers.Where(s => s.КМН == 1).ToList();
-                }
-                if (soldiers.Count != 0) {
-                    MakeRegister(spec.templateName, sh => {
-                        settings.soldiers = soldiers;
-                        spec.Format(dc, sh, settings);
-                    });
-                } else {
-                    System.Windows.Forms.MessageBox.Show("Взвод пуст!");
-                }
+            if (soldiers.Count == 0) {
+                System.Windows.Forms.MessageBox.Show("Нет соответствующих фильтру военнослужащих!");
             }
-        }
+            SoldierGrouping grouping = GetGrouping(dc);
 
-        private void MakeRegister(string templateName, Action<ExcelWorksheet> format) {
-            var rwb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
-            ExcelWorksheet rsh = rwb.Worksheets.First();
-            format(rsh);
-            rwb.Saved = true;
-            rwb.Application.Visible = true;
-            rsh.Activate();
-        }
-
-        private void MakeRegistersForPlatoons(DataContext dc, string templateName,
-                Action<ExcelWorksheet, int, List<ВоеннослужащийПоПодразделениям>> format) {
-            var rwb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
+            var rwb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(spec.templateName));
             ExcelWorksheet templateSheet = rwb.Worksheets.First();
-            var platoonIds =
-                Querying.GetSubunitsByType(dc, "взвод").Select(s => s.Код);
-            ProgressDialogs.ForEach(platoonIds, subunitId => {
-                var soldiers = Querying.GetSubunitSoldiers(dc, subunitId, 
-                    Querying.GetSoldierQueryFilterByType(dc, 
-                        selectCadets: selectCadets.Checked,
-                        selectPermanent: selectPermanent.Checked,
-                        selectContract: selectContract.Checked,
-                        studyType: studyType.GetComboBoxEnumValue<StudyType>()));
-                if (onlyKMN.Checked) {
-                    soldiers = soldiers.Where(s => s.КМН == 1).ToList();
-                }
-
-                if (soldiers.Count != 0) {
-                    templateSheet.Copy(After: rwb.Worksheets.Last());
-                    ExcelWorksheet rsh = rwb.Worksheets.Last();
-                    rsh.Name = Querying.GetSubunitName(dc, subunitId);
-                    format(rsh, subunitId, soldiers);
-                }
+            ProgressDialogs.ForEach(soldiers.GroupBy(grouping.keySelector), group => {
+                templateSheet.Copy(After: rwb.Worksheets.Last());
+                ExcelWorksheet rsh = rwb.Worksheets.Last();
+                rsh.Name = grouping.registerName(group.Key);
+                settings.soldiers = group.ToList();
+                settings.subunit = grouping.subunit(settings.soldiers);
+                spec.Format(dc, rsh, settings);
             });
+
             templateSheet.Delete();
             rwb.Saved = true;
             rwb.Application.Visible = true;

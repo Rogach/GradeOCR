@@ -104,7 +104,14 @@ namespace Grader.util {
             };
         }
 
-        public static List<ВоеннослужащийПоПодразделениям> GetSubunitSoldiers(DataContext dc, int subunitId, Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> queryFilter) {
+        public static List<ВоеннослужащийПоПодразделениям> GetSubunitSoldiers(
+            DataContext dc, int subunitId, 
+            Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> queryFilter) {
+
+            return GetSubunitSoldiersQuery(dc, subunitId, queryFilter).ToListTimed("GetSubunitSoldiers").ToList();
+        }
+
+        public static IQueryable<ВоеннослужащийПоПодразделениям> GetSubunitSoldiersQuery(DataContext dc, int subunitId, Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> queryFilter) {
             var query =
                 from soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>()
                 from subunit in dc.GetTable<Подразделение>()
@@ -114,10 +121,10 @@ namespace Grader.util {
                 where soldier.КодЗвания == rank.Код
 
                 where soldier.КодСтаршегоПодразделения == subunitId
+                where soldier.Убыл == 0
                 orderby soldier.sortWeight descending, rank.order descending, soldier.Фамилия, soldier.Имя, soldier.Отчество
                 select soldier;
-
-            return queryFilter(query).ToListTimed("GetSubunitSoldiers").Where(s => !s.Убыл).ToList();
+            return queryFilter(query);
         }
 
         public static List<ВоеннослужащийПоПодразделениям> GetSubunitSoldiersExact(DataContext dc, int subunitId, Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> queryFilter) {
@@ -129,11 +136,13 @@ namespace Grader.util {
                 where subunit.Код == subunitId
                 from rank in dc.GetTable<Звание>()
                 where soldier.КодЗвания == rank.Код
+
+                where soldier.Убыл == 0
                 
                 orderby soldier.sortWeight descending, rank.order descending, soldier.Фамилия, soldier.Имя, soldier.Отчество
                 select soldier;
 
-            return queryFilter(query).ToListTimed("GetSubunitSoldiersExact").Where(s => !s.Убыл).ToList();
+            return queryFilter(query).ToListTimed("GetSubunitSoldiersExact").ToList();
         }
 
     }

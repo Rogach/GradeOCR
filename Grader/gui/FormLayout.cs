@@ -11,16 +11,17 @@ namespace Grader.gui {
         private Control control;
         private List<LayoutUnit> rows = new List<LayoutUnit>();
         private int controlWidth;
-        private int maxLabelWidth = 0;
-        private int y = 3;
-        private int x = 3;
+        private int maxLabelWidth;
+        private int y;
+        private int x;
         private Dictionary<Control, Label> labelForControl = new Dictionary<Control, Label>();
 
-        public FormLayout(Control control, int x = 3, int y = 3, int controlWidth = 150) {
+        public FormLayout(Control control, int x = 3, int y = 3, int controlWidth = 150, int maxLabelWidth = 0) {
             this.control = control;
             this.controlWidth = controlWidth;
             this.x = x;
             this.y = y;
+            this.maxLabelWidth = maxLabelWidth;
         }
 
         public T Add<T>(string labelText, T control, bool thin = false) where T : Control {
@@ -39,6 +40,13 @@ namespace Grader.gui {
         public T AddFullRow<T>(T control) where T : Control {
             rows.Add(new FullRow { control = control });
             return control;
+        }
+
+        public void AddControlGroup(string labelText, List<Control> controls) {
+            Label label = new Label();
+            label.Text = labelText;
+            maxLabelWidth = Math.Max(maxLabelWidth, label.PreferredWidth);
+            rows.Add(new ControlGroup { label = label, controls = controls });
         }
 
         public void AddSpacer(int height) {
@@ -67,6 +75,10 @@ namespace Grader.gui {
             return x;
         }
 
+        public int GetControlX() {
+            return x + maxLabelWidth + 5;
+        }
+
         interface LayoutUnit {
             void Layout(FormLayout layout);
         }
@@ -77,10 +89,10 @@ namespace Grader.gui {
             public int height { get; set; }
             public void Layout(FormLayout layout) {
                 if (control is Label) {
-                    control.Location = new Point(layout.x + layout.maxLabelWidth + 5, layout.y + 2);
+                    control.Location = new Point(layout.GetControlX(), layout.y + 2);
                     control.Size = new Size(layout.controlWidth, control.PreferredSize.Height);
                 } else {
-                    control.Location = new Point(layout.x + layout.maxLabelWidth + 5, layout.y);
+                    control.Location = new Point(layout.GetControlX(), layout.y);
                     control.Size = new Size(layout.controlWidth, control.PreferredSize.Height);
                 }
                 layout.control.Controls.Add(control);
@@ -108,6 +120,24 @@ namespace Grader.gui {
                 control.Size = new Size(layout.maxLabelWidth + 5 + layout.controlWidth, control.PreferredSize.Height);
                 layout.control.Controls.Add(control);
                 layout.y += control.PreferredSize.Height + 3;
+            }
+        }
+
+        private class ControlGroup : LayoutUnit {
+            public Label label { get; set; }
+            public List<Control> controls { get; set; }
+            public void Layout(FormLayout layout) {
+                int dy = 0;
+                foreach (var control in controls) {
+                    control.Location = new Point(layout.GetControlX(), layout.y + dy);
+                    control.Size = new Size(layout.controlWidth, control.PreferredSize.Height);
+                    layout.control.Controls.Add(control);
+                    dy += control.PreferredSize.Height + 1;
+                }
+                label.Location = new Point(layout.x, layout.y + (dy - label.PreferredHeight) / 2);
+                label.Size = new Size(layout.maxLabelWidth, label.PreferredHeight);
+                layout.control.Controls.Add(label);
+                layout.y += dy;
             }
         }
 

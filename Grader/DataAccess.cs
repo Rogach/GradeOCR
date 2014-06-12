@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Data.OleDb;
 using System.Data.Linq;
+using System.IO;
 
 namespace Grader {
     public class DataAccess {
@@ -20,7 +21,7 @@ namespace Grader {
         }
 
         public string GetTemplateLocation(string template) {
-            return dbLocation + "/templates/" + template;
+            return Directory.GetParent(dbLocation) + "/templates/" + template;
         }
     }
 }

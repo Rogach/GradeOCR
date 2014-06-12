@@ -28,7 +28,7 @@ namespace Grader {
         [Column]
         public string ТипВоеннослужащего { get; set; }
         [Column]
-        public bool Убыл { get; set; }
+        public int Убыл { get; set; }
         [Column]
         public int КМН { get; set; }
         [Column]
@@ -255,7 +255,7 @@ namespace Grader {
         [Column]
         public int КМН { get; set; }
         [Column]
-        public bool Убыл { get; set; }
+        public int Убыл { get; set; }
         [Column]
         public int sortWeight { get; set; }
         [Column]
