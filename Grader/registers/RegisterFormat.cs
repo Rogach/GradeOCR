@@ -249,9 +249,9 @@ namespace Grader.registers {
                 sh.GetRange("SoldierList").GetOffset(1, 0).EntireRow.Insert(ExcelEnums.Direction.Down);
             }
             ExcelRange c = sh.GetRange("SoldierList");
-            for (int i = 0; i < soldiers.Count; i++) {
-                var soldier = soldiers.ElementAt(i);
-                c.Value = i + 1;
+            int r = 1;
+            ProgressDialogs.ForEach(soldiers, soldier => {
+                c.Value = r++;
                 c.GetOffset(0, 1).Value = soldier.Звание;
                 if (useShortNames) {
                     c.GetOffset(0, 2).Value = soldier.ФИО;
@@ -276,7 +276,7 @@ namespace Grader.registers {
                 }
 
                 c = c.GetOffset(1, 0);
-            }
+            });
         }
     }
 }
