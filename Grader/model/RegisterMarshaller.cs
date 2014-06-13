@@ -53,43 +53,57 @@ namespace Grader.model {
                     rid = 1;
                 }
             }
+
+            List<Action> commands = new List<Action>();
             
             // save the register
-            dc.ExecuteCommand(@"insert into Ведомость(Код, Название, ДатаЗаполнения, ДатаВнесения, ДатаИзменения, Виртуальная, Включена) 
+            commands.Add(() => {
+                dc.ExecuteCommand(@"insert into Ведомость(Код, Название, ДатаЗаполнения, ДатаВнесения, ДатаИзменения, Виртуальная, Включена) 
                                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)",
-                              rid, register.name,
-                              SqlTime(register.fillDate), SqlTime(register.importDate.Value), SqlTime(register.editDate.Value),
-                              register.virt, register.enabled);
+                                  rid, register.name,
+                                  SqlTime(register.fillDate), SqlTime(register.importDate.Value), SqlTime(register.editDate.Value),
+                                  register.virt, register.enabled);
+            });
 
             
             foreach (string tag in register.tags) {
-                dc.ExecuteCommand("insert into ВедомостьТег(Тег, КодВедомости) values (@p0, @p1)", tag, rid);
+                commands.Add(() => {
+                    dc.ExecuteCommand("insert into ВедомостьТег(Тег, КодВедомости) values (@p0, @p1)", tag, rid);
+                });
             }
 
             int subjectOrder = 1;
             foreach (int subjectId in register.subjectIds) {
-                dc.ExecuteCommand(@"insert into ВедомостьПредмет(КодПредмета, КодВедомости, Порядок) values (@p0, @p1, @p2)",
-                                    subjectId, rid, subjectOrder++);
+                commands.Add(() => {
+                    dc.ExecuteCommand(@"insert into ВедомостьПредмет(КодПредмета, КодВедомости, Порядок) values (@p0, @p1, @p2)",
+                                        subjectId, rid, subjectOrder++);
+                });
             }
 
             int recordOrder = 1;
             foreach (RegisterRecord record in register.records) {
-                dc.ExecuteCommand(@"insert into ВедомостьЗапись(КодВоеннослужащего, КодВедомости, Порядок) values (@p0, @p1, @p2)",
-                                    record.soldier.Код, rid, recordOrder++);
+                commands.Add(() => {
+                    dc.ExecuteCommand(@"insert into ВедомостьЗапись(КодВоеннослужащего, КодВедомости, Порядок) values (@p0, @p1, @p2)",
+                                        record.soldier.Код, rid, recordOrder++);
+                });
             }
 
             foreach (RegisterRecord record in register.records) {
                 foreach (Оценка grade in record.marks) {
-                    dc.ExecuteCommand(@"insert into Оценка(
+                    commands.Add(() => {
+                        dc.ExecuteCommand(@"insert into Оценка(
                                             КодПроверяемого, КодПредмета, ЭтоКомментарий, Значение, 
                                             Текст, КодПодразделения, ВУС, ТипВоеннослужащего, 
                                             КодЗвания, КодВедомости)
-                                        values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)",
-                                        grade.КодПроверяемого, grade.КодПредмета, grade.ЭтоКомментарий,
-                                        grade.Значение, grade.Текст, grade.КодПодразделения,
-                                        grade.ВУС, grade.ТипВоеннослужащего, grade.КодЗвания, rid);
+                                            values (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)",
+                                            grade.КодПроверяемого, grade.КодПредмета, grade.ЭтоКомментарий,
+                                            grade.Значение, grade.Текст, grade.КодПодразделения,
+                                            grade.ВУС, grade.ТипВоеннослужащего, grade.КодЗвания, rid);
+                    });
                 }
             }
+
+            ProgressDialogs.ForEach(commands, command => command.Invoke());
 
             DataAccess.AfterInsert(dc);
         }
