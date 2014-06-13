@@ -66,14 +66,16 @@ namespace Grader.model {
             });
 
             
-            foreach (string tag in register.tags) {
+            foreach (string _tag in register.tags) {
+                string tag = _tag;
                 commands.Add(() => {
                     dc.ExecuteCommand("insert into ВедомостьТег(Тег, КодВедомости) values (@p0, @p1)", tag, rid);
                 });
             }
 
             int subjectOrder = 1;
-            foreach (int subjectId in register.subjectIds) {
+            foreach (int _subjectId in register.subjectIds) {
+                int subjectId = _subjectId;
                 commands.Add(() => {
                     dc.ExecuteCommand(@"insert into ВедомостьПредмет(КодПредмета, КодВедомости, Порядок) values (@p0, @p1, @p2)",
                                         subjectId, rid, subjectOrder++);
@@ -81,15 +83,18 @@ namespace Grader.model {
             }
 
             int recordOrder = 1;
-            foreach (RegisterRecord record in register.records) {
+            foreach (RegisterRecord _record in register.records) {
+                RegisterRecord record = _record;
                 commands.Add(() => {
                     dc.ExecuteCommand(@"insert into ВедомостьЗапись(КодВоеннослужащего, КодВедомости, Порядок) values (@p0, @p1, @p2)",
                                         record.soldier.Код, rid, recordOrder++);
                 });
             }
 
-            foreach (RegisterRecord record in register.records) {
-                foreach (Оценка grade in record.marks) {
+            foreach (RegisterRecord _record in register.records) {
+                RegisterRecord record = _record;
+                foreach (Оценка _grade in record.marks) {
+                    Оценка grade = _grade;
                     commands.Add(() => {
                         dc.ExecuteCommand(@"insert into Оценка(
                                             КодПроверяемого, КодПредмета, ЭтоКомментарий, Значение, 

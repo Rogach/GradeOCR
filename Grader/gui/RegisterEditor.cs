@@ -357,6 +357,8 @@ namespace Grader.gui {
                 registerDataTable.Rows.Add(cells.ToArray());
             }
 
+            registerDataGridView.Columns.Clear();
+
             registerDataGridView.DataSource = registerDataSet;
             registerDataGridView.DataMember = "register";
             registerDataGridView.Refresh();
