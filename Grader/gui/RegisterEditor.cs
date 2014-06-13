@@ -185,23 +185,25 @@ namespace Grader.gui {
                         registerDataGridView.Columns.Remove(registerDataGridView.Columns[e.ColumnIndex]);
                     });
 
-                    MenuItem addColumnAction = new MenuItem("Добавить предмет");
-                    addColumnAction.Click += new EventHandler(delegate {
-                        DataGridViewColumn newCol = new DataGridViewColumn();
-                        
-                        newCol.Name = "ФП";
-
-                        newCol.CellTemplate = new DataGridViewTextBoxCell();
-
-                        // insert after current column
-                        registerDataGridView.Columns.Insert(e.ColumnIndex + 1, newCol);
-                    });
+                    MenuItem addSubjectSubmenu = new MenuItem("Добавить предмет");
+                    foreach (string subj in dataAccess.GetDataContext().GetTable<Предмет>().Select(s => s.Название).ToList()) {
+                        string subject = subj;
+                        MenuItem subjectItem = new MenuItem(subj);
+                        subjectItem.Click += new EventHandler(delegate {
+                            DataGridViewColumn newCol = new DataGridViewColumn();
+                            newCol.Name = subject;
+                            newCol.CellTemplate = new DataGridViewTextBoxCell();
+                            // insert after current column
+                            registerDataGridView.Columns.Insert(e.ColumnIndex + 1, newCol);
+                        });
+                        addSubjectSubmenu.MenuItems.Add(subjectItem);
+                    }
 
                     ContextMenu ctx;
                     if (e.ColumnIndex > 2) {
-                        ctx = new ContextMenu(new MenuItem[] { deleteColumnAction, addColumnAction });
+                        ctx = new ContextMenu(new MenuItem[] { deleteColumnAction, addSubjectSubmenu });
                     } else  {
-                        ctx = new ContextMenu(new MenuItem[] { addColumnAction });
+                        ctx = new ContextMenu(new MenuItem[] { addSubjectSubmenu });
                     }
                     ctx.Show(registerDataGridView, new Point(x, e.Y));
                 }
