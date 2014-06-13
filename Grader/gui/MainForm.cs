@@ -21,6 +21,9 @@ namespace Grader.gui {
 
         private TabControl tabs;
 
+        private RegisterGenerationTab registerGenerationTab;
+        private RegisterImportTab registerImportTab;
+
         private void InitializeComponent() {
             this.SuspendLayout();
 
@@ -59,7 +62,9 @@ namespace Grader.gui {
 
             ToolStripMenuItem menu_file_exit = new ToolStripMenuItem("Выход");
             menu_file_exit.Click += new EventHandler(delegate {
-                Environment.Exit(0);
+                if (registerImportTab.CheckForUnsavedChanges()) {
+                    Environment.Exit(0);
+                }
             });
             menu_file.DropDownItems.Add(menu_file_exit);
 
@@ -75,8 +80,10 @@ namespace Grader.gui {
             tabs.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             tabs.Size = new System.Drawing.Size(1200, 776);
 
-            AddTab(tabs, new RegisterGenerationTab(dataAccess));
-            AddTab(tabs, new RegisterImportTab(dataAccess));
+            registerGenerationTab = new RegisterGenerationTab(dataAccess);
+            AddTab(tabs, registerGenerationTab);
+            registerImportTab = new RegisterImportTab(dataAccess);
+            AddTab(tabs, registerImportTab);
             AddTab(tabs, new TabPage("Просмотр оценок"));
             AddTab(tabs, new TabPage("Анализ оценок"));
 
@@ -89,6 +96,12 @@ namespace Grader.gui {
             this.Controls.Add(tabs);
             this.Text = "Grader";
             this.ResumeLayout(false);
+
+            this.FormClosing += new FormClosingEventHandler(delegate(object sender, FormClosingEventArgs e) {
+                if (!registerImportTab.CheckForUnsavedChanges()) {
+                    e.Cancel = true;
+                }
+            });
         }
 
         private void AddTab(TabControl tabs, TabPage tab) {
