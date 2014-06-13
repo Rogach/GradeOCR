@@ -80,6 +80,31 @@ namespace Grader.gui {
                     }
                 }
             });
+            registerList.MouseClick += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
+                if (e.Clicks == 1 && e.Button == MouseButtons.Right) {
+                    ListViewItem item = registerList.Items[registerList.SelectedIndices[0]];
+                    RegisterDesc rd = (RegisterDesc) item.Tag;
+
+                    MenuItem deleteRegister = new MenuItem("Удалить ведомость");
+                    deleteRegister.Click += new EventHandler(delegate {
+                        DialogResult confirmationResult =
+                            MessageBox.Show(
+                                String.Format("Действительно удалить ведомость '{0}'?", rd.name), 
+                                "Удаление ведомости", 
+                                MessageBoxButtons.OKCancel, 
+                                MessageBoxIcon.Warning, 
+                                MessageBoxDefaultButton.Button1
+                                );
+                        if (confirmationResult == DialogResult.OK) {
+                            RegisterMarshaller.DeleteRegister(rd.id, dataAccess.GetDataContext());
+                            UpdateRegisterList();
+                        }
+                    });
+
+                    ContextMenu contextMenu = new ContextMenu(new MenuItem[] { deleteRegister });
+                    contextMenu.Show(registerList, e.Location);
+                }
+            });
             this.Controls.Add(registerList);
             UpdateRegisterList();
 

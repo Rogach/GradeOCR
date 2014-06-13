@@ -41,12 +41,7 @@ namespace Grader.model {
 
         public static void SaveRegister(Register register, DataContext dc) {
             if (register.id != -1) {
-                // delete all records about old register
-                dc.ExecuteCommand("delete from ВедомостьТег where КодВедомости = @p0", register.id);
-                dc.ExecuteCommand("delete from ВедомостьПредмет where КодВедомости = @p0", register.id);
-                dc.ExecuteCommand("delete from ВедомостьЗапись where КодВедомости = @p0", register.id);
-                dc.ExecuteCommand("delete from Оценка where КодВедомости = @p0", register.id);
-                dc.ExecuteCommand("delete from Ведомость where Код = @p0", register.id);
+                DeleteRegister(register.id, dc);
             }
             int rid = register.id;
             if (register.id == -1) {
@@ -97,6 +92,14 @@ namespace Grader.model {
             }
 
             DataAccess.AfterInsert(dc);
+        }
+
+        public static void DeleteRegister(int rid, DataContext dc) {
+            dc.ExecuteCommand("delete from ВедомостьТег where КодВедомости = @p0", rid);
+            dc.ExecuteCommand("delete from ВедомостьПредмет where КодВедомости = @p0", rid);
+            dc.ExecuteCommand("delete from ВедомостьЗапись where КодВедомости = @p0", rid);
+            dc.ExecuteCommand("delete from Оценка where КодВедомости = @p0", rid);
+            dc.ExecuteCommand("delete from Ведомость where Код = @p0", rid);
         }
 
         private class BatchInsert {
