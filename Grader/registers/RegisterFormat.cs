@@ -13,6 +13,7 @@ namespace Grader.registers {
 
     public class RegisterSettings {
         public Подразделение subunit { get; set; }
+        public string subunitName { get; set; }
         public DateTime registerDate { get; set; }
         public RegisterType registerType { get; set; }
         public bool onlyKMN { get; set; }
@@ -31,34 +32,43 @@ namespace Grader.registers {
             if (settings.onlyKMN) {
                 ExcelTemplates.SetRange(sh, "ИмяПодразделения", "кандидатов на замещение вакантных должностей");
             } else {
-                ExcelTemplates.SetRange(sh, "ИмяПодразделения", settings.subunit.ИмяРодительный);
+                if (settings.subunit != null) {
+                    ExcelTemplates.SetRange(sh, "ИмяПодразделения", settings.subunit.ИмяРодительный);
+                } else {
+                    ExcelTemplates.SetRange(sh, "ИмяПодразделения", settings.subunitName);
+                }
             }
 
             ExcelTemplates.ReplaceRange(sh, "RegisterDate", "$month$", ReadableTextUtil.GetMonthGenitive(settings.registerDate));
             ExcelTemplates.ReplaceRange(sh, "RegisterDate", "$year$", settings.registerDate.ToString("yyyy"));
 
-            if (settings.subunit.Тип == "взвод") {
+            if (settings.subunit != null && settings.subunit.Тип == "взвод") {
                 ExcelTemplates.AppendRange(sh, "КВ", Querying.GetSubunitCommander(dc, settings.subunit.Код).Map(s => s.GetFullName()).GetOrElse(""));
             } else {
                 ExcelTemplates.DeleteRow(sh, "КВ");
             }
 
-            Option<Военнослужащий> commander;
-            Подразделение subunit;
-            if (settings.subunit.Тип == "взвод") {
-                commander = Querying.GetCompanyCommander(dc, settings.subunit.Код);
-                subunit = Querying.GetCompany(dc, settings.subunit.Код).Get();
+            if (settings.subunit == null) {
+                ExcelTemplates.DeleteRow(sh, "Подпись");
             } else {
-                commander = settings.subunit.Командир(dc);
-                subunit = settings.subunit;
+                Option<Военнослужащий> commander;
+                Подразделение signatureSubunit;
+
+                if (settings.subunit.Тип == "взвод") {
+                    commander = Querying.GetCompanyCommander(dc, settings.subunit.Код);
+                    signatureSubunit = Querying.GetCompany(dc, settings.subunit.Код).Get();
+                } else {
+                    commander = settings.subunit.Командир(dc);
+                    signatureSubunit = settings.subunit;
+                }
+                ExcelTemplates.SetRange(
+                        sh, "Подпись",
+                        String.Format(
+                            "Командир {0}: {1}                    {2}",
+                            signatureSubunit.ИмяРодительный,
+                            commander.Map(c => c.Звание.Название).GetOrElse("???"),
+                            commander.Map(c => c.ФИО).GetOrElse("???")));
             }
-            ExcelTemplates.SetRange(
-                    sh, "Подпись",
-                    String.Format(
-                        "Командир {0}: {1}                    {2}",
-                        subunit.ИмяРодительный,
-                        commander.Map(c => c.Звание.Название).GetOrElse("???"),
-                        commander.Map(c => c.ФИО).GetOrElse("???")));
 
             InsertSoldiers(sh, settings);
 

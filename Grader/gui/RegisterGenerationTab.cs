@@ -44,7 +44,7 @@ namespace Grader.gui {
             new GenericRegister("МП")
         };
 
-        private PersonFilter personFilter;
+        private PersonSelector personSelector;
         private RadioButton groupingNone;
         private RadioButton groupingByPlatoon;
         private RadioButton groupingByVus;
@@ -58,13 +58,14 @@ namespace Grader.gui {
         private void InitializeComponent() {
             this.Text = "Печать ведомостей";
 
+            personSelector = new PersonSelector(dataAccess);
+            //personSelector.Size = new Size(255, 170);
+            personSelector.Location = new Point(3, 3);
+            this.Controls.Add(personSelector);
+
             DataContext dc = dataAccess.GetDataContext();
 
-            FormLayout layout = new FormLayout(this, maxLabelWidth: 87);
-
-            personFilter = layout.AddFullRow(new PersonFilter(dataAccess));
-
-            layout.AddSpacer(5);
+            FormLayout layout = new FormLayout(this, maxLabelWidth: 90, y: 6 + personSelector.PreferredSize.Height);
 
             groupingNone = new RadioButton { Text = "нет", Checked = true };
             groupingByPlatoon = new RadioButton { Text = "повзводно" };
@@ -114,7 +115,13 @@ namespace Grader.gui {
                 return new SoldierGrouping {
                     keySelector = v => 0,
                     registerName = _ => "ведомость",
-                    subunit = _ => (Подразделение) personFilter.subunitSelector.SelectedItem
+                    subunit = _ => {
+                        if (personSelector.IsFilter()) {
+                            return (Подразделение) personSelector.personFilter.subunitSelector.SelectedItem;
+                        } else {
+                            return null;
+                        }
+                    }
                 };
             } else if (groupingByPlatoon.Checked) {
                 return new SoldierGrouping {
@@ -126,7 +133,13 @@ namespace Grader.gui {
                 return new SoldierGrouping {
                     keySelector = v => v.ВУС,
                     registerName = vus => vus.ToString(),
-                    subunit = _ => (Подразделение) personFilter.subunitSelector.SelectedItem
+                    subunit = _ => {
+                        if (personSelector.IsFilter()) {
+                            return (Подразделение) personSelector.personFilter.subunitSelector.SelectedItem;
+                        } else {
+                            return null;
+                        }
+                    }
                 };
             } else {
                 throw new Exception("No valid grouping selected");
@@ -143,7 +156,7 @@ namespace Grader.gui {
                 registerDate = registerDate.Value
             };
             List<ВоеннослужащийПоПодразделениям> soldiers =
-                personFilter.GetPersonQuery().ToListTimed();
+                personSelector.GetPersonList();
             if (onlyKMN.Checked) {
                 soldiers = soldiers.Where(v => v.КМН == 1).ToList();
             }
@@ -160,6 +173,9 @@ namespace Grader.gui {
                 rsh.Name = grouping.registerName(group.Key);
                 settings.soldiers = group.ToList();
                 settings.subunit = grouping.subunit(settings.soldiers);
+                if (personSelector.IsPredefinedList()) {
+                    settings.subunitName = personSelector.predefinedPersonLists.GetRegisterName();
+                }
                 spec.Format(dc, rsh, settings);
             });
 

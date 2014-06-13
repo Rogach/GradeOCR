@@ -63,6 +63,8 @@ namespace Grader.gui {
             selectContract.Text = "Контрактники?";
 
             layout.PerformLayout();
+
+            this.Size = new Size(layout.GetX(), layout.GetY());
         }
 
         public IQueryable<ВоеннослужащийПоПодразделениям> GetPersonQuery() {

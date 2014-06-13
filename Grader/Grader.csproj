@@ -85,6 +85,12 @@
     <Compile Include="gui\PersonFilter.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="gui\PersonSelector.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="gui\PredefinedPersonLists.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="gui\RegisterEditor.cs">
       <SubType>Component</SubType>
     </Compile>
