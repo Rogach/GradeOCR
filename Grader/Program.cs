@@ -6,6 +6,7 @@ using Grader.gui;
 using System.IO;
 using System.Xml;
 using LibUtil;
+using System.Data.Linq;
 
 namespace Grader {
     public static class Program {

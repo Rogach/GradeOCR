@@ -58,25 +58,31 @@ namespace Grader.model {
                     rid = 1;
                 }
             }
+            
             // save the register
             dc.ExecuteCommand(@"insert into Ведомость(Код, Название, ДатаЗаполнения, ДатаВнесения, ДатаИзменения, Виртуальная, Включена) 
                                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)",
                               rid, register.name,
                               SqlTime(register.fillDate), SqlTime(register.importDate.Value), SqlTime(register.editDate.Value),
                               register.virt, register.enabled);
+
+            
             foreach (string tag in register.tags) {
-                dc.ExecuteCommand(@"insert into ВедомостьТег(Тег, КодВедомости) values(@p0, @p1)", tag, rid);
+                dc.ExecuteCommand("insert into ВедомостьТег(Тег, КодВедомости) values (@p0, @p1)", tag, rid);
             }
+
             int subjectOrder = 1;
             foreach (int subjectId in register.subjectIds) {
                 dc.ExecuteCommand(@"insert into ВедомостьПредмет(КодПредмета, КодВедомости, Порядок) values (@p0, @p1, @p2)",
                                     subjectId, rid, subjectOrder++);
             }
+
             int recordOrder = 1;
             foreach (RegisterRecord record in register.records) {
                 dc.ExecuteCommand(@"insert into ВедомостьЗапись(КодВоеннослужащего, КодВедомости, Порядок) values (@p0, @p1, @p2)",
                                     record.soldier.Код, rid, recordOrder++);
             }
+
             foreach (RegisterRecord record in register.records) {
                 foreach (Оценка grade in record.marks) {
                     dc.ExecuteCommand(@"insert into Оценка(
@@ -89,6 +95,32 @@ namespace Grader.model {
                                         grade.ВУС, grade.ТипВоеннослужащего, grade.КодЗвания, rid);
                 }
             }
+
+            DataAccess.AfterInsert(dc);
+        }
+
+        private class BatchInsert {
+            private StringBuilder sb = new StringBuilder();
+            private DataContext dc;
+            private string tableDef;
+
+            public BatchInsert(DataContext dc, string tableDef) {
+                this.dc = dc;
+                this.tableDef = tableDef;
+            }
+
+            public void Add(string format, params object[] args) {
+                sb.Append(String.Format("insert into {0} values ({1});", tableDef, String.Format(format, args)));
+            }
+
+            public string GetText() {
+                return sb.ToString();
+            }
+
+            public void Execute() {
+                dc.ExecuteCommand(sb.ToString());
+            }
+
         }
 
         private static string SqlTime(DateTime t) {
