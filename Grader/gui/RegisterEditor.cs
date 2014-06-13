@@ -186,7 +186,7 @@ namespace Grader.gui {
                     });
 
                     MenuItem addSubjectSubmenu = new MenuItem("Добавить предмет");
-                    foreach (string subj in dataAccess.GetDataContext().GetTable<Предмет>().Select(s => s.Название).ToList()) {
+                    foreach (string subj in dataAccess.GetDataContext().GetTable<Предмет>().Select(s => s.Название).ToList().OrderBy(s => s)) {
                         string subject = subj;
                         MenuItem subjectItem = new MenuItem(subj);
                         subjectItem.Click += new EventHandler(delegate {
