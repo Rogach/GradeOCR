@@ -6,7 +6,7 @@ using System.Data.Linq;
 using LibUtil;
 
 namespace Grader.model {
-    public class RegisterLoad {
+    public class RegisterMarshaller {
         public static Register LoadRegister(int id, DataContext dc) {
             Ведомость r = dc.GetTable<Ведомость>().Where(reg => reg.Код == id).ToList().First();
             List<string> tags = dc.GetTable<ВедомостьТег>().Where(t => t.КодВедомости == id).Select(t => t.Тег).ToList();

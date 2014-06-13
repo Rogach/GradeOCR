@@ -73,7 +73,7 @@ namespace Grader.gui {
                     if (CheckForUnsavedChanges()) {
                         SetRegisterPanelEnabled(false);
                         SelectRegisterInList(rd.id);
-                        Register r = RegisterLoad.LoadRegister(rd.id, dataAccess.GetDataContext());
+                        Register r = RegisterMarshaller.LoadRegister(rd.id, dataAccess.GetDataContext());
                         registerEditor.SetRegister(r);
                         changesPending = false;
                         SetRegisterPanelEnabled(true);
@@ -106,7 +106,7 @@ namespace Grader.gui {
             saveRegister.Click += new EventHandler(delegate {
                 SetRegisterPanelEnabled(false);
                 Register register = registerEditor.GetRegister();
-                RegisterLoad.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
+                RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
                 changesPending = false;
                 UpdateRegisterList();
                 SelectRegisterInList(register.id);
@@ -136,7 +136,7 @@ namespace Grader.gui {
                 if (result == DialogResult.Cancel) {
                     return false;
                 } else if (result == DialogResult.OK) {
-                    RegisterLoad.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
+                    RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
                     changesPending = false;
                     return true;
                 } else if (result == DialogResult.No) {
