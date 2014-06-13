@@ -32,7 +32,7 @@ namespace Grader.gui {
             return
                 from s in dc.GetTable<ВоеннослужащийПоПодразделениям>()
                 where personIds.Contains(s.Код)
-                where s.КодСтаршегоПодразделения == 1
+                where s.КодСтаршегоПодразделения == s.КодПодразделения
                 where s.Убыл == 0
                 select s;
         }

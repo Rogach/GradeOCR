@@ -317,7 +317,7 @@ namespace Grader.gui {
             foreach (RegisterRecord record in register.records) {
                 List<string> cells = new List<string>();
                 cells.Add(record.soldier.Код.ToString());
-                cells.Add(record.soldier.Звание.Название);
+                cells.Add(record.soldier.Звание);
                 cells.Add(record.soldier.ФИО);
 
                 foreach (int subjectId in register.subjectIds) {
@@ -366,7 +366,7 @@ namespace Grader.gui {
                         }
                     })
                     .Select(row => {
-                        Военнослужащий soldier = dataAccess.GetDataContext().GetTable<Военнослужащий>()
+                        ВоеннослужащийПоПодразделениям soldier = dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
                                 .Where(v => v.Код == Int32.Parse(row.Cells[0].Value.ToString()))
                                 .ToListTimed().First();
                         List<Оценка> marks = new List<Оценка>();

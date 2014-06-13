@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using Grader.model;
+using LibUtil;
 
 namespace Grader.gui {
     class RegisterImportTab : TabPage {
@@ -48,10 +49,12 @@ namespace Grader.gui {
             newRegisterButton.Size = new Size(200, 25);
             newRegisterButton.Click += new EventHandler(delegate {
                 if (CheckForUnsavedChanges()) {
-                    DeselectRegisterInList();
-                    changesPending = true;
-                    registerEditor.SetRegister(registerEditor.GetEmptyRegister());
-                    SetRegisterPanelEnabled(true);
+                    AskForRegisterInit().ForEach(register => {
+                        DeselectRegisterInList();
+                        changesPending = true;
+                        registerEditor.SetRegister(register);
+                        SetRegisterPanelEnabled(true);
+                    });
                 }
             });
             this.Controls.Add(newRegisterButton);
@@ -212,6 +215,50 @@ namespace Grader.gui {
             public bool enabled { get; set; }
             public override string ToString() {
                 return String.Format("{0} ({1})", name, fillDate.ToString("dd.MM.yyyy"));
+            }
+        }
+
+        public Option<Register> AskForRegisterInit() {
+            Form f = new Form();
+            f.Text = "Новая ведомость";
+            f.SuspendLayout();
+            
+            PersonSelector personSelector = new PersonSelector(dataAccess);
+            personSelector.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            f.Location = new Point(0, 0);
+            f.Size = new Size(personSelector.PreferredSize.Width + 15, personSelector.PreferredSize.Height + 80);
+            f.Controls.Add(personSelector);
+            
+            Button buttonOk = new Button { Text = "ОК" };
+            buttonOk.Click += new EventHandler(delegate {
+                f.DialogResult = DialogResult.OK;
+                f.Hide();
+            });
+            buttonOk.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+            buttonOk.Size = new Size(100, 25);
+            buttonOk.Location = new Point(35, personSelector.Height + 10);
+            f.Controls.Add(buttonOk);
+
+            
+            Button buttonCancel = new Button { Text = "Отменить" };
+            buttonCancel.Click += new EventHandler(delegate {
+                f.DialogResult = DialogResult.Cancel;
+                f.Hide();
+            });
+            buttonCancel.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+            buttonCancel.Size = new Size(100, 25);
+            buttonCancel.Location = new Point(145, personSelector.Height + 10);
+            f.Controls.Add(buttonCancel);
+
+            f.ResumeLayout(false);
+
+            DialogResult result = f.ShowDialog();
+            if (result == DialogResult.OK) {
+                Register reg = registerEditor.GetEmptyRegister();
+                reg.records = personSelector.GetPersonList().Select(p => new RegisterRecord { marks = new List<Оценка>(), soldier = p }).ToList();
+                return new Some<Register>(reg);
+            } else {
+                return new None<Register>();
             }
         }
     }

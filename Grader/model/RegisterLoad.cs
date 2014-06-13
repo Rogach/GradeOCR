@@ -14,7 +14,8 @@ namespace Grader.model {
             List<RegisterRecord> records = (
                 from rec in dc.GetTable<ВедомостьЗапись>()
                 where rec.КодВедомости == id
-                join v in dc.GetTable<Военнослужащий>() on rec.КодВоеннослужащего equals v.Код
+                join v in dc.GetTable<ВоеннослужащийПоПодразделениям>() on rec.КодВоеннослужащего equals v.Код
+                where v.КодПодразделения == v.КодСтаршегоПодразделения
                 select new RegisterRecord { soldier = v }).ToList();
             foreach (var record in records) {
                 record.marks = new List<Оценка>();
