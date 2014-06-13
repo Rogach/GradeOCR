@@ -199,11 +199,30 @@ namespace Grader.gui {
                         addSubjectSubmenu.MenuItems.Add(subjectItem);
                     }
 
+                    MenuItem addSubjects = new MenuItem("Добавить предметы");
+                    addSubjects.Click += new EventHandler(delegate {
+                        InputDialog.ShowInputDialog("Список предметов:", "Выбор предметов", "").ForEach(subjects => {
+                            List<string> subjectList =
+                                subjects.Split(new char[] { ' ', ',', ';' })
+                                .Where(s => s.Trim().Length > 0)
+                                .Select(s => s.ToUpper())
+                                .ToList();
+                            int c = 1;
+                            foreach (var subj in subjectList) {
+                                DataGridViewColumn newCol = new DataGridViewColumn();
+                                newCol.Name = subj;
+                                newCol.CellTemplate = new DataGridViewTextBoxCell();
+                                // insert after current column
+                                registerDataGridView.Columns.Insert(e.ColumnIndex + (c++), newCol);
+                            }
+                        });
+                    });
+
                     ContextMenu ctx;
                     if (e.ColumnIndex > 2) {
-                        ctx = new ContextMenu(new MenuItem[] { deleteColumnAction, addSubjectSubmenu });
+                        ctx = new ContextMenu(new MenuItem[] { deleteColumnAction, addSubjectSubmenu, addSubjects });
                     } else  {
-                        ctx = new ContextMenu(new MenuItem[] { addSubjectSubmenu });
+                        ctx = new ContextMenu(new MenuItem[] { addSubjectSubmenu, addSubjects });
                     }
                     ctx.Show(registerDataGridView, new Point(x, e.Y));
                 }
