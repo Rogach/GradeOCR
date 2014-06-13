@@ -172,7 +172,7 @@ namespace Grader.gui {
             });
 
             registerDataGridView.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(delegate(object sender, DataGridViewCellMouseEventArgs e) {
-                if (e.Button == MouseButtons.Right && e.ColumnIndex > 1) {
+                if (e.Button == MouseButtons.Right && e.ColumnIndex > 2) {
                     int x = 0;
                     x += registerDataGridView.RowHeadersWidth;
                     for (int ci = 0; ci < e.ColumnIndex; ci++) {
@@ -219,7 +219,7 @@ namespace Grader.gui {
                     });
 
                     ContextMenu ctx;
-                    if (e.ColumnIndex > 2) {
+                    if (e.ColumnIndex > 3) {
                         ctx = new ContextMenu(new MenuItem[] { deleteColumnAction, addSubjectSubmenu, addSubjects });
                     } else  {
                         ctx = new ContextMenu(new MenuItem[] { addSubjectSubmenu, addSubjects });
@@ -238,12 +238,12 @@ namespace Grader.gui {
             registerDataGridView.EditingControlShowing += 
                 new DataGridViewEditingControlShowingEventHandler(delegate(object sender, DataGridViewEditingControlShowingEventArgs args) {
                     TextBox ed = (TextBox) registerDataGridView.EditingControl;
-                    if (registerDataGridView.CurrentCell.ColumnIndex == 1) {
+                    if (registerDataGridView.CurrentCell.ColumnIndex == 2) {
                         ed.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                         ed.AutoCompleteSource = AutoCompleteSource.CustomSource;
                         ed.AutoCompleteCustomSource = new AutoCompleteStringCollection();
                         ed.AutoCompleteCustomSource.AddRange(autocompleteRanks.ToArray());
-                    } else if (registerDataGridView.CurrentCell.ColumnIndex == 2) {
+                    } else if (registerDataGridView.CurrentCell.ColumnIndex == 3) {
                         ed.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                         ed.AutoCompleteSource = AutoCompleteSource.CustomSource;
                         ed.AutoCompleteCustomSource = new AutoCompleteStringCollection();
@@ -254,7 +254,7 @@ namespace Grader.gui {
             });
 
             registerDataGridView.CellValueChanged += new DataGridViewCellEventHandler(delegate(object sender, DataGridViewCellEventArgs e) {
-                if (e.ColumnIndex == 2) {
+                if (e.ColumnIndex == 3) {
                     Regex nameRegex = new Regex(@"(\w+) (\w).(\w).");
                     Match match = nameRegex.Match(registerDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString());
                     if (match.Success) {
@@ -272,8 +272,8 @@ namespace Grader.gui {
                             select new { id = v.Код, rank = r.Название };
                         var soldierList = query.ToListTimed();
                         if (soldierList.Count == 1) {
-                            registerDataGridView.Rows[e.RowIndex].Cells[0].Value = soldierList[0].id.ToString();
-                            registerDataGridView.Rows[e.RowIndex].Cells[1].Value = soldierList[0].rank;
+                            registerDataGridView.Rows[e.RowIndex].Cells[1].Value = soldierList[0].id.ToString();
+                            registerDataGridView.Rows[e.RowIndex].Cells[2].Value = soldierList[0].rank;
                         }
                     }
                 }
@@ -283,10 +283,12 @@ namespace Grader.gui {
             registerDataGridView.ColumnAdded += new DataGridViewColumnEventHandler(delegate(object e, DataGridViewColumnEventArgs args) {
                 args.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
                 if (args.Column.Index == 0) {
-                    args.Column.Width = 45;
+                    args.Column.Width = 20;
                 } else if (args.Column.Index == 1) {
-                    args.Column.Width = 100;
+                    args.Column.Width = 45;
                 } else if (args.Column.Index == 2) {
+                    args.Column.Width = 100;
+                } else if (args.Column.Index == 3) {
                     args.Column.Width = 150;
                 } else {
                     args.Column.Width = 40;
@@ -327,6 +329,7 @@ namespace Grader.gui {
             registerDataTable = new DataTable("register");
             registerDataSet.Tables.Add(registerDataTable);
 
+            registerDataTable.Columns.Add(new DataColumn("N"));
             registerDataTable.Columns.Add(new DataColumn("ID"));
             registerDataTable.Columns.Add(new DataColumn("Звание"));
             registerDataTable.Columns.Add(new DataColumn("Фамилия И.О."));
@@ -335,8 +338,10 @@ namespace Grader.gui {
                 registerDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
             }
 
+            int c = 1;
             foreach (RegisterRecord record in register.records) {
                 List<string> cells = new List<string>();
+                cells.Add((c++).ToString());
                 cells.Add(record.soldier.Код.ToString());
                 cells.Add(record.soldier.Звание);
                 cells.Add(record.soldier.ФИО);
@@ -367,7 +372,7 @@ namespace Grader.gui {
         public Register GetRegister() {
             List<int> subjectIds = 
                 registerDataGridView.Columns
-                .ToNormalList<DataGridViewColumn>().Skip(3)
+                .ToNormalList<DataGridViewColumn>().Skip(4)
                 .Select(col => subjectNameToId[col.Name]).ToList();
             return new Register {
                 id = currentRegister.id,
@@ -382,22 +387,22 @@ namespace Grader.gui {
                 records = 
                     registerDataGridView.Rows.ToNormalList<DataGridViewRow>()
                     .Where(row => {
-                        if (row.Cells[0].Value != null) {
-                            return row.Cells[0].Value.ToString().Trim().Length > 0;
+                        if (row.Cells[1].Value != null) {
+                            return row.Cells[1].Value.ToString().Trim().Length > 0;
                         } else {
                             return false;
                         }
                     })
                     .Select(row => {
                         ВоеннослужащийПоПодразделениям soldier = dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
-                                .Where(v => v.Код == Int32.Parse(row.Cells[0].Value.ToString()))
+                                .Where(v => v.Код == Int32.Parse(row.Cells[1].Value.ToString()))
                                 .ToListTimed().First();
                         List<Оценка> marks = new List<Оценка>();
-                        for (int col = 3; col < registerDataGridView.Columns.Count; col++) {
+                        for (int col = 4; col < registerDataGridView.Columns.Count; col++) {
                             Оценка g = new Оценка {
                                 Код = -1,
                                 КодПроверяемого = soldier.Код,
-                                КодПредмета = subjectIds[col - 3],
+                                КодПредмета = subjectIds[col - 4],
                                 КодПодразделения = soldier.КодПодразделения,
                                 ВУС = soldier.ВУС,
                                 ТипВоеннослужащего = soldier.ТипВоеннослужащего,
