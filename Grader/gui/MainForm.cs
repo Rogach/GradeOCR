@@ -93,6 +93,10 @@ namespace Grader.gui {
             AddTab(tabs, gradeViewTab);
             AddTab(tabs, new TabPage("Анализ оценок"));
 
+            gradeViewTab.ChangesSaved.AddEventListener(() => {
+                registerImportTab.UpdateRegisterList();
+            });
+
             tabs.ResumeLayout(false);
 
             this.AutoScaleDimensions = new SizeF(6F, 13F);

@@ -17,6 +17,7 @@ namespace Grader.gui {
         Dictionary<string, int> subjectNameToId;
         Dictionary<int, string> subjectIdToName;
         List<int> rankIdsSorted;
+        public EventManager ChangesSaved = new EventManager();
 
         private static string TAB_NAME = "Просмотр оценок";
 
@@ -440,6 +441,7 @@ namespace Grader.gui {
                 okButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
                 okButton.Click += new EventHandler(delegate {
                     RegisterMarshaller.SaveRegister(changesEditor.GetRegister(), dataAccess.GetDataContext());
+                    ChangesSaved.Invoke();
                     f.DialogResult = DialogResult.OK;
                     f.Hide();
                 });
