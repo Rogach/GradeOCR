@@ -190,13 +190,14 @@ namespace Grader.gui {
                 where g.КодВедомости == r.Код
 
                 where r.Включена == 1
-                where selectedTags.Count == 0 || 
-                    (from t in dc.GetTable<ВедомостьТег>() 
+                where r.ДатаЗаполнения >= dateFrom.Value.Date && r.ДатаЗаполнения <= dateTo.Value.Date
+
+                where selectedTags.Count == 0 ||
+                    (from t in dc.GetTable<ВедомостьТег>()
                      where t.КодВедомости == r.Код
                      where selectedTags.Contains(t.Тег)
                      select t).SingleOrDefault() != default(ВедомостьТег)
-
-                where r.ДатаЗаполнения >= dateFrom.Value.Date && r.ДатаЗаполнения <= dateTo.Value.Date
+                
                 orderby rank.order, v.Фамилия, v.Имя, v.Отчество, r.ДатаЗаполнения
                 select new GradeDesc { grade = g, soldier = v, virt = r.Виртуальная };
 
