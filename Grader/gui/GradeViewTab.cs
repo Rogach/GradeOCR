@@ -9,12 +9,16 @@ using LibUtil;
 using System.Data;
 using Grader.util;
 using Grader.gui.gridutil;
+using Grader.model;
 
 namespace Grader.gui {
     public class GradeViewTab : TabPage {
         private DataAccess dataAccess;
         Dictionary<string, int> subjectNameToId;
         Dictionary<int, string> subjectIdToName;
+        List<int> rankIdsSorted;
+
+        private RegisterEditor changesEditor;
 
         private static string TAB_NAME = "Просмотр оценок";
 
@@ -30,6 +34,12 @@ namespace Grader.gui {
                 .Select(s => new { id = s.Код, name = s.Название })
                 .ToListTimed()
                 .ToDictionary(s => s.id, s => s.name);
+            rankIdsSorted =
+                dataAccess.GetDataContext().GetTable<Звание>()
+                .OrderByDescending(r => r.order)
+                .Select(r => r.Код)
+                .ToList();
+            changesEditor = new RegisterEditor(dataAccess);
             this.InitializeComponent();
         }
 
@@ -60,6 +70,8 @@ namespace Grader.gui {
         }
 
         private Dictionary<Tuple<int, int>, GradeDesc> originalGrades;
+        private List<ВоеннослужащийПоПодразделениям> soldiers;
+        private List<int> subjectIds;
 
         private void InitializeComponent() {
             this.Text = TAB_NAME;
@@ -113,7 +125,8 @@ namespace Grader.gui {
             saveChanges.Size = new Size(150, 25);
             saveChanges.Enabled = false;
             saveChanges.Click += new EventHandler(delegate {
-                throw new NotImplementedException();
+                SaveChanges();
+                changesPending = false;
             });
             this.Controls.Add(saveChanges);
 
@@ -123,7 +136,10 @@ namespace Grader.gui {
             cancelChanges.Size = new Size(150, 25);
             cancelChanges.Enabled = false;
             cancelChanges.Click += new EventHandler(delegate {
-                throw new NotImplementedException();
+                changesPending = false;
+                gradeView.DataSource = null;
+                cancelChanges.Enabled = false;
+                saveChanges.Enabled = false;
             });
             this.Controls.Add(cancelChanges);
 
@@ -201,7 +217,7 @@ namespace Grader.gui {
                      where selectedTags.Contains(t.Тег)
                      select t).SingleOrDefault() != default(ВедомостьТег)
                 
-                orderby rank.order, v.Фамилия, v.Имя, v.Отчество, r.ДатаЗаполнения
+                orderby rank.order descending, v.Фамилия, v.Имя, v.Отчество, r.ДатаЗаполнения
                 select new GradeDesc { grade = g, soldier = v, virt = r.Виртуальная };
 
             originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
@@ -221,7 +237,7 @@ namespace Grader.gui {
             gradeViewDataTable.Columns.Add(new DataColumn("Звание"));
             gradeViewDataTable.Columns.Add(new DataColumn("Фамилия И.О."));
 
-            List<int> subjectIds = 
+            subjectIds = 
                 grades.Select(gd => gd.grade.КодПредмета)
                 .Distinct()
                 .OrderBy(s => subjectIdToName[s])
@@ -230,7 +246,7 @@ namespace Grader.gui {
                 gradeViewDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
             }
 
-            List<ВоеннослужащийПоПодразделениям> soldiers = grades.Select(gd => gd.soldier).Distinct().ToList();
+            soldiers = grades.Select(gd => gd.soldier).Distinct().ToList();
             int c = 1;
             foreach (var soldier in soldiers) {
                 List<string> cells = new List<string>();
@@ -269,6 +285,8 @@ namespace Grader.gui {
                     }
                 }
             }
+            saveChanges.Enabled = true;
+            cancelChanges.Enabled = true;
         }
 
         private class GradeDesc {
@@ -283,8 +301,7 @@ namespace Grader.gui {
                 if (result == DialogResult.Cancel) {
                     return false;
                 } else if (result == DialogResult.OK) {
-                    // save changes
-                    throw new NotImplementedException();
+                    SaveChanges();
                     changesPending = false;
                     return true;
                 } else if (result == DialogResult.No) {
@@ -294,6 +311,151 @@ namespace Grader.gui {
                 }
             } else {
                 return true;
+            }
+        }
+
+        public void SaveChanges() {
+            Dictionary<ВоеннослужащийПоПодразделениям, List<Оценка>> editedGrades = 
+                new Dictionary<ВоеннослужащийПоПодразделениям, List<Оценка>>();
+
+            foreach (var soldier in soldiers) {
+                foreach (int subjectId in subjectIds) {
+                    string v = gradeView.Rows[soldiers.IndexOf(soldier)].Cells[subjectIds.IndexOf(subjectId) + 4].Value.ToString().Trim();
+                    Option<GradeDesc> gdOpt = originalGrades.GetOption(new Tuple<int, int>(soldier.Код, subjectId));
+                    if (gdOpt.IsEmpty()) {
+                        // new grade was added
+                        List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldier, () => new List<Оценка>());
+                        Оценка g = new Оценка {
+                            Код = -1,
+                            КодВедомости = -1,
+                            КодПроверяемого = soldier.Код,
+                            ВУС = soldier.ВУС,
+                            КодЗвания = soldier.КодЗвания,
+                            КодПодразделения = soldier.КодПодразделения,
+                            КодПредмета = subjectId,
+                            ТипВоеннослужащего = soldier.ТипВоеннослужащего
+                        };
+                        Util.ParseInt(v).Map(vv => {
+                            g.ЭтоКомментарий = false;
+                            g.Значение = vv;
+                            g.Текст = "";
+                            return true;
+                        }).GetOrElse(() => {
+                            g.ЭтоКомментарий = true;
+                            g.Текст = v;
+                            g.Значение = 0;
+                            return true;
+                        });
+                        grades.Add(g);
+                    } else {
+                        GradeDesc gd = gdOpt.Get();
+                        if (v == "") {
+                            // grade was deleted
+                            List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldier, () => new List<Оценка>());
+                            Оценка g = new Оценка {
+                                Код = -1,
+                                КодВедомости = -1,
+                                КодПроверяемого = soldier.Код,
+                                ВУС = soldier.ВУС,
+                                КодЗвания = soldier.КодЗвания,
+                                КодПодразделения = soldier.КодПодразделения,
+                                КодПредмета = subjectId,
+                                ТипВоеннослужащего = soldier.ТипВоеннослужащего,
+                                ЭтоКомментарий = true,
+                                Значение = 0,
+                                Текст = "_"
+                            };
+                            grades.Add(g);
+                        } else if ((gd.grade.ЭтоКомментарий && gd.grade.Текст == v) || gd.grade.Значение.ToString() == v) {
+                            // no change happened
+                        } else {
+                            // grade was changed
+                            List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldier, () => new List<Оценка>());
+                            Оценка g = new Оценка {
+                                Код = -1,
+                                КодВедомости = -1,
+                                КодПроверяемого = soldier.Код,
+                                ВУС = soldier.ВУС,
+                                КодЗвания = soldier.КодЗвания,
+                                КодПодразделения = soldier.КодПодразделения,
+                                КодПредмета = subjectId,
+                                ТипВоеннослужащего = soldier.ТипВоеннослужащего
+                            };
+                            Util.ParseInt(v).Map(vv => {
+                                g.ЭтоКомментарий = false;
+                                g.Значение = vv;
+                                g.Текст = "";
+                                return true;
+                            }).GetOrElse(() => {
+                                g.ЭтоКомментарий = true;
+                                g.Текст = v;
+                                g.Значение = 0;
+                                return true;
+                            });
+                            grades.Add(g);
+                        }
+                    }
+                }
+            }
+
+            if (editedGrades.Count > 0) {
+
+                Register newRegister = new Register {
+                    id = -1,
+                    fillDate = DateTime.Now,
+                    importDate = DateTime.Now,
+                    editDate = DateTime.Now,
+                    enabled = true,
+                    virt = true,
+                    name = "",
+                    tags = RegisterEditor.SplitTags(tags.Text),
+                    subjectIds = editedGrades.Values.SelectMany(grades => grades.Select(g => g.КодПредмета)).OrderBy(sid => subjectIds.IndexOf(sid)).ToList(),
+                    records =
+                        editedGrades.ToList()
+                        .Select(kv => new RegisterRecord { soldier = kv.Key, marks = kv.Value })
+                        .OrderBy(r => r.soldier.Отчество)
+                        .OrderBy(r => r.soldier.Имя)
+                        .OrderBy(r => r.soldier.Фамилия)
+                        .OrderBy(r => rankIdsSorted.IndexOf(r.soldier.КодЗвания))
+                        .ToList()
+                };
+
+                Form f = new Form();
+                f.Text = "Сохранение изменений";
+                f.Size = new Size(800, 900);
+
+                changesEditor = new RegisterEditor(dataAccess);
+                changesEditor.Location = new Point(5, 5);
+                changesEditor.Size = new Size(770, 820);
+                changesEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+                changesEditor.SetRegister(newRegister);
+                f.Controls.Add(changesEditor);
+
+                Button okButton = new Button { Text = "Сохранить" };
+                okButton.Location = new Point(5, 830);
+                okButton.Size = new Size(100, 25);
+                okButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+                okButton.Click += new EventHandler(delegate {
+                    RegisterMarshaller.SaveRegister(changesEditor.GetRegister(), dataAccess.GetDataContext());
+                    f.DialogResult = DialogResult.OK;
+                    f.Hide();
+                });
+                f.Controls.Add(okButton);
+
+                Button cancelButton = new Button { Text = "Отменить" };
+                cancelButton.Location = new Point(115, 830);
+                cancelButton.Size = new Size(100, 25);
+                cancelButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+                cancelButton.Click += new EventHandler(delegate {
+                    f.DialogResult = DialogResult.Cancel;
+                    f.Hide();
+                });
+                f.Controls.Add(cancelButton);
+
+                if (f.ShowDialog() == DialogResult.OK) {
+                    changesPending = false;
+                    showGrades_Click(null, null);
+                }
             }
         }
     }

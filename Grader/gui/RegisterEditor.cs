@@ -53,7 +53,7 @@ namespace Grader.gui {
             FormLayout layout = new FormLayout(this);
 
             EventHandler changeHandler = new EventHandler(delegate {
-                RegisterEdited(this, null);
+                //RegisterEdited(this, null);
             });
             
             registerName = layout.Add("Имя ведомости", new TextBox());
@@ -330,28 +330,30 @@ namespace Grader.gui {
                                 .ToListTimed().First();
                         List<Оценка> marks = new List<Оценка>();
                         for (int col = 4; col < registerDataGridView.Columns.Count; col++) {
-                            Оценка g = new Оценка {
-                                Код = -1,
-                                КодПроверяемого = soldier.Код,
-                                КодПредмета = subjectIds[col - 4],
-                                КодПодразделения = soldier.КодПодразделения,
-                                ВУС = soldier.ВУС,
-                                ТипВоеннослужащего = soldier.ТипВоеннослужащего,
-                                КодЗвания = soldier.КодЗвания,
-                                КодВедомости = -1
-                            };
-                            Util.ParseInt(row.Cells[col].Value.ToString()).Map(v => {
-                                g.ЭтоКомментарий = false;
-                                g.Значение = v;
-                                g.Текст = "";
-                                return true;
-                            }).GetOrElse(() => {
-                                g.ЭтоКомментарий = true;
-                                g.Текст = row.Cells[col].Value.ToString();
-                                g.Значение = 0;
-                                return true;
-                            });
-                            marks.Add(g);
+                            if (row.Cells[col].Value.ToString().Trim() != "") {
+                                Оценка g = new Оценка {
+                                    Код = -1,
+                                    КодПроверяемого = soldier.Код,
+                                    КодПредмета = subjectIds[col - 4],
+                                    КодПодразделения = soldier.КодПодразделения,
+                                    ВУС = soldier.ВУС,
+                                    ТипВоеннослужащего = soldier.ТипВоеннослужащего,
+                                    КодЗвания = soldier.КодЗвания,
+                                    КодВедомости = -1
+                                };
+                                Util.ParseInt(row.Cells[col].Value.ToString()).Map(v => {
+                                    g.ЭтоКомментарий = false;
+                                    g.Значение = v;
+                                    g.Текст = "";
+                                    return true;
+                                }).GetOrElse(() => {
+                                    g.ЭтоКомментарий = true;
+                                    g.Текст = row.Cells[col].Value.ToString();
+                                    g.Значение = 0;
+                                    return true;
+                                });
+                                marks.Add(g);
+                            }
                         }
                         return new RegisterRecord {
                             soldier = soldier,
