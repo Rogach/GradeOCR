@@ -18,8 +18,6 @@ namespace Grader.gui {
         Dictionary<int, string> subjectIdToName;
         List<int> rankIdsSorted;
 
-        private RegisterEditor changesEditor;
-
         private static string TAB_NAME = "Просмотр оценок";
 
         public GradeViewTab(DataAccess dataAccess) {
@@ -39,7 +37,6 @@ namespace Grader.gui {
                 .OrderByDescending(r => r.order)
                 .Select(r => r.Код)
                 .ToList();
-            changesEditor = new RegisterEditor(dataAccess);
             this.InitializeComponent();
         }
 
@@ -414,7 +411,7 @@ namespace Grader.gui {
                     virt = true,
                     name = "",
                     tags = RegisterEditor.SplitTags(tags.Text),
-                    subjectIds = editedGrades.Values.SelectMany(grades => grades.Select(g => g.КодПредмета)).OrderBy(sid => subjectIds.IndexOf(sid)).ToList(),
+                    subjectIds = editedGrades.Values.SelectMany(grades => grades.Select(g => g.КодПредмета)).Distinct().OrderBy(sid => subjectIds.IndexOf(sid)).ToList(),
                     records =
                         editedGrades.ToList()
                         .Select(kv => new RegisterRecord { soldier = kv.Key, marks = kv.Value })
@@ -429,7 +426,7 @@ namespace Grader.gui {
                 f.Text = "Сохранение изменений";
                 f.Size = new Size(800, 900);
 
-                changesEditor = new RegisterEditor(dataAccess);
+                RegisterEditor changesEditor = new RegisterEditor(dataAccess);
                 changesEditor.Location = new Point(5, 5);
                 changesEditor.Size = new Size(770, 820);
                 changesEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;

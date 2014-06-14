@@ -18,6 +18,7 @@ namespace Grader.gui {
         DataAccess dataAccess;
         Dictionary<string, int> subjectNameToId;
         Dictionary<int, string> subjectIdToName;
+        public EventManager RegisterEdited = new EventManager();
 
         public RegisterEditor(DataAccess dataAccess) {
             this.dataAccess = dataAccess;
@@ -53,7 +54,7 @@ namespace Grader.gui {
             FormLayout layout = new FormLayout(this);
 
             EventHandler changeHandler = new EventHandler(delegate {
-                //RegisterEdited(this, null);
+                RegisterEdited.Invoke();
             });
             
             registerName = layout.Add("Имя ведомости", new TextBox());
@@ -208,7 +209,7 @@ namespace Grader.gui {
                         }
                     }
                 }
-                RegisterEdited(this, null);
+                RegisterEdited.Invoke();
             });
 
             registerDataGridView.ColumnAdded += new DataGridViewColumnEventHandler(delegate(object e, DataGridViewColumnEventArgs args) {
@@ -229,8 +230,6 @@ namespace Grader.gui {
 
             this.Controls.Add(registerDataGridView);
         }
-
-        public event EventHandler RegisterEdited;
 
         public Register GetEmptyRegister() {
             return new model.Register {

@@ -80,6 +80,7 @@
     <Compile Include="grades\GradeSummaryGenerator.cs" />
     <Compile Include="grades\OldGraderExporter.cs" />
     <Compile Include="grades\PerDaySummaryGenerator.cs" />
+    <Compile Include="gui\EventManager.cs" />
     <Compile Include="gui\gridutil\FluidGradeEntering.cs" />
     <Compile Include="gui\FormLayout.cs" />
     <Compile Include="gui\GradeViewTab.cs">

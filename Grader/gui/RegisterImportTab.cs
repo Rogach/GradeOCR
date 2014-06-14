@@ -118,7 +118,7 @@ namespace Grader.gui {
             registerEditor.Location = new Point(220, 0);
             registerEditor.Size = new Size(970, 770);
             registerEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            registerEditor.RegisterEdited += new EventHandler(delegate {
+            registerEditor.RegisterEdited.AddEventListener(() => {
                 changesPending = true;
             });
             this.Controls.Add(registerEditor);
