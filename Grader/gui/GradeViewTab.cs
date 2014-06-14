@@ -323,7 +323,9 @@ namespace Grader.gui {
                 foreach (int subjectId in subjectIds) {
                     string v = gradeView.Rows[soldiers.IndexOf(soldier)].Cells[subjectIds.IndexOf(subjectId) + 4].Value.ToString().Trim();
                     Option<GradeDesc> gdOpt = originalGrades.GetOption(new Tuple<int, int>(soldier.Код, subjectId));
-                    if (gdOpt.IsEmpty()) {
+                    if (v == "" && gdOpt.IsEmpty()) {
+                        // no change
+                    } else if (gdOpt.IsEmpty()) {
                         // new grade was added
                         List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldier, () => new List<Оценка>());
                         Оценка g = new Оценка {
