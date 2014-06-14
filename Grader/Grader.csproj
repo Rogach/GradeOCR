@@ -86,6 +86,7 @@
     <Compile Include="gui\GradeViewTab.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="gui\gridutil\GridDeleteKeySupport.cs" />
     <Compile Include="gui\gridutil\GridPasteSupport.cs" />
     <Compile Include="gui\GuiUtils.cs" />
     <Compile Include="gui\InputDialog.cs">

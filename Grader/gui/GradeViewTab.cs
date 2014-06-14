@@ -181,6 +181,7 @@ namespace Grader.gui {
 
             FluidGradeEntering.EnableFluidGradeEntering(gradeView, gradeViewDataTable, 4);
             GridPasteSupport.AddPasteSupport(gradeView, gradeViewDataTable);
+            GridDeleteKeySupport.AddDeleteKeySupport(gradeView, fromColumn: 4);
 
             this.ResumeLayout(false);
         }

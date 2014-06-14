@@ -102,6 +102,7 @@ namespace Grader.gui {
 
             FluidGradeEntering.EnableFluidGradeEntering(registerDataGridView, registerDataTable, 4);
             GridPasteSupport.AddPasteSupport(registerDataGridView, registerDataTable);
+            GridDeleteKeySupport.AddDeleteKeySupport(registerDataGridView);
 
             registerDataGridView.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(delegate(object sender, DataGridViewCellMouseEventArgs e) {
                 if (e.Button == MouseButtons.Right && e.ColumnIndex > 2) {
