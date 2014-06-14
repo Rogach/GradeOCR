@@ -183,7 +183,7 @@ namespace Grader.gui {
                     name = r.Название,
                     fillDate = r.ДатаВнесения, 
                     virt = r.Виртуальная, 
-                    enabled = r.Включена 
+                    enabled = r.Включена
                 })
                 .ToList().ForEach(rd => {
                     ListViewItem item = new ListViewItem(rd.ToString());
@@ -201,14 +201,14 @@ namespace Grader.gui {
         public void UpdateRegisterListColors() {
             foreach (ListViewItem item in registerList.Items) {
                 RegisterDesc rd = (RegisterDesc) item.Tag;
-                if (rd.virt) {
-                    if (rd.enabled) {
+                if (rd.virt == 1) {
+                    if (rd.enabled == 1) {
                         item.BackColor = Color.FromArgb(171, 191, 255);
                     } else {
                         item.BackColor = Color.FromArgb(250, 250, 150);
                     }
                 } else {
-                    if (!rd.enabled) {
+                    if (rd.enabled == 0) {
                         item.BackColor = Color.FromArgb(255, 200, 200);
                     } else {
                         item.BackColor = Color.White;
@@ -236,8 +236,8 @@ namespace Grader.gui {
             public int id { get; set; }
             public string name { get; set; }
             public DateTime fillDate { get; set; }
-            public bool virt { get; set; }
-            public bool enabled { get; set; }
+            public int virt { get; set; }
+            public int enabled { get; set; }
             public override string ToString() {
                 return String.Format("{0} ({1})", name, fillDate.ToString("dd.MM.yyyy"));
             }

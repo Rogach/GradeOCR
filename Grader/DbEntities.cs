@@ -186,9 +186,9 @@ namespace Grader {
         [Column]
         public DateTime ДатаИзменения { get; set; }
         [Column]
-        public bool Виртуальная { get; set; }
+        public int Виртуальная { get; set; }
         [Column]
-        public bool Включена { get; set; }
+        public int Включена { get; set; }
     }
 
     [Table]

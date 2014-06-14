@@ -23,6 +23,7 @@ namespace Grader.gui {
 
         private RegisterGenerationTab registerGenerationTab;
         private RegisterImportTab registerImportTab;
+        private GradeViewTab gradeViewTab;
 
         private void InitializeComponent() {
             this.SuspendLayout();
@@ -35,26 +36,30 @@ namespace Grader.gui {
 
             ToolStripMenuItem menu_file_select_base = new ToolStripMenuItem("Выбрать базу");
             menu_file_select_base.Click += new EventHandler(delegate {
-                Settings.AskForDbLocation().ForEach(newDbLocation => {
-                    context.MainForm = null;
-                    this.Dispose();
+                if (CheckForUnsavedChanges()) {
+                    Settings.AskForDbLocation().ForEach(newDbLocation => {
+                        context.MainForm = null;
+                        this.Dispose();
 
-                    settings.dbLocation = newDbLocation;
-                    MainForm newMainForm = new MainForm(settings, context);
-                    context.MainForm = newMainForm;
-                    newMainForm.Show();
-                });
+                        settings.dbLocation = newDbLocation;
+                        MainForm newMainForm = new MainForm(settings, context);
+                        context.MainForm = newMainForm;
+                        newMainForm.Show();
+                    });
+                }
             });
             menu_file.DropDownItems.Add(menu_file_select_base);
 
             ToolStripMenuItem menu_file_reload_base = new ToolStripMenuItem("Перезагрузить базу");
             menu_file_reload_base.Click += new EventHandler(delegate {
-                context.MainForm = null;
-                this.Dispose();
+                if (CheckForUnsavedChanges()) {
+                    context.MainForm = null;
+                    this.Dispose();
 
-                MainForm newMainForm = new MainForm(settings, context);
-                context.MainForm = newMainForm;
-                newMainForm.Show();
+                    MainForm newMainForm = new MainForm(settings, context);
+                    context.MainForm = newMainForm;
+                    newMainForm.Show();
+                }
             });
             menu_file.DropDownItems.Add(menu_file_reload_base);
 
@@ -62,7 +67,7 @@ namespace Grader.gui {
 
             ToolStripMenuItem menu_file_exit = new ToolStripMenuItem("Выход");
             menu_file_exit.Click += new EventHandler(delegate {
-                if (registerImportTab.CheckForUnsavedChanges()) {
+                if (CheckForUnsavedChanges()) {
                     Environment.Exit(0);
                 }
             });
@@ -84,7 +89,8 @@ namespace Grader.gui {
             AddTab(tabs, registerGenerationTab);
             registerImportTab = new RegisterImportTab(dataAccess);
             AddTab(tabs, registerImportTab);
-            AddTab(tabs, new TabPage("Просмотр оценок"));
+            gradeViewTab = new GradeViewTab(dataAccess);
+            AddTab(tabs, gradeViewTab);
             AddTab(tabs, new TabPage("Анализ оценок"));
 
             tabs.ResumeLayout(false);
@@ -98,7 +104,7 @@ namespace Grader.gui {
             this.ResumeLayout(false);
 
             this.FormClosing += new FormClosingEventHandler(delegate(object sender, FormClosingEventArgs e) {
-                if (!registerImportTab.CheckForUnsavedChanges()) {
+                if (!CheckForUnsavedChanges()) {
                     e.Cancel = true;
                 }
             });
@@ -108,6 +114,10 @@ namespace Grader.gui {
             tab.Location = new Point(4, 22);
             tab.UseVisualStyleBackColor = true;
             tabs.Controls.Add(tab);
+        }
+
+        public bool CheckForUnsavedChanges() {
+            return registerImportTab.CheckForUnsavedChanges() && gradeViewTab.CheckForUnsavedChanges();
         }
     }
 }

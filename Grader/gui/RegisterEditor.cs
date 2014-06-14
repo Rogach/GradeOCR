@@ -11,6 +11,7 @@ using System.Threading;
 using Grader.util;
 using System.Text.RegularExpressions;
 using System.Data.Linq;
+using Grader.gui.gridutil;
 
 namespace Grader.gui {
     public class RegisterEditor : Panel {
@@ -46,8 +47,6 @@ namespace Grader.gui {
         private DataSet registerDataSet;
         private DataTable registerDataTable;
         private DataGridView registerDataGridView;
-
-        private bool afterGradeType = false;
 
         private void InitializeComponent() {
             this.Size = new Size(600, 600);
@@ -100,76 +99,8 @@ namespace Grader.gui {
             registerDataGridView.AllowUserToOrderColumns = false;
             registerDataGridView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
 
-            registerDataGridView.PreviewKeyDown +=new PreviewKeyDownEventHandler(delegate (object sender, PreviewKeyDownEventArgs args) {
-                Dictionary<Keys, string> quickKeys = new Dictionary<Keys, string> {
-                    { Keys.D2, "2" }, { Keys.NumPad2, "2" },
-                    { Keys.D3, "3" }, { Keys.NumPad3, "3" },
-                    { Keys.D4, "4" }, { Keys.NumPad4, "4" },
-                    { Keys.D5, "5" }, { Keys.NumPad5, "5" }
-                };
-                if (quickKeys.ContainsKey(args.KeyCode)) {
-                    int minX = Int32.MaxValue;
-                    int minY = Int32.MaxValue;
-                    foreach (DataGridViewCell sc in registerDataGridView.SelectedCells) {
-                        minX = Math.Min(minX, sc.ColumnIndex);
-                        minY = Math.Min(minY, sc.RowIndex);
-                    }
-                    if (minX > 2) {
-                        if (minY + 1 < registerDataGridView.Rows.Count) {
-                            registerDataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
-                            registerDataGridView.ClearSelection();
-                            registerDataGridView.Rows[minY + 1].Cells[minX].Selected = true;
-                            registerDataGridView.CurrentCell = registerDataGridView.Rows[minY + 1].Cells[minX];
-                        } else {
-                            DataRow row = registerDataTable.Rows.Add(new object[] { });
-                            row.SetField(registerDataTable.Columns[minX], quickKeys[args.KeyCode]);
-                            registerDataGridView.Rows.RemoveAt(registerDataGridView.Rows.Count - 2);
-                            registerDataGridView.ClearSelection();
-                            registerDataGridView.CurrentCell = registerDataGridView.Rows[registerDataGridView.Rows.Count - 1].Cells[minX];
-                            registerDataGridView.CurrentCell.Selected = true;
-                        }
-                        afterGradeType = true;
-                    }
-                }
-            });
-            registerDataGridView.CellBeginEdit += new DataGridViewCellCancelEventHandler(delegate (object sender, DataGridViewCellCancelEventArgs e) {
-                if (afterGradeType) {
-                    e.Cancel = true;
-                    afterGradeType = false;
-                }
-            });
-            
-            registerDataGridView.KeyDown += new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
-                if (e.KeyCode == Keys.V && e.Control) {
-                    int minX = Int32.MaxValue;
-                    int minY = Int32.MaxValue;
-                    foreach (DataGridViewCell sc in registerDataGridView.SelectedCells) {
-                        minX = Math.Min(minX, sc.ColumnIndex);
-                        minY = Math.Min(minY, sc.RowIndex);
-                    }
-
-                    List<List<string>> copiedData = 
-                        Clipboard.GetText(TextDataFormat.UnicodeText)
-                        .Split(new char[] { '\n' })
-                        .Where(line => line.Trim().Length > 0)
-                        .Select(line => line.Split(new char[] { '\t' }).ToList()).ToList();
-
-                    int clipX = copiedData.Select(line => line.Count).Max();
-                    int clipY = copiedData.Count;
-
-                    for (int row = 0; row < clipY; row++) {
-                        if (row >= registerDataGridView.Rows.Count - 1) {
-                            registerDataTable.Rows.Add(new object[] {});
-                        }
-                        for (int col = 0; col < clipX; col++) {
-                            if (minX + col < registerDataGridView.Columns.Count) {
-                                registerDataGridView.Rows[minY + row].Cells[minX + col].Value = copiedData[row][col];
-                            }
-                        }
-                    }
-
-                }
-            });
+            FluidGradeEntering.EnableFluidGradeEntering(registerDataGridView, registerDataTable, 4);
+            GridPasteSupport.AddPasteSupport(registerDataGridView, registerDataTable);
 
             registerDataGridView.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(delegate(object sender, DataGridViewCellMouseEventArgs e) {
                 if (e.Button == MouseButtons.Right && e.ColumnIndex > 2) {
@@ -380,7 +311,7 @@ namespace Grader.gui {
                 fillDate = registerFillDate.Value,
                 importDate = currentRegister.importDate.ToOption().GetOrElse(DateTime.Now),
                 editDate = DateTime.Now,
-                tags = registerTags.Text.Split(new char[] { ' ' }).Where(t => t.Trim().Length > 0).ToList(),
+                tags = SplitTags(registerTags.Text),
                 virt = registerVirtual.Checked,
                 enabled = registerEnabled.Checked,
                 subjectIds = subjectIds,
@@ -428,6 +359,10 @@ namespace Grader.gui {
                         };
                     }).ToList()
             };
+        }
+
+        public static List<String> SplitTags(string tags) {
+            return tags.Split(new char[] { ' ' }).Where(t => t.Trim().Length > 0).ToList();
         }
     }
 }

@@ -32,8 +32,8 @@ namespace Grader.model {
                 importDate = r.ДатаВнесения,
                 editDate = r.ДатаИзменения,
                 tags = tags,
-                virt = r.Виртуальная,
-                enabled = r.Включена,
+                virt = (r.Виртуальная == 1),
+                enabled = (r.Включена == 1),
                 subjectIds = subjectIds,
                 records = records
             };
@@ -62,7 +62,7 @@ namespace Grader.model {
                                 values (@p0, @p1, @p2, @p3, @p4, @p5, @p6)",
                                   rid, register.name,
                                   SqlTime(register.fillDate), SqlTime(register.importDate.Value), SqlTime(register.editDate.Value),
-                                  register.virt, register.enabled);
+                                  register.virt ? 1 : 0, register.enabled ? 1 : 0);
             });
 
             

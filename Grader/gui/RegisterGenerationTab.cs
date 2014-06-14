@@ -59,7 +59,6 @@ namespace Grader.gui {
             this.Text = "Печать ведомостей";
 
             personSelector = new PersonSelector(dataAccess);
-            //personSelector.Size = new Size(255, 170);
             personSelector.Location = new Point(3, 3);
             this.Controls.Add(personSelector);
 
