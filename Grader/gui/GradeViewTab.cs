@@ -225,7 +225,12 @@ namespace Grader.gui {
             List<GradeDesc> grades = gradeQuery.ToList();
 
             foreach (GradeDesc gd in grades) {
-                originalGrades.AddOrReplace(new Tuple<int, int>(gd.soldier.Код, gd.grade.КодПредмета), gd);
+                if (gd.grade.ЭтоКомментарий && gd.grade.Текст == "_") {
+                    // found marker for grade deletion
+                    originalGrades.Remove(new Tuple<int, int>(gd.soldier.Код, gd.grade.КодПредмета));
+                } else {
+                    originalGrades.AddOrReplace(new Tuple<int, int>(gd.soldier.Код, gd.grade.КодПредмета), gd);
+                }
             }
 
             gradeViewDataSet = new DataSet("gradeView");
