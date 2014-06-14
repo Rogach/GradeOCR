@@ -71,11 +71,13 @@ namespace Grader.gui {
 
             dateFrom = layout.Add("от", new DateTimePicker());
             dateFrom.Format = DateTimePickerFormat.Long;
-            dateFrom.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            dateFrom.ShowCheckBox = true;
+            dateFrom.Checked = false;
 
             dateTo = layout.Add("до", new DateTimePicker());
             dateTo.Format = DateTimePickerFormat.Long;
-            dateTo.Value = DateTime.Now.AddDays(1);
+            dateTo.ShowCheckBox = true;
+            dateTo.Checked = false;
 
             layout.PerformLayout();
 
@@ -190,7 +192,8 @@ namespace Grader.gui {
                 where g.КодВедомости == r.Код
 
                 where r.Включена == 1
-                where r.ДатаЗаполнения >= dateFrom.Value.Date && r.ДатаЗаполнения <= dateTo.Value.Date
+                where !dateFrom.Checked || r.ДатаЗаполнения >= dateFrom.Value.Date
+                where !dateTo.Checked || r.ДатаЗаполнения <= dateTo.Value.Date
 
                 where selectedTags.Count == 0 ||
                     (from t in dc.GetTable<ВедомостьТег>()
