@@ -123,7 +123,6 @@ namespace Grader.gui {
             saveChanges.Enabled = false;
             saveChanges.Click += new EventHandler(delegate {
                 SaveChanges();
-                changesPending = false;
             });
             this.Controls.Add(saveChanges);
 
