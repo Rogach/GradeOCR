@@ -89,7 +89,7 @@ namespace Grader.gui {
             AddTab(tabs, registerGenerationTab);
             registerImportTab = new RegisterImportTab(dataAccess);
             AddTab(tabs, registerImportTab);
-            gradeViewTab = new GradeViewTab(dataAccess);
+            gradeViewTab = new GradeViewTab(dataAccess, settings);
             AddTab(tabs, gradeViewTab);
             AddTab(tabs, new TabPage("Анализ оценок"));
 

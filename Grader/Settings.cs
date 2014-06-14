@@ -10,15 +10,22 @@ using System.Windows.Forms;
 namespace Grader {
     public class Settings {
         public string dbLocation { get; set; }
+        public string gradeViewTags { get; set; }
 
         public void Save() {
             XmlDocument doc = new XmlDocument();
             doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", null));
+
             XmlElement settings = doc.CreateElement("settings");
             doc.AppendChild(settings);
-            XmlElement dbLocationSetting = doc.CreateElement("dbLocation");
-            dbLocationSetting.AppendChild(doc.CreateTextNode(dbLocation));
-            settings.AppendChild(dbLocationSetting);
+
+            XmlElement dbLocation_setting = doc.CreateElement("dbLocation");
+            dbLocation_setting.AppendChild(doc.CreateTextNode(dbLocation));
+            settings.AppendChild(dbLocation_setting);
+
+            XmlElement gradeViewTags_setting = doc.CreateElement("gradeViewTags");
+            gradeViewTags_setting.AppendChild(doc.CreateTextNode(gradeViewTags));
+            settings.AppendChild(gradeViewTags_setting);
 
             XmlWriter xw = XmlWriter.Create(GetSettingsLocation());
             doc.WriteTo(xw);
@@ -31,9 +38,9 @@ namespace Grader {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(GetSettingsLocation());
 
-                XmlNodeList dbLocationSetting = doc.SelectNodes("/settings/dbLocation");
-                if (dbLocationSetting.Count > 0) {
-                    settings.dbLocation = dbLocationSetting[0].InnerText;
+                XmlNodeList dbLocation_setting = doc.SelectNodes("/settings/dbLocation");
+                if (dbLocation_setting.Count > 0) {
+                    settings.dbLocation = dbLocation_setting[0].InnerText;
                 } else {
                     Option<string> userDbLocation = AskForDbLocation();
                     if (userDbLocation.NonEmpty()) {
@@ -41,6 +48,13 @@ namespace Grader {
                     } else {
                         return new None<Settings>();
                     }
+                }
+
+                XmlNodeList gradeViewTags_setting = doc.SelectNodes("/settings/gradeViewTags");
+                if (gradeViewTags_setting.Count > 0) {
+                    settings.gradeViewTags = gradeViewTags_setting[0].InnerText;
+                } else {
+                    settings.gradeViewTags = "";
                 }
             } else {
                 Option<string> userDbLocation = AskForDbLocation();

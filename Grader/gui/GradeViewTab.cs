@@ -14,6 +14,7 @@ using Grader.model;
 namespace Grader.gui {
     public class GradeViewTab : TabPage {
         private DataAccess dataAccess;
+        private Settings settings;
         Dictionary<string, int> subjectNameToId;
         Dictionary<int, string> subjectIdToName;
         List<int> rankIdsSorted;
@@ -21,8 +22,9 @@ namespace Grader.gui {
 
         private static string TAB_NAME = "Просмотр оценок";
 
-        public GradeViewTab(DataAccess dataAccess) {
+        public GradeViewTab(DataAccess dataAccess, Settings settings) {
             this.dataAccess = dataAccess;
+            this.settings = settings;
             subjectNameToId =
                 dataAccess.GetDataContext().GetTable<Предмет>()
                 .Select(s => new { id = s.Код, name = s.Название })
@@ -103,6 +105,7 @@ namespace Grader.gui {
             tags = new TextBox();
             tags.Location = new Point(95, layout.GetY() + 5 + personSelector.Height + 10);
             tags.Size = new Size(152, 20);
+            tags.Text = settings.gradeViewTags;
             this.Controls.Add(tags);
 
             showGrades = new Button { Text = "Показать оценки" };
@@ -290,6 +293,8 @@ namespace Grader.gui {
             }
             saveChanges.Enabled = true;
             cancelChanges.Enabled = true;
+            settings.gradeViewTags = tags.Text;
+            settings.Save();
         }
 
         private class GradeDesc {
