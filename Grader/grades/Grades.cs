@@ -100,18 +100,28 @@ namespace Grader.grades {
         public static List<GradeSet> GradeSets(DataContext dc, IQueryable<Оценка> gradeQuery) {
             var query =
                 from g in gradeQuery
+
                 from subj in dc.GetTable<Предмет>()
                 where g.КодПредмета == subj.Код
+
                 from soldier in dc.GetTable<Военнослужащий>()
                 where g.КодПроверяемого == soldier.Код
+
                 from subunit in dc.GetTable<Подразделение>()
                 where g.КодПодразделения == subunit.Код
+
                 from rank in dc.GetTable<Звание>()
                 where g.КодЗвания == rank.Код
-                select new { grade = g.Значение, soldier, rank, subunit, /*g.ДатаОценки,*/ subj = subj.Название };
+
+                from register in dc.GetTable<Ведомость>()
+                where g.КодВедомости == register.Код
+
+                orderby register.ДатаЗаполнения
+
+                select new { grade = g.Значение, soldier, rank, subunit, date = register.ДатаЗаполнения, subj = subj.Название };
             var gradeSets = new Dictionary<int, GradeSet>();
             foreach (var g in query.ToListTimed("GradeSets")) {
-                var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, DateTime.Now /*g.ДатаОценки*/));
+                var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, g.date));
                 gradeSet.AddGrade(g.subj, g.grade);
             }
             return gradeSets.Values.ToList();

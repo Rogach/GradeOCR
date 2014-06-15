@@ -12,10 +12,8 @@ using LibUtil;
 namespace Grader.grades {
     public static class GradeListGenerator {
 
-        public static void GenerateGradeList(Application accessApp) {
-            string subjectName = accessApp.GetForm("ПоОценкам").Get().GetControl("SubjectSelect").Get().StringValue();
-            DataContext dc = accessApp.GetDataContext();
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
+        public static void GenerateGradeList(DataAccess dataAccess, IQueryable<Оценка> gradeQuery, string subjectName) {
+            DataContext dc = dataAccess.GetDataContext();
             List<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
 
             ExcelWorksheet sh = ExcelTemplates.CreateEmptyExcelTable();

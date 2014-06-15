@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using LibUtil;
 
 namespace Grader.grades {
     public class GradeSet {
@@ -18,7 +19,7 @@ namespace Grader.grades {
             this.grades = new Dictionary<string, int>();
         }
         public void AddGrade(string subj, int value) {
-            grades.Add(subj, value);
+            grades.AddOrReplace(subj, value);
         }
 
         public override string ToString() {

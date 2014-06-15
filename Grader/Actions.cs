@@ -42,12 +42,6 @@ namespace Grader {
             }
         }
 
-        public void GenerateGradeList(AccessApplication accessApp) {
-            doCall(() => {
-                GradeListGenerator.GenerateGradeList(accessApp);
-            });
-        }
-
         public void GenerateGradeSummary(AccessApplication accessApp) {
             doCall(() => {
                 GradeSummaryGenerator.GenerateSummary(accessApp);
