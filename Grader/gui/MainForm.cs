@@ -24,6 +24,7 @@ namespace Grader.gui {
         private RegisterGenerationTab registerGenerationTab;
         private RegisterImportTab registerImportTab;
         private GradeViewTab gradeViewTab;
+        private GradeAnalysisTab gradeAnalysisTab;
 
         private void InitializeComponent() {
             this.SuspendLayout();
@@ -91,7 +92,8 @@ namespace Grader.gui {
             AddTab(tabs, registerImportTab);
             gradeViewTab = new GradeViewTab(dataAccess, settings);
             AddTab(tabs, gradeViewTab);
-            AddTab(tabs, new TabPage("Анализ оценок"));
+            gradeAnalysisTab = new GradeAnalysisTab(dataAccess);
+            AddTab(tabs, gradeAnalysisTab);
 
             gradeViewTab.ChangesSaved.AddEventListener(() => {
                 registerImportTab.UpdateRegisterList();
