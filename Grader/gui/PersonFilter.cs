@@ -20,6 +20,7 @@ namespace Grader.gui {
         }
 
         public ComboBox subunitSelector;
+        public CheckBox selectRelatedSubunits;
         public ComboBox studyType;
         public ComboBox vusSelector;
         public CheckBox selectCadets;
@@ -36,6 +37,12 @@ namespace Grader.gui {
             subunitSelector.SelectedIndex = 0;
             subunitSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             subunitSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
+
+            selectRelatedSubunits = layout.AddFullRow(new CheckBox(), leftPadding: 60);
+            selectRelatedSubunits.Text = "Подчиненные подразделения?";
+            selectRelatedSubunits.Checked = true;
+
+            layout.AddSpacer(10);
 
             studyType = layout.Add("Тип обучения", new ComboBox());
             studyType.PopulateComboBox(typeof(StudyType));
@@ -67,6 +74,43 @@ namespace Grader.gui {
             this.Size = new Size(layout.GetX(), layout.GetY());
         }
 
+        public IQueryable<Оценка> GetGradeQuery() {
+            DataContext dc = dataAccess.GetDataContext();
+            Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
+            StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
+            Option<int> vus;
+            if (vusSelector.SelectedItem == null) {
+                vus = new None<int>();
+            } else {
+                vus = new Some<int>(Int32.Parse((string) vusSelector.SelectedItem));
+            }
+            IQueryable<Оценка> gradeQuery =
+                from grade in dc.GetTable<Оценка>()
+
+                from subunit in dc.GetTable<Подразделение>()
+                where grade.КодПодразделения == subunit.Код
+
+                from subunitRel in dc.GetTable<ПодразделениеПодчинение>()
+                where grade.КодПодразделения == subunitRel.КодПодразделения
+
+                from rank in dc.GetTable<Звание>()
+                where grade.КодЗвания == rank.Код
+
+                where subunitRel.КодСтаршегоПодразделения == selectedSubunit.Код
+                where (selectRelatedSubunits.Checked || grade.КодПодразделения == selectedSubunit.Код)
+
+                where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
+
+                where
+                    (grade.ТипВоеннослужащего == "курсант" && selectCadets.Checked) ||
+                    (grade.ТипВоеннослужащего == "постоянный срочник" && selectPermanent.Checked) ||
+                    (grade.ТипВоеннослужащего == "контрактник" && selectContract.Checked)
+                where vus.IsEmpty() || grade.ВУС == vus.GetOrElse(-1)
+                select grade;
+
+            return gradeQuery;
+        }
+
         public IQueryable<ВоеннослужащийПоПодразделениям> GetPersonQuery() {
             DataContext dc = dataAccess.GetDataContext();
             Option<int> vus;
@@ -83,10 +127,13 @@ namespace Grader.gui {
         private Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> GetPersonQueryFilter(DataContext dc) {
             return q => {
                 StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
+                Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
                 return
                     from soldier in q
                     from subunit in dc.GetTable<Подразделение>()
                     where soldier.КодПодразделения == subunit.Код
+
+                    where selectRelatedSubunits.Checked || soldier.КодПодразделения == selectedSubunit.Код
 
                     where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
 

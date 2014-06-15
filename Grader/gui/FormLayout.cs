@@ -37,8 +37,8 @@ namespace Grader.gui {
             return control;
         }
 
-        public T AddFullRow<T>(T control) where T : Control {
-            rows.Add(new FullRow { control = control });
+        public T AddFullRow<T>(T control, int leftPadding = 0) where T : Control {
+            rows.Add(new FullRow { control = control, leftPadding = leftPadding });
             return control;
         }
 
@@ -115,9 +115,10 @@ namespace Grader.gui {
 
         private class FullRow : LayoutUnit {
             public Control control { get; set; }
+            public int leftPadding { get; set; }
             public void Layout(FormLayout layout) {
-                control.Location = new Point(layout.x, layout.y);
-                control.Size = new Size(layout.maxLabelWidth + 5 + layout.controlWidth, control.PreferredSize.Height);
+                control.Location = new Point(layout.x + leftPadding, layout.y);
+                control.Size = new Size(layout.maxLabelWidth + 5 + layout.controlWidth - leftPadding, control.PreferredSize.Height);
                 layout.control.Controls.Add(control);
                 layout.y += control.PreferredSize.Height + 3;
             }

@@ -280,7 +280,7 @@ namespace Grader.gui {
             DialogResult result = f.ShowDialog();
             if (result == DialogResult.OK) {
                 Register reg = registerEditor.GetEmptyRegister();
-                reg.records = personSelector.GetPersonList().Select(p => new RegisterRecord { marks = new List<Оценка>(), soldier = p }).ToList();
+                reg.records = personSelector.GetPersonList().Select(p => new RegisterRecord { marks = new List<Оценка>(), soldierId = p.Код }).ToList();
                 return new Some<Register>(reg);
             } else {
                 return new None<Register>();

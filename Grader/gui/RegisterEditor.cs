@@ -18,6 +18,7 @@ namespace Grader.gui {
         DataAccess dataAccess;
         Dictionary<string, int> subjectNameToId;
         Dictionary<int, string> subjectIdToName;
+        Dictionary<int, string> rankIdToName;
         public EventManager RegisterEdited = new EventManager();
 
         public RegisterEditor(DataAccess dataAccess) {
@@ -33,6 +34,11 @@ namespace Grader.gui {
                 .Select(s => new { id = s.Код, name = s.Название })
                 .ToListTimed()
                 .ToDictionary(s => s.id, s => s.name);
+            rankIdToName =
+                dataAccess.GetDataContext().GetTable<Звание>()
+                .Select(r => new { id = r.Код, rank = r.Название })
+                .ToListTimed()
+                .ToDictionary(r => r.id, r => r.rank);
         }
 
         private Register currentRegister;
@@ -269,13 +275,26 @@ namespace Grader.gui {
                 registerDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
             }
 
+            List<int> soldierIds = register.records.Select(rec => rec.soldierId).ToList();
+            Dictionary<int, string> soldierIdToName =
+                dataAccess.GetDataContext().GetTable<Военнослужащий>()
+                .Where(s => soldierIds.Contains(s.Код))
+                .ToListTimed()
+                .Select(s => new { id = s.Код, name = s.ФИО })
+                .ToDictionary(s => s.id, s => s.name);
+
             int c = 1;
             foreach (RegisterRecord record in register.records) {
                 List<string> cells = new List<string>();
                 cells.Add((c++).ToString());
-                cells.Add(record.soldier.Код.ToString());
-                cells.Add(record.soldier.Звание);
-                cells.Add(record.soldier.ФИО);
+                cells.Add(record.soldierId.ToString());
+                if (record.marks.Count > 0) {
+                    cells.Add(rankIdToName[record.marks[0].КодЗвания]);
+                    cells.Add(soldierIdToName[record.marks[0].КодПроверяемого]);
+                } else {
+                    cells.Add("");
+                    cells.Add("");
+                }
 
                 foreach (int subjectId in register.subjectIds) {
                     Option<Оценка> markOpt = record.marks.FindOption(g => g.КодПредмета == subjectId);
@@ -325,20 +344,22 @@ namespace Grader.gui {
                         }
                     })
                     .Select(row => {
-                        ВоеннослужащийПоПодразделениям soldier = dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
-                                .Where(v => v.Код == Int32.Parse(row.Cells[1].Value.ToString()))
-                                .ToListTimed().First();
+                        //ВоеннослужащийПоПодразделениям soldier = dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
+                        //        .Where(v => v.Код == Int32.Parse(row.Cells[1].Value.ToString()))
+                        //        .ToListTimed().First();
+                        int soldierId = Int32.Parse(row.Cells[1].Value.ToString());
+                        List<Оценка> previousMarks = currentRegister.records.Find(r => r.soldierId == soldierId).marks;
                         List<Оценка> marks = new List<Оценка>();
                         for (int col = 4; col < registerDataGridView.Columns.Count; col++) {
                             if (row.Cells[col].Value.ToString().Trim() != "") {
                                 Оценка g = new Оценка {
                                     Код = -1,
-                                    КодПроверяемого = soldier.Код,
+                                    КодПроверяемого = soldierId,
                                     КодПредмета = subjectIds[col - 4],
-                                    КодПодразделения = soldier.КодПодразделения,
-                                    ВУС = soldier.ВУС,
-                                    ТипВоеннослужащего = soldier.ТипВоеннослужащего,
-                                    КодЗвания = soldier.КодЗвания,
+                                    КодПодразделения = previousMarks[0].КодПодразделения,
+                                    ВУС = previousMarks[0].ВУС,
+                                    ТипВоеннослужащего = previousMarks[0].ТипВоеннослужащего,
+                                    КодЗвания = previousMarks[0].КодЗвания,
                                     КодВедомости = -1
                                 };
                                 Util.ParseInt(row.Cells[col].Value.ToString()).Map(v => {
@@ -356,10 +377,12 @@ namespace Grader.gui {
                             }
                         }
                         return new RegisterRecord {
-                            soldier = soldier,
+                            soldierId = soldierId,
                             marks = marks
                         };
-                    }).ToList()
+                    })
+                    .Where(rec => rec.marks.Count > 0) // don't save empty rows
+                    .ToList()
             };
         }
 

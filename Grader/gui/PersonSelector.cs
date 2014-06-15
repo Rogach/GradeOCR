@@ -67,6 +67,16 @@ namespace Grader.gui {
             }
         }
 
+        public IQueryable<Оценка> GetGradeQuery() {
+            if (this.SelectedTab == personFilterPage) {
+                return personFilter.GetGradeQuery();
+            } else if (this.SelectedTab == predefinedListsPage) {
+                return predefinedPersonLists.GetGradeQuery();
+            } else {
+                throw new Exception("no selector tab is selected");
+            }
+        }
+
         public bool IsFilter() {
             return this.SelectedTab == personFilterPage;
         }

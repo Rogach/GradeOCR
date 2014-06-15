@@ -26,6 +26,15 @@ namespace Grader.gui {
             return (PersonList) this.SelectedItem;
         }
 
+        public IQueryable<Оценка> GetGradeQuery() {
+            DataContext dc = dataAccess.GetDataContext();
+            return
+                from grade in dc.GetTable<Оценка>()
+                from soldier in GetPersonQuery()
+                where grade.КодПроверяемого == soldier.Код
+                select grade;
+        }
+
         public IQueryable<ВоеннослужащийПоПодразделениям> GetPersonQuery() {
             DataContext dc = dataAccess.GetDataContext();
             List<int> personIds = GetSelectedList().soldierIds;

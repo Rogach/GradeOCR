@@ -16,12 +16,12 @@ namespace Grader.model {
                 where rec.КодВедомости == id
                 join v in dc.GetTable<ВоеннослужащийПоПодразделениям>() on rec.КодВоеннослужащего equals v.Код
                 where v.КодПодразделения == v.КодСтаршегоПодразделения
-                select new RegisterRecord { soldier = v }).ToList();
+                select new RegisterRecord { soldierId = v.Код }).ToList();
             foreach (var record in records) {
                 record.marks = new List<Оценка>();
             }
             foreach (Оценка g in dc.GetTable<Оценка>().Where(g => g.КодВедомости == id).ToList()) {
-                records.FindOption(rec => rec.soldier.Код == g.КодПроверяемого).ForEach(rec => {
+                records.FindOption(rec => rec.soldierId == g.КодПроверяемого).ForEach(rec => {
                     rec.marks.Add(g);
                 });
             }
@@ -87,7 +87,7 @@ namespace Grader.model {
                 RegisterRecord record = _record;
                 commands.Add(() => {
                     dc.ExecuteCommand(@"insert into ВедомостьЗапись(КодВоеннослужащего, КодВедомости, Порядок) values (@p0, @p1, @p2)",
-                                        record.soldier.Код, rid, recordOrder++);
+                                        record.soldierId, rid, recordOrder++);
                 });
             }
 

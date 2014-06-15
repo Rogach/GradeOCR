@@ -17,7 +17,6 @@ namespace Grader.gui {
         private Settings settings;
         Dictionary<string, int> subjectNameToId;
         Dictionary<int, string> subjectIdToName;
-        List<int> rankIdsSorted;
         public EventManager ChangesSaved = new EventManager();
 
         private static string TAB_NAME = "Просмотр оценок";
@@ -35,11 +34,6 @@ namespace Grader.gui {
                 .Select(s => new { id = s.Код, name = s.Название })
                 .ToListTimed()
                 .ToDictionary(s => s.id, s => s.name);
-            rankIdsSorted =
-                dataAccess.GetDataContext().GetTable<Звание>()
-                .OrderByDescending(r => r.order)
-                .Select(r => r.Код)
-                .ToList();
             this.InitializeComponent();
         }
 
@@ -70,7 +64,7 @@ namespace Grader.gui {
         }
 
         private Dictionary<Tuple<int, int>, GradeDesc> originalGrades;
-        private List<ВоеннослужащийПоПодразделениям> soldiers;
+        private List<int> soldierIds;
         private List<int> subjectIds;
 
         private void InitializeComponent() {
@@ -189,21 +183,17 @@ namespace Grader.gui {
             this.ResumeLayout(false);
         }
 
-        void gradeView_CellValueChanged(object sender, DataGridViewCellEventArgs e) {
-            throw new NotImplementedException();
-        }
-
         private void showGrades_Click(object sender, EventArgs e) {
             DataContext dc = dataAccess.GetDataContext();
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
             IQueryable<GradeDesc> gradeQuery =
-                from g in dc.GetTable<Оценка>()
+                from g in personSelector.GetGradeQuery()
 
-                from v in personSelector.GetPersonQuery()
+                from v in dc.GetTable<Военнослужащий>()
                 where g.КодПроверяемого == v.Код
 
                 from rank in dc.GetTable<Звание>()
-                where v.КодЗвания == rank.Код
+                where g.КодЗвания == rank.Код
 
                 from r in dc.GetTable<Ведомость>()
                 where g.КодВедомости == r.Код
@@ -219,7 +209,7 @@ namespace Grader.gui {
                      select t).SingleOrDefault() != default(ВедомостьТег)
                 
                 orderby rank.order descending, v.Фамилия, v.Имя, v.Отчество, r.ДатаЗаполнения
-                select new GradeDesc { grade = g, soldier = v, virt = r.Виртуальная };
+                select new GradeDesc { grade = g, soldierId = v.Код, ФИО = v.ФИО, rank = rank.Название, virt = r.Виртуальная };
 
             originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
 
@@ -228,9 +218,9 @@ namespace Grader.gui {
             foreach (GradeDesc gd in grades) {
                 if (gd.grade.ЭтоКомментарий && gd.grade.Текст == "_") {
                     // found marker for grade deletion
-                    originalGrades.Remove(new Tuple<int, int>(gd.soldier.Код, gd.grade.КодПредмета));
+                    originalGrades.Remove(new Tuple<int, int>(gd.soldierId, gd.grade.КодПредмета));
                 } else {
-                    originalGrades.AddOrReplace(new Tuple<int, int>(gd.soldier.Код, gd.grade.КодПредмета), gd);
+                    originalGrades.AddOrReplace(new Tuple<int, int>(gd.soldierId, gd.grade.КодПредмета), gd);
                 }
             }
 
@@ -252,17 +242,18 @@ namespace Grader.gui {
                 gradeViewDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
             }
 
-            soldiers = grades.Select(gd => gd.soldier).Distinct().ToList();
+            soldierIds = grades.Select(gd => gd.soldierId).Distinct().ToList();
             int c = 1;
-            foreach (var soldier in soldiers) {
+            foreach (var soldierId in soldierIds) {
                 List<string> cells = new List<string>();
                 cells.Add((c++).ToString());
-                cells.Add(soldier.Код.ToString());
-                cells.Add(soldier.Звание);
-                cells.Add(soldier.ФИО);
+                cells.Add(soldierId.ToString());
+                GradeDesc someGradeDesc = grades.Find(gd => gd.soldierId == soldierId);
+                cells.Add(someGradeDesc.rank);
+                cells.Add(someGradeDesc.ФИО);
 
                 foreach (int subjectId in subjectIds) {
-                    Option<GradeDesc> gradeOpt = originalGrades.GetOption(new Tuple<int, int>(soldier.Код, subjectId));
+                    Option<GradeDesc> gradeOpt = originalGrades.GetOption(new Tuple<int, int>(soldierId, subjectId));
                     if (gradeOpt.IsEmpty()) {
                         cells.Add("");
                     }
@@ -284,10 +275,10 @@ namespace Grader.gui {
             gradeView.Refresh();
 
             // color grades coming from virtual registers
-            foreach (var soldier in soldiers) {
+            foreach (var soldierId in soldierIds) {
                 foreach (int subjectId in subjectIds) {
-                    if (originalGrades.GetOption(new Tuple<int, int>(soldier.Код, subjectId)).Map(gd => gd.virt == 1).GetOrElse(false)) {
-                        gradeView.Rows[soldiers.IndexOf(soldier)].Cells[subjectIds.IndexOf(subjectId) + 4].Style.BackColor = Color.FromArgb(171, 191, 255);
+                    if (originalGrades.GetOption(new Tuple<int, int>(soldierId, subjectId)).Map(gd => gd.virt == 1).GetOrElse(false)) {
+                        gradeView.Rows[soldierIds.IndexOf(soldierId)].Cells[subjectIds.IndexOf(subjectId) + 4].Style.BackColor = Color.FromArgb(171, 191, 255);
                     }
                 }
             }
@@ -300,7 +291,9 @@ namespace Grader.gui {
         private class GradeDesc {
             public Оценка grade { get; set; }
             public int virt { get; set; }
-            public ВоеннослужащийПоПодразделениям soldier { get; set; }
+            public int soldierId { get; set; }
+            public string rank { get; set; }
+            public string ФИО { get; set; }
         }
 
         public bool CheckForUnsavedChanges() {
@@ -323,27 +316,28 @@ namespace Grader.gui {
         }
 
         public void SaveChanges() {
-            Dictionary<ВоеннослужащийПоПодразделениям, List<Оценка>> editedGrades = 
-                new Dictionary<ВоеннослужащийПоПодразделениям, List<Оценка>>();
+            Dictionary<int, List<Оценка>> editedGrades = 
+                new Dictionary<int, List<Оценка>>();
 
-            foreach (var soldier in soldiers) {
+            foreach (var soldierId in soldierIds) {
                 foreach (int subjectId in subjectIds) {
-                    string v = gradeView.Rows[soldiers.IndexOf(soldier)].Cells[subjectIds.IndexOf(subjectId) + 4].Value.ToString().Trim();
-                    Option<GradeDesc> gdOpt = originalGrades.GetOption(new Tuple<int, int>(soldier.Код, subjectId));
+                    string v = gradeView.Rows[soldierIds.IndexOf(soldierId)].Cells[subjectIds.IndexOf(subjectId) + 4].Value.ToString().Trim();
+                    Option<GradeDesc> gdOpt = originalGrades.GetOption(new Tuple<int, int>(soldierId, subjectId));
                     if (v == "" && gdOpt.IsEmpty()) {
                         // no change
                     } else if (gdOpt.IsEmpty()) {
                         // new grade was added
-                        List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldier, () => new List<Оценка>());
+                        List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldierId, () => new List<Оценка>());
+                        GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierId).Select(kv => kv.Value).First();
                         Оценка g = new Оценка {
                             Код = -1,
                             КодВедомости = -1,
-                            КодПроверяемого = soldier.Код,
-                            ВУС = soldier.ВУС,
-                            КодЗвания = soldier.КодЗвания,
-                            КодПодразделения = soldier.КодПодразделения,
+                            КодПроверяемого = soldierId,
+                            ВУС = someGradeDesc.grade.ВУС,
+                            КодЗвания = someGradeDesc.grade.КодЗвания,
+                            КодПодразделения = someGradeDesc.grade.КодПодразделения,
                             КодПредмета = subjectId,
-                            ТипВоеннослужащего = soldier.ТипВоеннослужащего
+                            ТипВоеннослужащего = someGradeDesc.grade.ТипВоеннослужащего
                         };
                         Util.ParseInt(v).Map(vv => {
                             g.ЭтоКомментарий = false;
@@ -361,16 +355,16 @@ namespace Grader.gui {
                         GradeDesc gd = gdOpt.Get();
                         if (v == "") {
                             // grade was deleted
-                            List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldier, () => new List<Оценка>());
+                            List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldierId, () => new List<Оценка>());
                             Оценка g = new Оценка {
                                 Код = -1,
                                 КодВедомости = -1,
-                                КодПроверяемого = soldier.Код,
-                                ВУС = soldier.ВУС,
-                                КодЗвания = soldier.КодЗвания,
-                                КодПодразделения = soldier.КодПодразделения,
+                                КодПроверяемого = soldierId,
+                                ВУС = gd.grade.ВУС,
+                                КодЗвания = gd.grade.КодЗвания,
+                                КодПодразделения = gd.grade.КодПодразделения,
                                 КодПредмета = subjectId,
-                                ТипВоеннослужащего = soldier.ТипВоеннослужащего,
+                                ТипВоеннослужащего = gd.grade.ТипВоеннослужащего,
                                 ЭтоКомментарий = true,
                                 Значение = 0,
                                 Текст = "_"
@@ -380,16 +374,16 @@ namespace Grader.gui {
                             // no change happened
                         } else {
                             // grade was changed
-                            List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldier, () => new List<Оценка>());
+                            List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldierId, () => new List<Оценка>());
                             Оценка g = new Оценка {
                                 Код = -1,
                                 КодВедомости = -1,
-                                КодПроверяемого = soldier.Код,
-                                ВУС = soldier.ВУС,
-                                КодЗвания = soldier.КодЗвания,
-                                КодПодразделения = soldier.КодПодразделения,
+                                КодПроверяемого = soldierId,
+                                ВУС = gd.grade.ВУС,
+                                КодЗвания = gd.grade.КодЗвания,
+                                КодПодразделения = gd.grade.КодПодразделения,
                                 КодПредмета = subjectId,
-                                ТипВоеннослужащего = soldier.ТипВоеннослужащего
+                                ТипВоеннослужащего = gd.grade.ТипВоеннослужащего
                             };
                             Util.ParseInt(v).Map(vv => {
                                 g.ЭтоКомментарий = false;
@@ -419,14 +413,15 @@ namespace Grader.gui {
                     virt = true,
                     name = "",
                     tags = RegisterEditor.SplitTags(tags.Text),
-                    subjectIds = editedGrades.Values.SelectMany(grades => grades.Select(g => g.КодПредмета)).Distinct().OrderBy(sid => subjectIds.IndexOf(sid)).ToList(),
+                    subjectIds = 
+                        editedGrades.Values
+                        .SelectMany(grades => grades.Select(g => g.КодПредмета))
+                        .Distinct()
+                        .OrderBy(sid => subjectIds.IndexOf(sid))
+                        .ToList(),
                     records =
                         editedGrades.ToList()
-                        .Select(kv => new RegisterRecord { soldier = kv.Key, marks = kv.Value })
-                        .OrderBy(r => r.soldier.Отчество)
-                        .OrderBy(r => r.soldier.Имя)
-                        .OrderBy(r => r.soldier.Фамилия)
-                        .OrderBy(r => rankIdsSorted.IndexOf(r.soldier.КодЗвания))
+                        .Select(kv => new RegisterRecord { soldierId = kv.Key, marks = kv.Value })
                         .ToList()
                 };
 
