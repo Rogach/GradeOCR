@@ -126,6 +126,7 @@ namespace Grader.gui {
                 from soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>()
                 from subunit in dc.GetTable<Подразделение>()
                 where soldier.КодПодразделения == subunit.Код
+                where soldier.КодСтаршегоПодразделения == selectedSubunit.Код
 
                 where selectRelatedSubunits.Checked || soldier.КодПодразделения == selectedSubunit.Код
 

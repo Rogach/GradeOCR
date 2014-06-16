@@ -98,13 +98,14 @@ namespace Grader.util {
 
             var query =
                 from soldier in soldierQuery
-                from subunit in dc.GetTable<Подразделение>()
-                where soldier.КодПодразделения == subunit.Код
+
+                from subunitRel in dc.GetTable<ПодразделениеПодчинение>()
+                where soldier.КодПодразделения == subunitRel.КодПодразделения
+                where subunitRel.КодСтаршегоПодразделения == subunitId
 
                 from rank in dc.GetTable<Звание>()
                 where soldier.КодЗвания == rank.Код
 
-                where soldier.КодСтаршегоПодразделения == subunitId
                 where soldier.Убыл == 0
                 orderby soldier.sortWeight descending, rank.order descending, soldier.Фамилия, soldier.Имя, soldier.Отчество
                 select soldier;
@@ -118,9 +119,7 @@ namespace Grader.util {
             var query =
                 from soldier in soldierQuery
                 where soldier.КодПодразделения == subunitId
-                where soldier.КодСтаршегоПодразделения == subunitId
-                from subunit in dc.GetTable<Подразделение>()
-                where subunit.Код == subunitId
+
                 from rank in dc.GetTable<Звание>()
                 where soldier.КодЗвания == rank.Код
 
