@@ -10,17 +10,16 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class GradeSummaryGenerator {
-        public static void GenerateSummary(Application accessApp) {
-            
-            Form f = accessApp.GetForm("ПоОценкам").Get();
-            int subunitId = f.GetControl("SubunitSelect").Get().IntegerValue();
-            string subjectName = f.GetControl("SubjectSelect").Get().StringValue();
-            bool produceSummaryGrade = f.GetControl("ProduceSummaryGrade").Get().BooleanValue();
-            DataContext dc = accessApp.GetDataContext();
-            Подразделение subunit = dc.GetTable<Подразделение>().Where(s => s.Код == subunitId).ToListTimed().First();
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
+        public static void GenerateSummary(
+                DataContext dc, 
+                Подразделение subunit, 
+                IQueryable<Оценка> gradeQuery, 
+                string subjectName, 
+                bool produceSummaryGrade,
+                bool cadetsSelected,
+                bool selectRelatedSubunits) {
 
-            List<int> grades = Grades.GetSubjectGrades(Grades.GetGradesForSubunit(dc, gradeQuery, subunitId), dc, subjectName);
+            List<int> grades = Grades.GetSubjectGrades(gradeQuery, dc, subjectName);
             if (grades.Count == 0) {
                 System.Windows.Forms.MessageBox.Show("Нет оценок!");
                 return;
@@ -40,7 +39,7 @@ namespace Grader.grades {
             sel.TypeText(String.Format("Средний балл\t- {0:F2}", grades.Mean()));
             sel.TypeParagraph();
             if (produceSummaryGrade) {
-                GradeCalcGroup.ОбщаяОценка(accessApp, dc, gradeQuery, subunit, subjectName).ForEach(summaryGrade => {
+                GradeCalcGroup.ОбщаяОценка(dc, gradeQuery, subunit, subjectName, cadetsSelected, selectRelatedSubunits).ForEach(summaryGrade => {
                     sel.TypeText(String.Format("Общая оценка «{0}»", ReadableTextUtil.HumanReadableGradeLong(summaryGrade)));
                     sel.TypeParagraph();
                 });

@@ -11,18 +11,21 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class AverageGradeTableGenerator {
-        public static void GenerateTableWithResultsBySubunitType(Application accessApp, string subunitType, bool byVus) {
-            DataContext dc = accessApp.GetDataContext();
-            var f = accessApp.GetForm("ПоОценкам").Get();
-            bool forAllSubunits = f.GetControl("ChoiceResultsForAllSubunits").Get().BooleanValue();
-            bool forAllSubjects = f.GetControl("ChoiceResultsForAllSubjects").Get().BooleanValue();
+        public static void GenerateTableWithResultsBySubunitType(
+                DataContext dc, 
+                IQueryable<Оценка> gradeQuery,
+                string subunitType,
+                string subjectName,
+                bool byVus, 
+                bool forAllSubunits,
+                bool forAllSubjects,
+                bool cadetsSelected) {
+
             if (byVus && subunitType != "цикл") {
                 throw new Exception("expecting cycles for byVus calculation");
             }
 
             var sh = ExcelTemplates.CreateEmptyExcelTable();
-
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
 
             if (forAllSubjects) {
                 var subjects = dc.GetTable<Предмет>().ToListTimed();
@@ -57,7 +60,6 @@ namespace Grader.grades {
                     }
                 });
             } else {
-                string subjectName = f.GetControl("SubjectSelect").Get().StringValue();
                 var c = sh.GetRange("A1");
                 c.GetOffset(1, 0).Value = "средняя";
                 c.GetOffset(2, 0).Value = "общая";
@@ -96,7 +98,7 @@ namespace Grader.grades {
                                 c.GetOffset(2, 0).Value = g;
                             });
                         } else {
-                            GradeCalcGroup.ОбщаяОценка(accessApp, dc, gradeQuery, subunit, subjectName).ForEach(g => {
+                            GradeCalcGroup.ОбщаяОценка(dc, gradeQuery, subjectName, cadetsSelected).ForEach(g => {
                                 c.GetOffset(2, 0).Value = g;
                             });
                         }

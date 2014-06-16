@@ -11,9 +11,7 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class ClassListGenerator {
-        public static void GenerateClassList(AccessApplication accessApp) {
-            DataContext dc = accessApp.GetDataContext();
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
+        public static void GenerateClassList(DataContext dc, IQueryable<Оценка> gradeQuery) {
             var gradeSets = Grades.GradeSets(dc, gradeQuery).Where(gs => GradeCalcIndividual.КлассностьКурсанты(gs));
 
             ExcelWorksheet sh = ExcelTemplates.CreateEmptyExcelTable();

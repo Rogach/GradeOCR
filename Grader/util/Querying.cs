@@ -85,35 +85,19 @@ namespace Grader.util {
             return GetPostsForSubunit(dc, subunitId, postName).HeadOption();
         }
 
-        public static Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> GetSoldierQueryFilterByType(
-            DataContext dc, bool selectCadets, bool selectPermanent, bool selectContract, StudyType studyType
-            ) {
-            return q => {
-                return
-                    from soldier in q
-                    from subunit in dc.GetTable<Подразделение>()
-                    where soldier.КодПодразделения == subunit.Код
-
-                    where (studyType.ToString() == "все" || subunit.ТипОбучения == studyType.ToString())
-
-                    where
-                        (soldier.ТипВоеннослужащего == "курсант" && selectCadets) ||
-                        (soldier.ТипВоеннослужащего == "постоянный срочник" && selectPermanent) ||
-                        (soldier.ТипВоеннослужащего == "контрактник" && selectContract)
-                    select soldier;
-            };
-        }
-
         public static List<ВоеннослужащийПоПодразделениям> GetSubunitSoldiers(
-            DataContext dc, int subunitId, 
-            Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> queryFilter) {
+                DataContext dc, int subunitId, 
+                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery) {
 
-            return GetSubunitSoldiersQuery(dc, subunitId, queryFilter).ToListTimed("GetSubunitSoldiers").ToList();
+            return GetSubunitSoldiersQuery(dc, subunitId, soldierQuery).ToListTimed("GetSubunitSoldiers").ToList();
         }
 
-        public static IQueryable<ВоеннослужащийПоПодразделениям> GetSubunitSoldiersQuery(DataContext dc, int subunitId, Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> queryFilter) {
+        public static IQueryable<ВоеннослужащийПоПодразделениям> GetSubunitSoldiersQuery(
+                DataContext dc, int subunitId, 
+                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery) {
+
             var query =
-                from soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>()
+                from soldier in soldierQuery
                 from subunit in dc.GetTable<Подразделение>()
                 where soldier.КодПодразделения == subunit.Код
 
@@ -124,12 +108,15 @@ namespace Grader.util {
                 where soldier.Убыл == 0
                 orderby soldier.sortWeight descending, rank.order descending, soldier.Фамилия, soldier.Имя, soldier.Отчество
                 select soldier;
-            return queryFilter(query);
+            return query;
         }
 
-        public static List<ВоеннослужащийПоПодразделениям> GetSubunitSoldiersExact(DataContext dc, int subunitId, Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> queryFilter) {
+        public static List<ВоеннослужащийПоПодразделениям> GetSubunitSoldiersExact(
+                DataContext dc, int subunitId,
+                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery) {
+
             var query =
-                from soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>()
+                from soldier in soldierQuery
                 where soldier.КодПодразделения == subunitId
                 where soldier.КодСтаршегоПодразделения == subunitId
                 from subunit in dc.GetTable<Подразделение>()
@@ -142,7 +129,7 @@ namespace Grader.util {
                 orderby soldier.sortWeight descending, rank.order descending, soldier.Фамилия, soldier.Имя, soldier.Отчество
                 select soldier;
 
-            return queryFilter(query).ToListTimed("GetSubunitSoldiersExact").ToList();
+            return query.ToListTimed("GetSubunitSoldiersExact").ToList();
         }
 
     }

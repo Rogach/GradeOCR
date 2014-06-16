@@ -10,10 +10,7 @@ using LibUtil;
 
 namespace Grader.grades {
     public class CurrentSummaryReportGenerator {
-        public static void GenerateCurrentSummaryReport(AccessApplication accessApp) {
-            DataContext dc = accessApp.GetDataContext();
-
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
+        public static void GenerateCurrentSummaryReport(DataContext dc, IQueryable<Оценка> gradeQuery) {
 
             var perPlatoon = gradeQuery.ToListTimed().GroupBy(g => g.КодПодразделения);
 
@@ -21,7 +18,6 @@ namespace Grader.grades {
             var sel = doc.Application.Selection;
             sel.TypeText("Справка хода ВЭ в 90 МРУЦ\n\n");
             sel.TypeText("По состоянию на " + DateTime.Now.ToString("HH:mm dd.MM.yyyy года") + "\n\n");
-            //sel.TypeText(String.Format("Сдали ВЭ {0} учебных взводов\n\n", perPlatoon.Count()));
             sel.TypeText(String.Format("Обработаны результаты по {0} взводам, сдававших ВЭ.\n\n", perPlatoon.Count()));
             
             List<Предмет> subjects = (from subj in dc.GetTable<Предмет>() select subj).ToListTimed();

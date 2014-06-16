@@ -59,7 +59,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="DataAccess.cs" />
     <Compile Include="DbEntities.cs" />

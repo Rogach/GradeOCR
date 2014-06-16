@@ -10,14 +10,16 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class GradeAnalysisGenerator {
-        public static void GenerateGradeAnalysis(Application accessApp) {
-            try {
-                Form f = accessApp.GetForm("ПоОценкам").Get();
-                string subjectName = f.GetControl("SubjectSelect").Get().StringValue();
-                string analysisType = f.GetControl("SelectAnalysisType").Get().StringValue();
-                DataContext dc = accessApp.GetDataContext();
-                IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
+        public static void GenerateGradeAnalysis(
+                DataContext dc, 
+                IQueryable<Оценка> gradeQuery, 
+                string subjectName, 
+                string analysisType,
+                bool selectCadets,
+                bool selectPermanent,
+                bool selectContract) {
 
+            try {
                 List<Подразделение> subunits;
                 Func<Подразделение, List<int>> subunitGrades;
                 Func<Подразделение, Option<double>> avgSubunitGrade;
@@ -29,7 +31,7 @@ namespace Grader.grades {
                     subunits = Querying.GetSubunitsByType(dc, "батальон");
                     subunitGrades = batallion => Grades.GetSubjectGrades(Grades.GetGradesForSubunit(dc, gradeQuery, batallion.Код), dc, subjectName);
                 } else if (analysisType == "по батальонам/циклам") {
-                    if (f.GetControl("SelectContract").Get().BooleanValue() != true && f.GetControl("SelectContractAndPermanent").Get().BooleanValue() != true) {
+                    if (selectCadets) {
                         throw new Exception("expecting contract soldiers for this analysis type");
                     }
                     subunits = Querying.GetSubunitsByType(dc, "батальон");
@@ -64,7 +66,7 @@ namespace Grader.grades {
                             );
                     res = "\tЛучшие результаты " + resFunc(maxSubunit.Get()) + ".\n\tНиже результаты " + resFunc(minSubunit.Get()) + ".";
                 } else if (analysisType == "по батальонам/ротам") {
-                    if (f.GetControl("SelectCadets").Get().BooleanValue()) {
+                    if (selectCadets) {
                         List<Подразделение> companies = Querying.GetSubunitsByType(dc, "рота");
                         Подразделение maxCompany = companies.MaxByOption(avgSubunitGrade).Get();
                         Подразделение minCompany = companies.MinByOption(avgSubunitGrade).Get();
@@ -116,12 +118,12 @@ namespace Grader.grades {
                     throw new Exception("Unknown analysis type: " + analysisType);
                 }
 
-                string fullRes = 
-                    GradeCalcGroup.ОбщаяОценка(accessApp, dc, gradeQuery, subjectName)
+                string fullRes =
+                    GradeCalcGroup.ОбщаяОценка(dc, gradeQuery, subjectName, selectCadets)
                     .Map(summGrade =>
-                        String.Format("\tОбщая оценка: «{0}», средний балл - {1:F2}.\n{2}", 
-                        ReadableTextUtil.HumanReadableGradeLong(summGrade), 
-                        Grades.GetSubjectGrades(gradeQuery, dc, subjectName).Mean(), 
+                        String.Format("\tОбщая оценка: «{0}», средний балл - {1:F2}.\n{2}",
+                        ReadableTextUtil.HumanReadableGradeLong(summGrade),
+                        Grades.GetSubjectGrades(gradeQuery, dc, subjectName).Mean(),
                         res)
                     ).GetOrElse(String.Format("\tНет общей оценки.\n{0}", res));
 

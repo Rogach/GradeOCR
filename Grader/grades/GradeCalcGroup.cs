@@ -11,12 +11,15 @@ using LibUtil;
 namespace Grader.grades {
     public static class GradeCalcGroup {
 
-        public static Option<int> ОбщаяОценка(AccessApplication accessApp, DataContext dc, IQueryable<Оценка> gradeQuery, Подразделение subunit, string subjectName) {
-            AccessForm f = accessApp.GetForm("ПоОценкам").Get();
-            bool selectCadets = f.GetControl("SelectCadets").Get().BooleanValue();
-            bool selectRelatedSubunits = f.GetControl("SelectRelatedSubunits").Get().BooleanValue();
+        public static Option<int> ОбщаяОценка(
+                DataContext dc, 
+                IQueryable<Оценка> gradeQuery, 
+                Подразделение subunit, 
+                string subjectName, 
+                bool cadetsSelected,
+                bool selectRelatedSubunits) {
 
-            if (subjectName == "ОБЩ (курсанты)" || subjectName == "ОВП (курсанты)" || selectCadets) {
+            if (subjectName == "ОБЩ (курсанты)" || subjectName == "ОВП (курсанты)" || cadetsSelected) {
                 return КурсантыПоПредмету(dc, gradeQuery, subunit, subjectName);
             } else if (subjectName == "командирск.подгот.") {
                 return КомандирскаяПодготовка(dc, gradeQuery, subunit);
@@ -30,11 +33,14 @@ namespace Grader.grades {
             }
         }
 
-        public static Option<int> ОбщаяОценка(AccessApplication accessApp, DataContext dc, IQueryable<Оценка> gradeQuery, string subjectName) {
-            AccessForm f = accessApp.GetForm("ПоОценкам").Get();
-            bool selectCadets = f.GetControl("SelectCadets").Get().BooleanValue();
+        public static Option<int> ОбщаяОценка( 
+                DataContext dc, 
+                IQueryable<Оценка> gradeQuery, 
+                string subjectName, 
+                bool cadetsSelected) {
+
             IEnumerable<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
-            if (subjectName == "ОБЩ (курсанты)" || subjectName == "ОВП (курсанты)" || selectCadets) {
+            if (subjectName == "ОБЩ (курсанты)" || subjectName == "ОВП (курсанты)" || cadetsSelected) {
                 return КурсантыПоПредметуЗаЧасть(dc, gradeSets, subjectName);
             } else if (subjectName == "ОБЩ (контракт)") {
                 return БоеваяПодготовкаЗаЧасть(dc, gradeSets);

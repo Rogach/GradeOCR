@@ -50,25 +50,35 @@ namespace Grader.grades {
             new ExportUnit { subunitName = "РО", exactSubunit = true, sheetName = "БОУП", rangeName = "insert_РО" }
         };
 
-        public static void ContractGradeListExport(AccessApplication accessApp) {
+        public static void ContractGradeListExport(
+                DataAccess dataAccess, 
+                IQueryable<Оценка> gradeQuery,
+                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery) {
             DoContractGradeListExport(
-                accessApp,
+                dataAccess,
+                gradeQuery,
+                soldierQuery,
                 "список_оценок_контрактники.xlsx",
                 new List<string> { "ТСП", "СП", "ТП", "ФП", "РХБЗ", "МП", "ОГН", "СТР", "ОВУ", "ОГП", "АВТ", "ВМП", "ИНЖ", "ПОЖ", "МОБ", "ОБВС", "ОЗГТ", "ТАК", "ТОП" },
                 contractExports
             );
         }
 
-        static void DoContractGradeListExport(AccessApplication accessApp, string templateName, List<string> subjects, List<ExportUnit> exports) {
-            DataContext dc = accessApp.GetDataContext();
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
-            var wb = ExcelTemplates.LoadExcelTemplate(accessApp.Template(templateName));
+        static void DoContractGradeListExport(
+                DataAccess dataAccess, 
+                IQueryable<Оценка> gradeQuery, 
+                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery,
+                string templateName, 
+                List<string> subjects, List<ExportUnit> exports) {
+
+            DataContext dc = dataAccess.GetDataContext();
+            var wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
             ProgressDialogs.ForEach(exports, e => {
                 ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                 var subunitId = (from s in dc.GetTable<Подразделение>() where s.ИмяКраткое == e.subunitName select s.Код).ToListTimed().First();
                 var soldiers = e.exactSubunit ?
-                    Querying.GetSubunitSoldiersExact(dc, subunitId, null /*Querying.GetSoldierQueryFilterByType(accessApp.GetForm("ПоОценкам").Get(), dc)*/) :
-                    Querying.GetSubunitSoldiers(dc, subunitId, null /*Querying.GetSoldierQueryFilterByType(accessApp.GetForm("ПоОценкам").Get(), dc)*/);
+                    Querying.GetSubunitSoldiersExact(dc, subunitId, soldierQuery) :
+                    Querying.GetSubunitSoldiers(dc, subunitId, soldierQuery);
                 var grades = Grades.GradeSets(dc, e.exactSubunit ?
                     Grades.GetGradesForSubunitExact(dc, gradeQuery, subunitId) :
                     Grades.GetGradesForSubunit(dc, gradeQuery, subunitId))

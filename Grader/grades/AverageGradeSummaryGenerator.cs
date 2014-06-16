@@ -10,11 +10,7 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class AverageGradeSummaryGenerator {
-        public static void GenerateAverageGradeSummary(AccessApplication accessApp) {
-            DataContext dc = accessApp.GetDataContext();
-            var f = accessApp.GetForm("ПоОценкам");
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
-
+        public static void GenerateAverageGradeSummary(DataContext dc, IQueryable<Оценка> gradeQuery) {
             var doc = WordTemplates.CreateEmptyWordDoc();
             var sel = doc.Application.Selection;
             Dictionary<string, double> averageGrades = new Dictionary<string, double>();

@@ -11,20 +11,18 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class ClassActGenerator {
-        public static void GenerateClassAct(AccessApplication accessApp) {
-            var f = accessApp.GetForm("ПоОценкам");
-            int subunitId = accessApp.GetForm("ПоОценкам").Get().GetControl("SubunitSelect").Get().IntegerValue();
-            ExcelWorkbook wb = ExcelTemplates.LoadExcelTemplate(accessApp.Template("акт_на_классность.xlsx"));
+        public static void GenerateClassAct(DataAccess dataAccess, Подразделение subunit, DateTime actDate, IQueryable<Оценка> gradeQuery) {
+            ExcelWorkbook wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation("акт_на_классность.xlsx"));
             ExcelWorksheet sh = wb.Worksheets.First();
-            FormatActSheet(sh, subunitId, accessApp);
+            FormatActSheet(sh, subunit, dataAccess.GetDataContext(), actDate, gradeQuery);
             wb.Saved = true;
             ExcelTemplates.ActivateExcel(sh);
         }
 
-        public static void GenerateAllClassActs(AccessApplication accessApp) {
-            var wb = ExcelTemplates.LoadExcelTemplate(accessApp.Template("акт_на_классность.xlsx"));
+        public static void GenerateAllClassActs(DataAccess dataAccess, DateTime actDate, IQueryable<Оценка> gradeQuery) {
+            var wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation("акт_на_классность.xlsx"));
             ExcelWorksheet templateSheet = wb.Worksheets.First();
-            DataContext dc = accessApp.GetDataContext();
+            DataContext dc = dataAccess.GetDataContext();
             var platoonIds =
                 Querying.GetSubunitsByType(dc, "взвод")
                 .Where(s => s.ТипОбучения == "срочники")
@@ -33,7 +31,11 @@ namespace Grader.grades {
                 templateSheet.Copy(After: wb.Worksheets.Last());
                 ExcelWorksheet rsh = wb.Worksheets.Last();
                 rsh.Name = Querying.GetSubunitName(dc, subunitId);
-                FormatActSheet(rsh, subunitId, accessApp);
+                Подразделение subunit =
+                    dc.GetTable<Подразделение>()
+                    .Where(s => s.Код == subunitId)
+                    .ToListTimed().First();
+                FormatActSheet(rsh, subunit, dc, actDate, gradeQuery);
             });
             templateSheet.Delete();
             wb.Saved = true;
@@ -41,20 +43,20 @@ namespace Grader.grades {
             wb.Activate();
         }
 
-        public static void FormatActSheet(ExcelWorksheet sh, int subunitId, AccessApplication accessApp) {
-            DataContext dc = accessApp.GetDataContext();
-            var f = accessApp.GetForm("ПоОценкам").Get();
-            DateTime actDate = f.GetControl("SelectDateTo").Get().DateTimeValue();
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
-            Подразделение subunit = dc.GetTable<Подразделение>().Where(s => s.Код == subunitId).ToListTimed().First();
+        public static void FormatActSheet(
+                ExcelWorksheet sh, 
+                Подразделение subunit, 
+                DataContext dc, 
+                DateTime actDate, 
+                IQueryable<Оценка> gradeQuery) {
 
             ExcelTemplates.ReplaceRange(sh, "Date", "$month$", ReadableTextUtil.GetMonthGenitive(actDate));
             ExcelTemplates.ReplaceRange(sh, "Date", "$year$", actDate.ToString("yyyy"));
             ExcelTemplates.AppendRange(sh, "ИмяПодразделения", subunit.ИмяКраткое);
 
             IEnumerable<Военнослужащий> comissionMembers =
-                Querying.GetSubunitCommander(dc, subunitId).ToList()
-                .Concat(Querying.GetPostsForSubunit(dc, subunitId, "Преподаватель"))
+                Querying.GetSubunitCommander(dc, subunit.Код).ToList()
+                .Concat(Querying.GetPostsForSubunit(dc, subunit.Код, "Преподаватель"))
                 .OrderBy(s => s.ФИО)
                 .OrderBy(s => s.Звание.order)
                 .Reverse();
@@ -64,7 +66,7 @@ namespace Grader.grades {
                 new List<Func<Военнослужащий, string>> { s => s.Звание.Название, s => "", s => "", s => s.ФИО });
 
             var gradeSets =
-                Grades.GradeSets(dc, Grades.GetGradesForSubunit(dc, gradeQuery, subunitId)).OrderBy(gs => gs.soldier.ФИО)
+                Grades.GradeSets(dc, Grades.GetGradesForSubunit(dc, gradeQuery, subunit.Код)).OrderBy(gs => gs.soldier.ФИО)
                 .Where(gs => GradeCalcIndividual.ДопускНаКлассностьКурсанты(gs));
             var vusList = gradeSets.Select(gs => gs.soldier.ВУС).Distinct();
             if (vusList.Count() > 1) {

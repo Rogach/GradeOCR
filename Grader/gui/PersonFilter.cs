@@ -113,36 +113,31 @@ namespace Grader.gui {
 
         public IQueryable<ВоеннослужащийПоПодразделениям> GetPersonQuery() {
             DataContext dc = dataAccess.GetDataContext();
+            StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
+            Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
             Option<int> vus;
             if (vusSelector.SelectedItem == null) {
                 vus = new None<int>();
             } else {
                 vus = new Some<int>(Int32.Parse((string) vusSelector.SelectedItem));
             }
-            Подразделение subunit = (Подразделение) subunitSelector.SelectedItem;
-            return Querying.GetSubunitSoldiersQuery(dc, subunit.Код, GetPersonQueryFilter(dc))
-                   .Where(s => vus.IsEmpty() || vus.GetOrElse(-1) == s.ВУС);
-        }
 
-        private Func<IQueryable<ВоеннослужащийПоПодразделениям>, IQueryable<ВоеннослужащийПоПодразделениям>> GetPersonQueryFilter(DataContext dc) {
-            return q => {
-                StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
-                Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
-                return
-                    from soldier in q
-                    from subunit in dc.GetTable<Подразделение>()
-                    where soldier.КодПодразделения == subunit.Код
+            var query =
+                from soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>()
+                from subunit in dc.GetTable<Подразделение>()
+                where soldier.КодПодразделения == subunit.Код
 
-                    where selectRelatedSubunits.Checked || soldier.КодПодразделения == selectedSubunit.Код
+                where selectRelatedSubunits.Checked || soldier.КодПодразделения == selectedSubunit.Код
 
-                    where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
+                where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
 
-                    where
-                        (soldier.ТипВоеннослужащего == "курсант" && selectCadets.Checked) ||
-                        (soldier.ТипВоеннослужащего == "постоянный срочник" && selectPermanent.Checked) ||
-                        (soldier.ТипВоеннослужащего == "контрактник" && selectContract.Checked)
-                    select soldier;
-            };
+                where
+                    (soldier.ТипВоеннослужащего == "курсант" && selectCadets.Checked) ||
+                    (soldier.ТипВоеннослужащего == "постоянный срочник" && selectPermanent.Checked) ||
+                    (soldier.ТипВоеннослужащего == "контрактник" && selectContract.Checked)
+                where vus.IsEmpty() || soldier.ВУС == vus.GetOrElse(-1)
+                select soldier;
+            return Querying.GetSubunitSoldiersQuery(dc, selectedSubunit.Код, query);
         }
 
     }

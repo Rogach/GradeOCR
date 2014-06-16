@@ -89,18 +89,27 @@ namespace Grader.grades {
             new ExportUnit { subunitName = "РО", exactSubunit = true, sheetName = "БОУП", rangeName = "insert_РО" }
         };
 
-        public static void ExportToOldGrader(AccessApplication accessApp) {
-            var f = accessApp.GetForm("ПоОценкам").Get();
-            if (f.GetControl("SelectCadets").Get().BooleanValue()) {
+        public static void ExportToOldGrader(
+                DataAccess dataAccess, 
+                IQueryable<Оценка> gradeQuery, 
+                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery, 
+                bool selectCadets, 
+                bool selectContract) {
+
+            if (selectCadets) {
                 DoExport(
-                    accessApp,
+                    dataAccess,
+                    gradeQuery,
+                    soldierQuery,
                     "старая_учетка_курсанты.xlsm",
                     new List<string> { "СП", "СЭС", "ТП", "СТР", "ФП", "ОВУ", "ОГН", "РХБЗ", "ВМП", "ОГП", "ТАКТ" },
                     cadetExports
                 );
-            } else if (f.GetControl("SelectContract").Get().BooleanValue()) {
+            } else if (selectContract) {
                 DoExport(
-                    accessApp,
+                    dataAccess,
+                    gradeQuery,
+                    soldierQuery,
                     "старая_учетка_контрактники.xlsx",
                     new List<string> { "ТСП", "СП", "ТП", "ФП", "РХБЗ", "МП", "ОГН", "СТР", "ОВУ", "ОГП" },
                     contractExports
@@ -110,18 +119,24 @@ namespace Grader.grades {
             }
         }
 
-        static void DoExport(AccessApplication accessApp, string templateName, List<string> subjects, List<ExportUnit> exports) {
-            DataContext dc = accessApp.GetDataContext();
-            IQueryable<Оценка> gradeQuery = Grades.GetGradeQuery(accessApp, dc);
-            var wb = ExcelTemplates.LoadExcelTemplate(accessApp.Template(templateName));
+        static void DoExport(
+                DataAccess dataAccess, 
+                IQueryable<Оценка> gradeQuery, 
+                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery,
+                string templateName, 
+                List<string> subjects, 
+                List<ExportUnit> exports) {
+                
+            DataContext dc = dataAccess.GetDataContext();
+            var wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
             ProgressDialogs.ForEach(exports, e => {
                 try {
                     ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                     ExcelRange c = sh.GetRange(e.rangeName);
                     var subunitId = (from s in dc.GetTable<Подразделение>() where s.ИмяКраткое == e.subunitName select s.Код).ToListTimed().First();
                     var soldiers = e.exactSubunit ?
-                        Querying.GetSubunitSoldiersExact(dc, subunitId, null /*Querying.GetSoldierQueryFilterByType(accessApp.GetForm("ПоОценкам").Get(), dc)*/) :
-                        Querying.GetSubunitSoldiers(dc, subunitId, null /*Querying.GetSoldierQueryFilterByType(accessApp.GetForm("ПоОценкам").Get(), dc)*/);
+                        Querying.GetSubunitSoldiersExact(dc, subunitId, soldierQuery) :
+                        Querying.GetSubunitSoldiers(dc, subunitId, soldierQuery);
                     var grades = Grades.GradeSets(dc,
                         e.exactSubunit ?
                             Grades.GetGradesForSubunitExact(dc, gradeQuery, subunitId) :
