@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Data.Linq;
 using Grader.grades;
+using Grader.enums;
 
 namespace Grader.gui {
     public class GradeAnalysisTab : TabPage {
@@ -154,17 +155,7 @@ namespace Grader.gui {
                 dataAccess.GetDataContext().GetTable<Предмет>()
                 .Select(s => s.Название)
                 .ToList();
-
-            List<string> compositeSubjectNames = new List<string> {
-                "ОВП (курсанты)",
-                "ОБЩ (курсанты)",
-                "ОБЩ (контракт)",
-                "ОБЩ (урс)",
-                "СП/ТП",
-                "командирск.подгот."
-            };
-
-            subjectNames.AddRange(compositeSubjectNames);
+            subjectNames.AddRange(ComplexSubjects.complexSubjectNames);
             subjectNames = subjectNames.OrderBy(s => s).ToList();
 
             subjectSelector = layout2.Add("Предмет", new ComboBox());
@@ -194,7 +185,9 @@ namespace Grader.gui {
 
                 from subj in dc.GetTable<Предмет>()
                 where grade.КодПредмета == subj.Код
-                where subjectSelector.SelectedItem == null ||  subj.Название == ((string) subjectSelector.SelectedItem)
+                where subjectSelector.SelectedItem == null
+                   || ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem)
+                   ||  subj.Название == ((string) subjectSelector.SelectedItem)
 
                 from r in dc.GetTable<Ведомость>()
                 where grade.КодВедомости == r.Код

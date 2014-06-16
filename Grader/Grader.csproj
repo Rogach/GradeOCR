@@ -62,6 +62,7 @@
     <Compile Include="Cache.cs" />
     <Compile Include="DataAccess.cs" />
     <Compile Include="DbEntities.cs" />
+    <Compile Include="enums\ComplexSubjects.cs" />
     <Compile Include="enums\RegisterType.cs" />
     <Compile Include="enums\StudyType.cs" />
     <Compile Include="grades\AverageGradeSummaryGenerator.cs" />
