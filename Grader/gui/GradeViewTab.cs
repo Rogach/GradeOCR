@@ -288,6 +288,8 @@ namespace Grader.gui {
             settings.Save();
         }
 
+        
+
         private class GradeDesc {
             public Оценка grade { get; set; }
             public int virt { get; set; }

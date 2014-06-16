@@ -327,6 +327,7 @@ namespace Grader.gui {
                 registerDataGridView.Columns
                 .ToNormalList<DataGridViewColumn>().Skip(4)
                 .Select(col => subjectNameToId[col.Name]).ToList();
+            Dictionary<int, Подразделение> subunitCache = new Dictionary<int,Подразделение>();
             return new Register {
                 id = currentRegister.id,
                 name = registerName.Text,
@@ -347,24 +348,63 @@ namespace Grader.gui {
                         }
                     })
                     .Select(row => {
-                        //ВоеннослужащийПоПодразделениям soldier = dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
-                        //        .Where(v => v.Код == Int32.Parse(row.Cells[1].Value.ToString()))
-                        //        .ToListTimed().First();
                         int soldierId = Int32.Parse(row.Cells[1].Value.ToString());
-                        List<Оценка> previousMarks = currentRegister.records.Find(r => r.soldierId == soldierId).marks;
+
+                        RegisterRecord record = currentRegister.records.Find(r => r.soldierId == soldierId);
+
+                        ВоеннослужащийПоПодразделениям maybeSoldier = record.soldier;
+
+                        List<Оценка> previousMarks = record.marks;
+
+                        int subunitId;
+                        if (previousMarks.Count > 0) {
+                            subunitId = previousMarks[0].КодПодразделения;
+                        } else if (maybeSoldier != null) {
+                            subunitId = maybeSoldier.КодПодразделения;
+                        } else {
+                            maybeSoldier = 
+                                dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
+                                .Where(s => s.Код == soldierId).Where(s => s.КодПодразделения == s.КодСтаршегоПодразделения)
+                                .ToList().First();
+                            subunitId = maybeSoldier.Код;
+                        }
+
                         List<Оценка> marks = new List<Оценка>();
+
                         for (int col = 4; col < registerDataGridView.Columns.Count; col++) {
-                            if (row.Cells[col].Value.ToString().Trim() != "") {
-                                Оценка g = new Оценка {
-                                    Код = -1,
-                                    КодПроверяемого = soldierId,
-                                    КодПредмета = subjectIds[col - 4],
-                                    КодПодразделения = previousMarks[0].КодПодразделения,
-                                    ВУС = previousMarks[0].ВУС,
-                                    ТипВоеннослужащего = previousMarks[0].ТипВоеннослужащего,
-                                    КодЗвания = previousMarks[0].КодЗвания,
-                                    КодВедомости = -1
-                                };
+                            if (row.Cells[col].Value != null && row.Cells[col].Value.ToString().Trim() != "") {
+                                Оценка g;
+                                if (previousMarks.Count > 0) {
+                                    g = new Оценка {
+                                        Код = -1,
+                                        КодПроверяемого = soldierId,
+                                        КодПредмета = subjectIds[col - 4],
+                                        КодПодразделения = previousMarks[0].КодПодразделения,
+                                        ВУС = previousMarks[0].ВУС,
+                                        ТипВоеннослужащего = previousMarks[0].ТипВоеннослужащего,
+                                        КодЗвания = previousMarks[0].КодЗвания,
+                                        КодВедомости = -1
+                                    };
+                                } else {
+                                    Подразделение subunit =
+                                        subunitCache.GetOrElseInsertAndGet(subunitId, () => {
+                                            return
+                                                dataAccess.GetDataContext().GetTable<Подразделение>()
+                                                .Where(s => s.Код == subunitId).ToList().First();
+                                        });
+
+                                    // maybeSoldier is surely not null now, since we initialized it above
+                                    g = new Оценка {
+                                        Код = -1,
+                                        КодПроверяемого = soldierId,
+                                        КодПредмета = subjectIds[col - 4],
+                                        КодПодразделения = maybeSoldier.КодПодразделения,
+                                        ВУС = maybeSoldier.ВУС,
+                                        ТипВоеннослужащего = subunit.ТипОбучения == null ? "" : subunit.ТипОбучения,
+                                        КодЗвания = maybeSoldier.КодЗвания,
+                                        КодВедомости = -1
+                                    };
+                                }
                                 Util.ParseInt(row.Cells[col].Value.ToString()).Map(v => {
                                     g.ЭтоКомментарий = false;
                                     g.Значение = v;
