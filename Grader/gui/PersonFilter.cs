@@ -38,6 +38,19 @@ namespace Grader.gui {
             subunitSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             subunitSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
 
+            subunitSelector.SelectedValueChanged += new EventHandler(delegate {
+                Подразделение subunit = (Подразделение) subunitSelector.SelectedItem;
+                if (subunit.ТипОбучения == "срочники") {
+                    selectCadets.Checked = true;
+                    selectPermanent.Checked = false;
+                    selectContract.Checked = false;
+                } else if (subunit.ТипОбучения == "" || subunit.ТипОбучения == null) {
+                    selectCadets.Checked = false;
+                    selectPermanent.Checked = false;
+                    selectContract.Checked = true;
+                }
+            });
+
             selectRelatedSubunits = layout.AddFullRow(new CheckBox(), leftPadding: 60);
             selectRelatedSubunits.Text = "Подчиненные подразделения?";
             selectRelatedSubunits.Checked = true;
