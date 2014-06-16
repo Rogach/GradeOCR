@@ -153,8 +153,19 @@ namespace Grader.gui {
             List<string> subjectNames =
                 dataAccess.GetDataContext().GetTable<Предмет>()
                 .Select(s => s.Название)
-                .OrderBy(s => s)
                 .ToList();
+
+            List<string> compositeSubjectNames = new List<string> {
+                "ОВП (курсанты)",
+                "ОБЩ (курсанты)",
+                "ОБЩ (контракт)",
+                "ОБЩ (урс)",
+                "СП/ТП",
+                "командирск.подгот."
+            };
+
+            subjectNames.AddRange(compositeSubjectNames);
+            subjectNames = subjectNames.OrderBy(s => s).ToList();
 
             subjectSelector = layout2.Add("Предмет", new ComboBox());
             subjectSelector.Items.AddRange(subjectNames.ToArray());
