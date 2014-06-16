@@ -44,6 +44,17 @@ namespace Grader.util {
             return Options.HeadOption(query.ToListTimed("GetSubunitCommander"));
         }
 
+        public static Option<ВоеннослужащийПоПодразделениям> GetSubunitCommander2(DataContext dc, int subunitId) {
+            var query =
+                from subunit in dc.GetTable<Подразделение>()
+                join soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>() on subunit.КодКомандира equals soldier.Код
+
+                where subunit.Код == subunitId
+                where soldier.КодПодразделения == soldier.КодСтаршегоПодразделения
+                select soldier;
+            return Options.HeadOption(query.ToListTimed("GetSubunitCommander"));
+        }
+
         public static string GetSubunitName(DataContext dc, int subunitId) {
             return (from subunit in dc.GetTable<Подразделение>() where subunit.Код == subunitId select subunit.Имя).ToListTimed("GetSubunitName").First();
         }
@@ -83,6 +94,25 @@ namespace Grader.util {
 
         public static Option<Военнослужащий> GetPostForSubunit(DataContext dc, int subunitId, string postName) {
             return GetPostsForSubunit(dc, subunitId, postName).HeadOption();
+        }
+
+        public static List<ВоеннослужащийПоПодразделениям> GetPostsForSubunit2(DataContext dc, int subunitId, string postName) {
+            var query =
+                from pos in dc.GetTable<Должность>()
+                from soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>()
+                where pos.КодВоеннослужащего == soldier.Код
+                where soldier.КодПодразделения == soldier.КодСтаршегоПодразделения
+                where pos.КодПодразделения == subunitId
+                where pos.Название == postName
+                from rank in dc.GetTable<Звание>()
+                where soldier.КодЗвания == rank.Код
+                orderby rank.order descending, soldier.Фамилия, soldier.Имя, soldier.Отчество
+                select soldier;
+            return query.ToListTimed("GetPostsForSubunit2");
+        }
+
+        public static Option<ВоеннослужащийПоПодразделениям> GetPostForSubunit2(DataContext dc, int subunitId, string postName) {
+            return GetPostsForSubunit2(dc, subunitId, postName).HeadOption();
         }
 
         public static List<ВоеннослужащийПоПодразделениям> GetSubunitSoldiers(

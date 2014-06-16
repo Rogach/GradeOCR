@@ -70,6 +70,21 @@ namespace Grader.registers {
                             commander.Map(c => c.ФИО).GetOrElse("???")));
             }
 
+            if (settings.registerType == RegisterType.экзамен && settings.subunit.Тип == "взвод") {
+                List<ВоеннослужащийПоПодразделениям> soldiers = new List<ВоеннослужащийПоПодразделениям>();
+                Querying.GetSubunitCommander2(dc, settings.subunit.Код).ForEach(commander => {
+                    soldiers.Add(commander);
+                });
+                Querying.GetPostForSubunit2(dc, settings.subunit.Код, "ЗКВ").ForEach(zkv => {
+                    soldiers.Add(zkv);
+                });
+                Querying.GetPostForSubunit2(dc, settings.subunit.Код, "КО").ForEach(ko => {
+                    soldiers.Add(ko);
+                });
+                soldiers.AddRange(settings.soldiers);
+                settings.soldiers = soldiers;
+            }
+
             InsertSoldiers(sh, settings);
 
             if (settings.registerType == RegisterType.экзамен || settings.registerType == RegisterType.зачет) {
