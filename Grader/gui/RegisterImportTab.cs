@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using System.Drawing;
 using Grader.model;
 using LibUtil;
+using System.Data.Linq;
+using Grader.util;
 
 namespace Grader.gui {
     class RegisterImportTab : TabPage {
@@ -251,8 +253,14 @@ namespace Grader.gui {
             PersonSelector personSelector = new PersonSelector(dataAccess);
             personSelector.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             f.Location = new Point(0, 0);
-            f.Size = new Size(personSelector.PreferredSize.Width + 15, personSelector.PreferredSize.Height + 80);
+            f.Size = new Size(personSelector.PreferredSize.Width + 15, personSelector.PreferredSize.Height + 105);
             f.Controls.Add(personSelector);
+
+            CheckBox forExam = new CheckBox { Text = "Для экзмена?" };
+            forExam.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
+            forExam.Size = new Size(100, 20);
+            forExam.Location = new Point(5, personSelector.Height + 5);
+            f.Controls.Add(forExam);
             
             Button buttonOk = new Button { Text = "ОК" };
             buttonOk.Click += new EventHandler(delegate {
@@ -261,10 +269,9 @@ namespace Grader.gui {
             });
             buttonOk.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
             buttonOk.Size = new Size(100, 25);
-            buttonOk.Location = new Point(35, personSelector.Height + 10);
+            buttonOk.Location = new Point(35, personSelector.Height + 35);
             f.Controls.Add(buttonOk);
 
-            
             Button buttonCancel = new Button { Text = "Отменить" };
             buttonCancel.Click += new EventHandler(delegate {
                 f.DialogResult = DialogResult.Cancel;
@@ -272,7 +279,7 @@ namespace Grader.gui {
             });
             buttonCancel.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
             buttonCancel.Size = new Size(100, 25);
-            buttonCancel.Location = new Point(145, personSelector.Height + 10);
+            buttonCancel.Location = new Point(145, personSelector.Height + 35);
             f.Controls.Add(buttonCancel);
 
             f.ResumeLayout(false);
@@ -280,7 +287,24 @@ namespace Grader.gui {
             DialogResult result = f.ShowDialog();
             if (result == DialogResult.OK) {
                 Register reg = registerEditor.GetEmptyRegister();
-                reg.records = personSelector.GetPersonList().Select(p => new RegisterRecord { marks = new List<Оценка>(), soldierId = p.Код }).ToList();
+
+                DataContext dc = dataAccess.GetDataContext();
+                List<ВоеннослужащийПоПодразделениям> personList = new List<ВоеннослужащийПоПодразделениям>();
+                if (forExam.Checked && personSelector.IsFilter()) {
+                    Подразделение subunit = (Подразделение) personSelector.personFilter.subunitSelector.SelectedItem;
+                    Querying.GetSubunitCommander2(dc, subunit.Код).ForEach(commander => {
+                        personList.Add(commander);
+                    });
+                    Querying.GetPostForSubunit2(dc, subunit.Код, "ЗКВ").ForEach(zkv => {
+                        personList.Add(zkv);
+                    });
+                    Querying.GetPostForSubunit2(dc, subunit.Код, "КО").ForEach(ko => {
+                        personList.Add(ko);
+                    });
+                }
+                personList.AddRange(personSelector.GetPersonList());
+
+                reg.records = personList.Select(p => new RegisterRecord { marks = new List<Оценка>(), soldierId = p.Код, soldier = p }).ToList();
                 return new Some<Register>(reg);
             } else {
                 return new None<Register>();

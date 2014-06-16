@@ -291,6 +291,9 @@ namespace Grader.gui {
                 if (record.marks.Count > 0) {
                     cells.Add(rankIdToName[record.marks[0].КодЗвания]);
                     cells.Add(soldierIdToName[record.marks[0].КодПроверяемого]);
+                } else if (record.soldier != null) {
+                    cells.Add(record.soldier.Звание);
+                    cells.Add(record.soldier.ФИО);
                 } else {
                     cells.Add("");
                     cells.Add("");
