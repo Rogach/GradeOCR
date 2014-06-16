@@ -356,17 +356,11 @@ namespace Grader.gui {
 
                         List<Оценка> previousMarks = record.marks;
 
-                        int subunitId;
-                        if (previousMarks.Count > 0) {
-                            subunitId = previousMarks[0].КодПодразделения;
-                        } else if (maybeSoldier != null) {
-                            subunitId = maybeSoldier.КодПодразделения;
-                        } else {
+                        if (previousMarks.Count == 0 && maybeSoldier == null) {
                             maybeSoldier = 
                                 dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
                                 .Where(s => s.Код == soldierId).Where(s => s.КодПодразделения == s.КодСтаршегоПодразделения)
                                 .ToList().First();
-                            subunitId = maybeSoldier.Код;
                         }
 
                         List<Оценка> marks = new List<Оценка>();
@@ -386,13 +380,6 @@ namespace Grader.gui {
                                         КодВедомости = -1
                                     };
                                 } else {
-                                    Подразделение subunit =
-                                        subunitCache.GetOrElseInsertAndGet(subunitId, () => {
-                                            return
-                                                dataAccess.GetDataContext().GetTable<Подразделение>()
-                                                .Where(s => s.Код == subunitId).ToList().First();
-                                        });
-
                                     // maybeSoldier is surely not null now, since we initialized it above
                                     g = new Оценка {
                                         Код = -1,
@@ -400,7 +387,7 @@ namespace Grader.gui {
                                         КодПредмета = subjectIds[col - 4],
                                         КодПодразделения = maybeSoldier.КодПодразделения,
                                         ВУС = maybeSoldier.ВУС,
-                                        ТипВоеннослужащего = subunit.ТипОбучения == null ? "" : subunit.ТипОбучения,
+                                        ТипВоеннослужащего = maybeSoldier.ТипВоеннослужащего,
                                         КодЗвания = maybeSoldier.КодЗвания,
                                         КодВедомости = -1
                                     };

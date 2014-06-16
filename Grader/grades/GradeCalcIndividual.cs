@@ -174,8 +174,7 @@ namespace Grader.grades {
             return ДопускНаКлассностьКурсанты(gradeSet) && sp && tp;
         }
 
-        public static Option<int> ОценкаОБЩ(Dictionary<string, int> grades, string ТипОбучения, string ТипВоеннослужащего) {
-            GradeSet gs = new GradeSet() { grades = grades };
+        public static Option<int> ОценкаОБЩ(GradeSet gs, string ТипОбучения, string ТипВоеннослужащего) {
             if (ТипВоеннослужащего == "контрактник" || ТипВоеннослужащего == "постоянный срочник") {
                 return ОценкаКонтрактникиОБЩ(gs);
             } else if (ТипОбучения == "3мес" || ТипОбучения == "6мес") {

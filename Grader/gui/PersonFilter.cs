@@ -87,18 +87,13 @@ namespace Grader.gui {
             IQueryable<Оценка> gradeQuery =
                 from grade in dc.GetTable<Оценка>()
 
-                from subunit in dc.GetTable<Подразделение>()
-                where grade.КодПодразделения == subunit.Код
-
                 from subunitRel in dc.GetTable<ПодразделениеПодчинение>()
                 where grade.КодПодразделения == subunitRel.КодПодразделения
-
-                from rank in dc.GetTable<Звание>()
-                where grade.КодЗвания == rank.Код
-
                 where subunitRel.КодСтаршегоПодразделения == selectedSubunit.Код
                 where (selectRelatedSubunits.Checked || grade.КодПодразделения == selectedSubunit.Код)
 
+                from subunit in dc.GetTable<Подразделение>()
+                where grade.КодПодразделения == subunit.Код
                 where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
 
                 where

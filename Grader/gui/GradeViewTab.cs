@@ -196,6 +196,7 @@ namespace Grader.gui {
         private void showGrades_Click(object sender, EventArgs e) {
             DataContext dc = dataAccess.GetDataContext();
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
+
             IQueryable<GradeDesc> gradeQuery =
                 from g in personSelector.GetGradeQuery()
 
@@ -298,6 +299,7 @@ namespace Grader.gui {
             for (int r = 0; r < gradeView.RowCount; r++) {
                 UpdateSummaryGradeInRow(r);
             }
+            changesPending = false;
 
             saveChanges.Enabled = true;
             cancelChanges.Enabled = true;
@@ -315,8 +317,11 @@ namespace Grader.gui {
             }
 
             GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierIds[rowIndex]).First().Value;
+
+            GradeSet gs = new GradeSet() { grades = grades, subunit = subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
+
             GradeCalcIndividual.ОценкаОБЩ(
-                grades,
+                gs,
                 subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
                 someGradeDesc.grade.ТипВоеннослужащего
             ).ForEach(sg => {
