@@ -106,7 +106,7 @@ namespace Grader.gui {
             registerDataGridView.AllowUserToOrderColumns = false;
             registerDataGridView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
 
-            FluidGradeEntering.EnableFluidGradeEntering(registerDataGridView, registerDataTable, 4);
+            FluidGradeEntering.EnableFluidGradeEntering(registerDataGridView, registerDataTable, col => col >= 4);
             GridPasteSupport.AddPasteSupport(registerDataGridView, registerDataTable);
             GridDeleteKeySupport.AddDeleteKeySupport(registerDataGridView);
 

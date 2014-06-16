@@ -7,7 +7,7 @@ using System.Data;
 
 namespace Grader.gui.gridutil {
     public static class FluidGradeEntering {
-        public static void EnableFluidGradeEntering(DataGridView dataGridView, DataTable dataTable, int columnFrom) {
+        public static void EnableFluidGradeEntering(DataGridView dataGridView, DataTable dataTable, Func<int, bool> isEditingAllowed) {
             bool afterGradeType = false;
             dataGridView.PreviewKeyDown += new PreviewKeyDownEventHandler(delegate(object sender, PreviewKeyDownEventArgs args) {
                 Dictionary<Keys, string> quickKeys = new Dictionary<Keys, string> {
@@ -23,7 +23,7 @@ namespace Grader.gui.gridutil {
                         minX = Math.Min(minX, sc.ColumnIndex);
                         minY = Math.Min(minY, sc.RowIndex);
                     }
-                    if (minX >= columnFrom) {
+                    if (isEditingAllowed(minX)) {
                         if (minY + 1 < dataGridView.Rows.Count) {
                             dataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
                             dataGridView.ClearSelection();

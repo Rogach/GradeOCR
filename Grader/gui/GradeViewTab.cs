@@ -10,6 +10,7 @@ using System.Data;
 using Grader.util;
 using Grader.gui.gridutil;
 using Grader.model;
+using Grader.grades;
 
 namespace Grader.gui {
     public class GradeViewTab : TabPage {
@@ -17,6 +18,7 @@ namespace Grader.gui {
         private Settings settings;
         Dictionary<string, int> subjectNameToId;
         Dictionary<int, string> subjectIdToName;
+        Dictionary<int, Подразделение> subunitIdToInstance;
         public EventManager ChangesSaved = new EventManager();
 
         private static string TAB_NAME = "Просмотр оценок";
@@ -34,6 +36,9 @@ namespace Grader.gui {
                 .Select(s => new { id = s.Код, name = s.Название })
                 .ToListTimed()
                 .ToDictionary(s => s.id, s => s.name);
+            subunitIdToInstance =
+                dataAccess.GetDataContext().GetTable<Подразделение>()
+                .ToList().ToDictionary(s => s.Код, s => s);
             this.InitializeComponent();
         }
 
@@ -149,7 +154,7 @@ namespace Grader.gui {
             this.Controls.Add(gradeView);
 
             gradeView.CellBeginEdit += new DataGridViewCellCancelEventHandler(delegate(object sender, DataGridViewCellCancelEventArgs e) {
-                if (e.ColumnIndex < 4) {
+                if (e.ColumnIndex < 4 || e.ColumnIndex == gradeView.ColumnCount - 1) {
                     e.Cancel = true;
                 }
             });
@@ -158,6 +163,7 @@ namespace Grader.gui {
                 // indicate that cell value has been changed
                 changesPending = true;
                 gradeView.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor = Color.FromArgb(255, 255, 153);
+                UpdateSummaryGradeInRow(e.RowIndex);
             });
 
             gradeView.ColumnAdded += new DataGridViewColumnEventHandler(delegate(object e, DataGridViewColumnEventArgs args) {
@@ -174,9 +180,13 @@ namespace Grader.gui {
                     args.Column.Width = 40;
                     args.Column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 }
+
+                if (args.Column.Name == "ОБЩ") {
+                    args.Column.DefaultCellStyle.BackColor = Color.LightYellow;
+                }
             });
 
-            FluidGradeEntering.EnableFluidGradeEntering(gradeView, gradeViewDataTable, 4);
+            FluidGradeEntering.EnableFluidGradeEntering(gradeView, gradeViewDataTable, col => col >= 4 && col != gradeView.ColumnCount - 1);
             GridPasteSupport.AddPasteSupport(gradeView, gradeViewDataTable);
             GridDeleteKeySupport.AddDeleteKeySupport(gradeView, fromColumn: 4);
 
@@ -242,6 +252,8 @@ namespace Grader.gui {
                 gradeViewDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
             }
 
+            gradeViewDataTable.Columns.Add(new DataColumn("ОБЩ"));
+
             soldierIds = grades.Select(gd => gd.soldierId).Distinct().ToList();
             int c = 1;
             foreach (var soldierId in soldierIds) {
@@ -282,13 +294,35 @@ namespace Grader.gui {
                     }
                 }
             }
+
+            for (int r = 0; r < gradeView.RowCount; r++) {
+                UpdateSummaryGradeInRow(r);
+            }
+
             saveChanges.Enabled = true;
             cancelChanges.Enabled = true;
             settings.gradeViewTags = tags.Text;
             settings.Save();
         }
 
-        
+        private void UpdateSummaryGradeInRow(int rowIndex) {
+            Dictionary<string, int> grades = new Dictionary<string, int>();
+            foreach (int subjectId in subjectIds) {
+                string v = gradeView.Rows[rowIndex].Cells[4 + subjectIds.IndexOf(subjectId)].Value.ToString().Trim();
+                Util.ParseInt(v).ForEach(g => {
+                    grades.Add(subjectIdToName[subjectId], g);
+                });
+            }
+
+            GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierIds[rowIndex]).First().Value;
+            GradeCalcIndividual.ОценкаОБЩ(
+                grades,
+                subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
+                someGradeDesc.grade.ТипВоеннослужащего
+            ).ForEach(sg => {
+                gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
+            });    
+        }
 
         private class GradeDesc {
             public Оценка grade { get; set; }

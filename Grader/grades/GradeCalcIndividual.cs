@@ -173,5 +173,18 @@ namespace Grader.grades {
             var tp = gradeSet.grades.GetOption("ТП").Filter(g => g >= 4).NonEmpty();
             return ДопускНаКлассностьКурсанты(gradeSet) && sp && tp;
         }
+
+        public static Option<int> ОценкаОБЩ(Dictionary<string, int> grades, string ТипОбучения, string ТипВоеннослужащего) {
+            GradeSet gs = new GradeSet() { grades = grades };
+            if (ТипВоеннослужащего == "контрактник" || ТипВоеннослужащего == "постоянный срочник") {
+                return ОценкаКонтрактникиОБЩ(gs);
+            } else if (ТипОбучения == "3мес" || ТипОбучения == "6мес") {
+                return ОценкаУрсОБЩ(gs);
+            } else if (ТипВоеннослужащего == "курсант" || ТипОбучения == "срочники") {
+                return ОценкаКурсантыОБЩ(gs);
+            } else {
+                throw new Exception(String.Format("Неожиданный ТипОбучения+ТипВоеннослужащего: '{0}'+'{1}'", ТипОбучения, ТипВоеннослужащего));
+            }
+        }
     }
 }

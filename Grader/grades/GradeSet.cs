@@ -11,6 +11,7 @@ namespace Grader.grades {
         public Подразделение subunit { get; set; }
         public Dictionary<string, int> grades;
         public DateTime gradeDate;
+        public GradeSet() { }
         public GradeSet(Военнослужащий soldier, Звание rank, Подразделение subunit, DateTime gradeDate) {
             this.soldier = soldier;
             this.rank = rank;
