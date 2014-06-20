@@ -16,6 +16,7 @@ namespace Grader.model {
                 where rec.КодВедомости == id
                 join v in dc.GetTable<ВоеннослужащийПоПодразделениям>() on rec.КодВоеннослужащего equals v.Код
                 where v.КодПодразделения == v.КодСтаршегоПодразделения
+                orderby rec.Порядок
                 select new RegisterRecord { soldierId = v.Код }).ToList();
             foreach (var record in records) {
                 record.marks = new List<Оценка>();
