@@ -160,10 +160,12 @@ namespace Grader.gui {
             });
 
             gradeView.CellValueChanged += new DataGridViewCellEventHandler(delegate(object sender, DataGridViewCellEventArgs e) {
-                // indicate that cell value has been changed
-                changesPending = true;
-                gradeView.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor = Color.FromArgb(255, 255, 153);
-                UpdateSummaryGradeInRow(e.RowIndex);
+                if (e.ColumnIndex >= 4 && e.ColumnIndex != gradeView.ColumnCount - 1) {
+                    // indicate that cell value has been changed
+                    changesPending = true;
+                    gradeView.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor = Color.FromArgb(255, 255, 153);
+                    UpdateSummaryGradeInRow(e.RowIndex);
+                }
             });
 
             gradeView.ColumnAdded += new DataGridViewColumnEventHandler(delegate(object e, DataGridViewColumnEventArgs args) {
