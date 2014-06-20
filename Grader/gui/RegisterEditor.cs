@@ -352,9 +352,15 @@ namespace Grader.gui {
 
                         RegisterRecord record = currentRegister.records.Find(r => r.soldierId == soldierId);
 
-                        ВоеннослужащийПоПодразделениям maybeSoldier = record.soldier;
+                        ВоеннослужащийПоПодразделениям maybeSoldier = null;
+                        if (record != null) {
+                            maybeSoldier = record.soldier;
+                        }
 
-                        List<Оценка> previousMarks = record.marks;
+                        List<Оценка> previousMarks = new List<Оценка>();
+                        if (maybeSoldier != null) {
+                            previousMarks.AddRange(record.marks);
+                        }
 
                         if (previousMarks.Count == 0 && maybeSoldier == null) {
                             maybeSoldier = 
