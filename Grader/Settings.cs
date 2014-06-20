@@ -63,6 +63,9 @@ namespace Grader {
                 } else {
                     return new None<Settings>();
                 }
+
+		        settings.gradeViewTags = "";
+                settings.Save();
             }
             return new Some<Settings>(settings);
         }

@@ -46,6 +46,7 @@ namespace Grader.gui {
                         MainForm newMainForm = new MainForm(settings, context);
                         context.MainForm = newMainForm;
                         newMainForm.Show();
+                        settings.Save();
                     });
                 }
             });
