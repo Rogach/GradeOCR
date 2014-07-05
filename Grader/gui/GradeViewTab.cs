@@ -106,6 +106,10 @@ namespace Grader.gui {
             tags.Size = new Size(152, 20);
             tags.Text = settings.gradeViewTags;
             this.Controls.Add(tags);
+            tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            tags.AutoCompleteCustomSource.AddRange(dataAccess.GetDataContext().GetTable<ВедомостьТег>().Select(t => t.Тег).Distinct().ToList().ToArray());
 
             showGrades = new Button { Text = "Показать оценки" };
             showGrades.Location = new Point(3, layout.GetY() + 5 + personSelector.Height + 10 + 30);

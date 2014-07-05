@@ -46,8 +46,6 @@ namespace Grader.grades {
                 avgSubunitGrade = subunit => subunitGrades(subunit).MeanOption();
                 avgSubunitGrade = Util.Cached(avgSubunitGrade);
 
-                
-
                 Option<Подразделение> maxSubunit = subunits.MaxByOption(avgSubunitGrade);
                 Option<Подразделение> minSubunit = subunits.MinByOption(avgSubunitGrade);
 

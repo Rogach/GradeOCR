@@ -124,6 +124,10 @@ namespace Grader.gui {
             tags.TextChanged += new EventHandler(delegate {
                 errorProvider.SetError(tags, null);
             });
+            tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            tags.AutoCompleteCustomSource.AddRange(dataAccess.GetDataContext().GetTable<ВедомостьТег>().Select(t => t.Тег).Distinct().ToList().ToArray());
 
             List<string> ranks = 
                 dataAccess.GetDataContext().GetTable<Звание>()
@@ -180,14 +184,9 @@ namespace Grader.gui {
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
             return
                 from grade in personFilter.GetGradeQuery()
+
                 from rank in dc.GetTable<Звание>()
                 where grade.КодЗвания == rank.Код
-
-                from subj in dc.GetTable<Предмет>()
-                where grade.КодПредмета == subj.Код
-                where subjectSelector.SelectedItem == null
-                   || ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem)
-                   ||  subj.Название == ((string) subjectSelector.SelectedItem)
 
                 from r in dc.GetTable<Ведомость>()
                 where grade.КодВедомости == r.Код
@@ -203,6 +202,12 @@ namespace Grader.gui {
                 from maxRank in dc.GetTable<Звание>()
                 where maxRank.Название == ((string) maxRankSelector.SelectedItem)
                 where rank.order <= maxRank.order
+
+                from subj in dc.GetTable<Предмет>()
+                where grade.КодПредмета == subj.Код
+                where subjectSelector.SelectedItem == null
+                   || ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem)
+                   || subj.Название == ((string) subjectSelector.SelectedItem)
 
                 where selectedTags.Count == 0 ||
                     (from t in dc.GetTable<ВедомостьТег>()
@@ -370,7 +375,11 @@ namespace Grader.gui {
             gradesByCycleButton.Text = "Оценки по циклам";
             gradesByCycleButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                CallBySubunitTable("цикл", true);
+                if (personFilter.selectCadets.Checked) {
+                    CallBySubunitTable("цикл", true);
+                } else {
+                    CallBySubunitTable("цикл", false);
+                }
             });
 
             displayAllSubunits = layout.AddFullRow(new CheckBox());

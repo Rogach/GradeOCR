@@ -19,6 +19,7 @@ namespace Grader {
         private DataContext CreateDataContext() {
             var conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + dbLocation + ";");
             var dc = new DataContext(conn);
+            //dc.Log = Console.Out;
             return dc;
         }
 

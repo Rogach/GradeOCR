@@ -77,6 +77,10 @@ namespace Grader.gui {
 
             registerTags = layout.Add("Тэги", new TextBox());
             registerTags.TextChanged += changeHandler;
+            registerTags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            registerTags.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            registerTags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            registerTags.AutoCompleteCustomSource.AddRange(dataAccess.GetDataContext().GetTable<ВедомостьТег>().Select(t => t.Тег).Distinct().ToList().ToArray());
 
             layout.AddSpacer(10);
 
