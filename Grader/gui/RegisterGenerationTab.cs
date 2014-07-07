@@ -165,7 +165,7 @@ namespace Grader.gui {
 
             var rwb = ExcelTemplates.LoadExcelTemplate(this.settings.GetTemplateLocation(spec.templateName));
             ExcelWorksheet templateSheet = rwb.Worksheets.First();
-            ProgressDialogs.ForEach(soldiers.GroupBy(grouping.keySelector), group => {
+            ProgressDialogs.ForEach(soldiers.GroupBy(grouping.keySelector).OrderBy(group => group.Key), group => {
                 templateSheet.Copy(After: rwb.Worksheets.Last());
                 ExcelWorksheet rsh = rwb.Worksheets.Last();
                 rsh.Name = grouping.registerName(group.Key);
