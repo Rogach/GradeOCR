@@ -96,7 +96,6 @@ namespace Grader.model {
                     });
                 }
 
-                throw new Exception("asdf");
                 foreach (RegisterRecord record in register.records) {
                     foreach (Оценка grade in record.marks) {
                         grade.КодВедомости = rid;
