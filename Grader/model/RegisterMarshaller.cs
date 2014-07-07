@@ -40,68 +40,76 @@ namespace Grader.model {
         }
 
         public static void SaveRegister(Register register, Entities et) {
-            if (register.id != -1) {
-                DeleteRegister(register.id, et);
-            }
-            int rid = register.id;
-            if (register.id == -1) {
-                // generate next id for register
-                List<int> registerIds = et.Ведомость.Select(v => v.Код).ToList();
-                if (registerIds.Count > 0) {
-                    rid = registerIds.Max() + 1;
-                } else {
-                    rid = 1;
+            var transaction = et.Connection.BeginTransaction();
+            try {
+                if (register.id != -1) {
+                    DeleteRegister(register.id, et);
                 }
-            }
-
-            List<Action> commands = new List<Action>();
-            
-            // save the register
-
-            et.Ведомость.AddObject(new Ведомость {
-                Код = rid,
-                Название = register.name,
-                ДатаЗаполнения = register.fillDate,
-                ДатаВнесения = register.importDate.Value,
-                ДатаИзменения = register.editDate.Value,
-                Виртуальная = register.virt,
-                Включена = register.enabled
-            });
-
-            
-            foreach (string tag in register.tags) {
-               et.ВедомостьТег.AddObject(new ВедомостьТег {
-                    Тег = tag,
-                    КодВедомости = rid
-                });
-            }
-
-            int subjectOrder = 1;
-            foreach (int subjectId in register.subjectIds) {
-                et.ВедомостьПредмет.AddObject(new ВедомостьПредмет {
-                    КодПредмета = subjectId,
-                    КодВедомости = rid,
-                    Порядок = subjectOrder++
-                });
-            }
-
-            int recordOrder = 1;
-            foreach (RegisterRecord record in register.records) {
-                et.ВедомостьЗапись.AddObject(new ВедомостьЗапись {
-                    КодВоеннослужащего = record.soldierId,
-                    КодВедомости = rid,
-                    Порядок = recordOrder++
-                });
-            }
-
-            foreach (RegisterRecord record in register.records) {
-                foreach (Оценка grade in record.marks) {
-                    grade.КодВедомости = rid;
-                    et.Оценка.AddObject(grade);
+                int rid = register.id;
+                if (register.id == -1) {
+                    // generate next id for register
+                    List<int> registerIds = et.Ведомость.Select(v => v.Код).ToList();
+                    if (registerIds.Count > 0) {
+                        rid = registerIds.Max() + 1;
+                    } else {
+                        rid = 1;
+                    }
                 }
-            }
 
-            et.SaveChanges();
+                List<Action> commands = new List<Action>();
+
+                // save the register
+
+                et.Ведомость.AddObject(new Ведомость {
+                    Код = rid,
+                    Название = register.name,
+                    ДатаЗаполнения = register.fillDate,
+                    ДатаВнесения = register.importDate.Value,
+                    ДатаИзменения = register.editDate.Value,
+                    Виртуальная = register.virt,
+                    Включена = register.enabled
+                });
+
+
+                foreach (string tag in register.tags) {
+                    et.ВедомостьТег.AddObject(new ВедомостьТег {
+                        Тег = tag,
+                        КодВедомости = rid
+                    });
+                }
+
+                int subjectOrder = 1;
+                foreach (int subjectId in register.subjectIds) {
+                    et.ВедомостьПредмет.AddObject(new ВедомостьПредмет {
+                        КодПредмета = subjectId,
+                        КодВедомости = rid,
+                        Порядок = subjectOrder++
+                    });
+                }
+
+                int recordOrder = 1;
+                foreach (RegisterRecord record in register.records) {
+                    et.ВедомостьЗапись.AddObject(new ВедомостьЗапись {
+                        КодВоеннослужащего = record.soldierId,
+                        КодВедомости = rid,
+                        Порядок = recordOrder++
+                    });
+                }
+
+                throw new Exception("asdf");
+                foreach (RegisterRecord record in register.records) {
+                    foreach (Оценка grade in record.marks) {
+                        grade.КодВедомости = rid;
+                        et.Оценка.AddObject(grade);
+                    }
+                }
+
+                et.SaveChanges();
+                transaction.Commit();
+            } catch (Exception e) {
+                transaction.Rollback();
+                throw e;
+            }
         }
 
         public static void DeleteRegister(int rid, Entities et) {
