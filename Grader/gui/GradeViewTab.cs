@@ -203,10 +203,16 @@ namespace Grader.gui {
                     (from t in et.ВедомостьТег
                      where t.КодВедомости == r.Код
                      where selectedTags.Contains(t.Тег)
-                     select t).SingleOrDefault() != default(ВедомостьТег)
+                     select t).FirstOrDefault() != default(ВедомостьТег)
                 
                 orderby rank.order descending, v.Фамилия, v.Имя, v.Отчество, r.ДатаЗаполнения
-                select new GradeDesc { grade = g, soldierId = v.Код, ФИО = v.ФИО(), rank = rank.Название, virt = r.Виртуальная };
+                select new GradeDesc { 
+                    grade = g, 
+                    soldierId = v.Код, 
+                    ФИО = v.Фамилия + " " + (v.Имя.Length > 0 ? v.Имя.Substring(0,1) : " ") + "." + (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + ".", 
+                    rank = rank.Название, 
+                    virt = r.Виртуальная 
+                };
 
             originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
 

@@ -89,12 +89,17 @@ namespace Grader.gui {
         public IQueryable<Оценка> GetGradeQuery() {
             Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
             StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
+            string stString = st.ToString();
+
             Option<int> vus;
             if (vusSelector.SelectedItem == null) {
                 vus = new None<int>();
             } else {
                 vus = new Some<int>(Int32.Parse((string) vusSelector.SelectedItem));
             }
+            bool vusIsEmpty = vus.IsEmpty();
+            int vusNum = vus.GetOrElse(-1);
+
             IQueryable<Оценка> gradeQuery =
                 from grade in et.Оценка
 
@@ -103,13 +108,13 @@ namespace Grader.gui {
                 where (selectRelatedSubunits.Checked || grade.КодПодразделения == selectedSubunit.Код)
 
                 join subunit in et.Подразделение on grade.КодПодразделения equals subunit.Код
-                where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
+                where (st == StudyType.все || subunit.ТипОбучения == stString)
 
                 where
                     (grade.ТипВоеннослужащего == "курсант" && selectCadets.Checked) ||
                     (grade.ТипВоеннослужащего == "постоянный срочник" && selectPermanent.Checked) ||
                     (grade.ТипВоеннослужащего == "контрактник" && selectContract.Checked)
-                where vus.IsEmpty() || grade.ВУС == vus.GetOrElse(-1)
+                where vusIsEmpty || grade.ВУС == vusNum
                 select grade;
 
             return gradeQuery;

@@ -6,9 +6,7 @@ using System.Text;
 namespace Grader.util {
     public static class Common {
         public static string ФИО(this Военнослужащий v) {
-            char name = v.Имя.Length > 0 ? v.Имя[0] : ' ';
-            char patronymic = v.Отчество.Length > 0 ? v.Отчество[0] : ' ';
-            return v.Фамилия + " " + name + "." + patronymic + ".";
+            return v.Фамилия + " " + (v.Имя.Length > 0 ? v.Имя.Substring(0, 1) : " ") + "." + (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + ".";
         }
 
         public static string GetFullName(this Военнослужащий v, Entities et) {
