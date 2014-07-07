@@ -10,10 +10,12 @@ using Grader.enums;
 
 namespace Grader.gui {
     public class GradeAnalysisTab : TabPage {
-        private DataAccess dataAccess;
+        private Entities et;
+        private Settings settings;
 
-        public GradeAnalysisTab(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public GradeAnalysisTab(Entities et, Settings settings) {
+            this.et = et;
+            this.settings = settings;
             this.InitializeComponent();
         }
 
@@ -56,7 +58,6 @@ namespace Grader.gui {
         private ErrorProvider errorProvider;
 
         private void InitializeComponent() {
-            DataContext dc = dataAccess.GetDataContext();
             this.Text = "Анализ оценок";
             this.Size = new Size(1200, 800);
 
@@ -92,7 +93,7 @@ namespace Grader.gui {
 
             layout.PerformLayout();
 
-            personFilter = new PersonFilter(dataAccess);
+            personFilter = new PersonFilter(et);
             personFilter.Size = new Size(personFilter.Size.Width + 15, personFilter.Size.Height);
             personFilter.Location = new Point(3, layout.GetY() + 5);
             this.Controls.Add(personFilter);
@@ -127,10 +128,10 @@ namespace Grader.gui {
             tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
             tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            tags.AutoCompleteCustomSource.AddRange(dataAccess.GetDataContext().GetTable<ВедомостьТег>().Select(t => t.Тег).Distinct().ToList().ToArray());
+            tags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToList().ToArray());
 
             List<string> ranks = 
-                dataAccess.GetDataContext().GetTable<Звание>()
+                et.Звание
                 .OrderByDescending(r => r.order)
                 .Select(r => r.Название)
                 .ToList();
@@ -156,9 +157,10 @@ namespace Grader.gui {
             layout2.AddSpacer(15);
 
             List<string> subjectNames =
-                dataAccess.GetDataContext().GetTable<Предмет>()
+                et.Предмет
                 .Select(s => s.Название)
                 .ToList();
+
             subjectNames.AddRange(ComplexSubjects.complexSubjectNames);
             subjectNames = subjectNames.OrderBy(s => s).ToList();
 
@@ -180,41 +182,39 @@ namespace Grader.gui {
         }
 
         IQueryable<Оценка> GetGradeQuery() {
-            DataContext dc = dataAccess.GetDataContext();
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
             return
                 from grade in personFilter.GetGradeQuery()
 
-                from rank in dc.GetTable<Звание>()
-                where grade.КодЗвания == rank.Код
+                join rank in et.Звание on grade.КодЗвания equals rank.Код
 
-                from r in dc.GetTable<Ведомость>()
-                where grade.КодВедомости == r.Код
-
-                where r.Включена == 1
-                where !dateFrom.Checked || r.ДатаЗаполнения >= dateFrom.Value.Date
-                where !dateTo.Checked || r.ДатаЗаполнения <= dateTo.Value.Date
-
-                from minRank in dc.GetTable<Звание>()
+                from minRank in et.Звание
                 where minRank.Название == ((string) minRankSelector.SelectedItem)
                 where rank.order >= minRank.order
 
-                from maxRank in dc.GetTable<Звание>()
+                from maxRank in et.Звание
                 where maxRank.Название == ((string) maxRankSelector.SelectedItem)
                 where rank.order <= maxRank.order
 
-                from subj in dc.GetTable<Предмет>()
-                where grade.КодПредмета == subj.Код
-                where subjectSelector.SelectedItem == null
-                   || ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem)
-                   || subj.Название == ((string) subjectSelector.SelectedItem)
+                from r in et.Ведомость
+                where grade.КодВедомости == r.Код
+
+                where r.Включена
+                where !dateFrom.Checked || r.ДатаЗаполнения >= dateFrom.Value.Date
+                where !dateTo.Checked || r.ДатаЗаполнения <= dateTo.Value.Date
 
                 where selectedTags.Count == 0 ||
-                    (from t in dc.GetTable<ВедомостьТег>()
+                    (from t in et.ВедомостьТег
                      where t.КодВедомости == r.Код
                      where selectedTags.Contains(t.Тег)
                      select t).SingleOrDefault() != default(ВедомостьТег)
 
+                from subj in et.Предмет
+                where grade.КодПредмета == subj.Код
+                where subjectSelector.SelectedItem == null
+                   || ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem)
+                   || subj.Название == ((string) subjectSelector.SelectedItem)
+                
                 select grade;
         }
 
@@ -230,7 +230,7 @@ namespace Grader.gui {
                     return;
                 }
 
-                GradeListGenerator.GenerateGradeList(dataAccess, GetGradeQuery(), (string) subjectSelector.SelectedItem);
+                GradeListGenerator.GenerateGradeList(et, GetGradeQuery(), (string) subjectSelector.SelectedItem);
             });
 
             gradeSummaryButton = layout.AddFullRow(new Button());
@@ -251,7 +251,7 @@ namespace Grader.gui {
                 }
 
                 GradeSummaryGenerator.GenerateSummary(
-                    dataAccess.GetDataContext(),
+                    et,
                     (Подразделение) personFilter.subunitSelector.SelectedItem,
                     GetGradeQuery(),
                     (string) subjectSelector.SelectedItem,
@@ -271,7 +271,7 @@ namespace Grader.gui {
             averageGradesForAllSubjectsButton.Text = "Средние оценки по всем предметам";
             averageGradesForAllSubjectsButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                AverageGradeSummaryGenerator.GenerateAverageGradeSummary(dataAccess.GetDataContext(), GetGradeQuery());
+                AverageGradeSummaryGenerator.GenerateAverageGradeSummary(et, GetGradeQuery());
             });
 
             layout.AddSpacer(15);
@@ -294,7 +294,8 @@ namespace Grader.gui {
                 }
 
                 ClassActGenerator.GenerateClassAct(
-                    dataAccess,
+                    et,
+                    settings,
                     (Подразделение) personFilter.subunitSelector.SelectedItem,
                     dateTo.Value,
                     GetGradeQuery()
@@ -311,7 +312,8 @@ namespace Grader.gui {
                 }
 
                 ClassActGenerator.GenerateAllClassActs(
-                    dataAccess,
+                    et,
+                    settings,
                     dateTo.Value,
                     GetGradeQuery()
                 );
@@ -322,7 +324,7 @@ namespace Grader.gui {
             classnostListButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                ClassListGenerator.GenerateClassList(dataAccess.GetDataContext(), GetGradeQuery());
+                ClassListGenerator.GenerateClassList(et, GetGradeQuery());
             });
 
             layout.AddSpacer(15);
@@ -332,7 +334,7 @@ namespace Grader.gui {
             currentSummaryButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                CurrentSummaryReportGenerator.GenerateCurrentSummaryReport(dataAccess.GetDataContext(), GetGradeQuery());
+                CurrentSummaryReportGenerator.GenerateCurrentSummaryReport(et, GetGradeQuery());
             });
 
             layout.AddSpacer(15);
@@ -342,7 +344,7 @@ namespace Grader.gui {
             dzdButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                PerDaySummaryGenerator.GenerateSummaryPerDay(dataAccess, GetGradeQuery(), withoutKMN.Checked);
+                PerDaySummaryGenerator.GenerateSummaryPerDay(et, settings, GetGradeQuery(), withoutKMN.Checked);
             });
 
             withoutKMN = layout.AddFullRow(new CheckBox());
@@ -400,7 +402,7 @@ namespace Grader.gui {
                 }
 
                 GradeAnalysisGenerator.GenerateGradeAnalysis(
-                    dataAccess.GetDataContext(),
+                    et,
                     GetGradeQuery(),
                     (string) subjectSelector.SelectedItem,
                     (string) analysisType.SelectedItem,
@@ -429,7 +431,8 @@ namespace Grader.gui {
                 errorProvider.Clear();
 
                 OldGraderExporter.ExportToOldGrader(
-                    dataAccess,
+                    et,
+                    settings,
                     GetGradeQuery(),
                     personFilter.GetPersonQuery(),
                     personFilter.selectCadets.Checked,
@@ -443,7 +446,8 @@ namespace Grader.gui {
                 errorProvider.Clear();
 
                 GradeListExporter.ContractGradeListExport(
-                    dataAccess,
+                    et,
+                    settings,
                     GetGradeQuery(),
                     personFilter.GetPersonQuery()
                 );
@@ -454,7 +458,7 @@ namespace Grader.gui {
 
         private void CallBySubunitTable(string subunitType, bool byVus) {
             AverageGradeTableGenerator.GenerateTableWithResultsBySubunitType(
-                dataAccess.GetDataContext(),
+                et,
                 GetGradeQuery(),
                 subunitType,
                 (string) subjectSelector.SelectedItem,

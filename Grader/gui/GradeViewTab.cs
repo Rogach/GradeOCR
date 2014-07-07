@@ -14,31 +14,15 @@ using Grader.grades;
 
 namespace Grader.gui {
     public class GradeViewTab : TabPage {
-        private DataAccess dataAccess;
+        private Entities et;
         private Settings settings;
-        Dictionary<string, int> subjectNameToId;
-        Dictionary<int, string> subjectIdToName;
-        Dictionary<int, Подразделение> subunitIdToInstance;
         public EventManager ChangesSaved = new EventManager();
 
         private static string TAB_NAME = "Просмотр оценок";
 
-        public GradeViewTab(DataAccess dataAccess, Settings settings) {
-            this.dataAccess = dataAccess;
+        public GradeViewTab(Entities et, Settings settings) {
+            this.et = et;
             this.settings = settings;
-            subjectNameToId =
-                dataAccess.GetDataContext().GetTable<Предмет>()
-                .Select(s => new { id = s.Код, name = s.Название })
-                .ToListTimed()
-                .ToDictionary(s => s.name, s => s.id);
-            subjectIdToName =
-                dataAccess.GetDataContext().GetTable<Предмет>()
-                .Select(s => new { id = s.Код, name = s.Название })
-                .ToListTimed()
-                .ToDictionary(s => s.id, s => s.name);
-            subunitIdToInstance =
-                dataAccess.GetDataContext().GetTable<Подразделение>()
-                .ToList().ToDictionary(s => s.Код, s => s);
             this.InitializeComponent();
         }
 
@@ -92,7 +76,7 @@ namespace Grader.gui {
 
             layout.PerformLayout();
 
-            personSelector = new PersonSelector(dataAccess);
+            personSelector = new PersonSelector(et);
             personSelector.Location = new Point(3, layout.GetY() + 5);
             this.Controls.Add(personSelector);
 
@@ -104,12 +88,12 @@ namespace Grader.gui {
             tags = new TextBox();
             tags.Location = new Point(95, layout.GetY() + 5 + personSelector.Height + 10);
             tags.Size = new Size(152, 20);
-            tags.Text = settings.gradeViewTags;
+            tags.Text = settings.gradeViewTags.GetValue();
             this.Controls.Add(tags);
             tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
             tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            tags.AutoCompleteCustomSource.AddRange(dataAccess.GetDataContext().GetTable<ВедомостьТег>().Select(t => t.Тег).Distinct().ToList().ToArray());
+            tags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToArray());
 
             showGrades = new Button { Text = "Показать оценки" };
             showGrades.Location = new Point(3, layout.GetY() + 5 + personSelector.Height + 10 + 30);
@@ -200,33 +184,29 @@ namespace Grader.gui {
         }
 
         private void showGrades_Click(object sender, EventArgs e) {
-            DataContext dc = dataAccess.GetDataContext();
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
 
             IQueryable<GradeDesc> gradeQuery =
                 from g in personSelector.GetGradeQuery()
 
-                from v in dc.GetTable<Военнослужащий>()
-                where g.КодПроверяемого == v.Код
+                join v in et.Военнослужащий on g.КодПроверяемого equals v.Код
 
-                from rank in dc.GetTable<Звание>()
-                where g.КодЗвания == rank.Код
+                join rank in et.Звание on g.КодЗвания equals rank.Код
 
-                from r in dc.GetTable<Ведомость>()
-                where g.КодВедомости == r.Код
+                join r in et.Ведомость on g.КодВедомости equals r.Код
 
-                where r.Включена == 1
+                where r.Включена
                 where !dateFrom.Checked || r.ДатаЗаполнения >= dateFrom.Value.Date
                 where !dateTo.Checked || r.ДатаЗаполнения <= dateTo.Value.Date
 
                 where selectedTags.Count == 0 ||
-                    (from t in dc.GetTable<ВедомостьТег>()
+                    (from t in et.ВедомостьТег
                      where t.КодВедомости == r.Код
                      where selectedTags.Contains(t.Тег)
                      select t).SingleOrDefault() != default(ВедомостьТег)
                 
                 orderby rank.order descending, v.Фамилия, v.Имя, v.Отчество, r.ДатаЗаполнения
-                select new GradeDesc { grade = g, soldierId = v.Код, ФИО = v.ФИО, rank = rank.Название, virt = r.Виртуальная };
+                select new GradeDesc { grade = g, soldierId = v.Код, ФИО = v.ФИО(), rank = rank.Название, virt = r.Виртуальная };
 
             originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
 
@@ -253,10 +233,10 @@ namespace Grader.gui {
             subjectIds = 
                 grades.Select(gd => gd.grade.КодПредмета)
                 .Distinct()
-                .OrderBy(s => subjectIdToName[s])
+                .OrderBy(s => et.subjectIdToName[s])
                 .ToList();
             foreach (int subjectId in subjectIds) {
-                gradeViewDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
+                gradeViewDataTable.Columns.Add(new DataColumn(et.subjectIdToName[subjectId]));
             }
 
             gradeViewDataTable.Columns.Add(new DataColumn("ОБЩ"));
@@ -296,7 +276,7 @@ namespace Grader.gui {
             // color grades coming from virtual registers
             foreach (var soldierId in soldierIds) {
                 foreach (int subjectId in subjectIds) {
-                    if (originalGrades.GetOption(new Tuple<int, int>(soldierId, subjectId)).Map(gd => gd.virt == 1).GetOrElse(false)) {
+                    if (originalGrades.GetOption(new Tuple<int, int>(soldierId, subjectId)).Map(gd => gd.virt).GetOrElse(false)) {
                         gradeView.Rows[soldierIds.IndexOf(soldierId)].Cells[subjectIds.IndexOf(subjectId) + 4].Style.BackColor = Color.FromArgb(171, 191, 255);
                     }
                 }
@@ -309,7 +289,7 @@ namespace Grader.gui {
 
             saveChanges.Enabled = true;
             cancelChanges.Enabled = true;
-            settings.gradeViewTags = tags.Text;
+            settings.gradeViewTags.SetValue(tags.Text);
             settings.Save();
         }
 
@@ -318,17 +298,17 @@ namespace Grader.gui {
             foreach (int subjectId in subjectIds) {
                 string v = gradeView.Rows[rowIndex].Cells[4 + subjectIds.IndexOf(subjectId)].Value.ToString().Trim();
                 Util.ParseInt(v).ForEach(g => {
-                    grades.Add(subjectIdToName[subjectId], g);
+                    grades.Add(et.subjectIdToName[subjectId], g);
                 });
             }
 
             GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierIds[rowIndex]).First().Value;
 
-            GradeSet gs = new GradeSet() { grades = grades, subunit = subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
+            GradeSet gs = new GradeSet() { grades = grades, subunit = et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
 
             GradeCalcIndividual.ОценкаОБЩ(
                 gs,
-                subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
+                et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
                 someGradeDesc.grade.ТипВоеннослужащего
             ).ForEach(sg => {
                 gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
@@ -337,7 +317,7 @@ namespace Grader.gui {
 
         private class GradeDesc {
             public Оценка grade { get; set; }
-            public int virt { get; set; }
+            public bool virt { get; set; }
             public int soldierId { get; set; }
             public string rank { get; set; }
             public string ФИО { get; set; }
@@ -388,7 +368,7 @@ namespace Grader.gui {
                         };
                         Util.ParseInt(v).Map(vv => {
                             g.ЭтоКомментарий = false;
-                            g.Значение = vv;
+                            g.Значение = (sbyte) vv;
                             g.Текст = "";
                             return true;
                         }).GetOrElse(() => {
@@ -434,7 +414,7 @@ namespace Grader.gui {
                             };
                             Util.ParseInt(v).Map(vv => {
                                 g.ЭтоКомментарий = false;
-                                g.Значение = vv;
+                                g.Значение = (sbyte) vv;
                                 g.Текст = "";
                                 return true;
                             }).GetOrElse(() => {
@@ -476,7 +456,7 @@ namespace Grader.gui {
                 f.Text = "Сохранение изменений";
                 f.Size = new Size(800, 900);
 
-                RegisterEditor changesEditor = new RegisterEditor(dataAccess);
+                RegisterEditor changesEditor = new RegisterEditor(et);
                 changesEditor.Location = new Point(5, 5);
                 changesEditor.Size = new Size(770, 820);
                 changesEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -488,7 +468,7 @@ namespace Grader.gui {
                 okButton.Size = new Size(100, 25);
                 okButton.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
                 okButton.Click += new EventHandler(delegate {
-                    RegisterMarshaller.SaveRegister(changesEditor.GetRegister(), dataAccess.GetDataContext());
+                    RegisterMarshaller.SaveRegister(changesEditor.GetRegister(), et);
                     ChangesSaved.Invoke();
                     f.DialogResult = DialogResult.OK;
                     f.Hide();

@@ -7,10 +7,10 @@ using System.Drawing;
 
 namespace Grader.gui {
     public class PersonSelector : TabControl {
-        private DataAccess dataAccess;
+        private Entities et;
 
-        public PersonSelector(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public PersonSelector(Entities et) {
+            this.et = et;
             this.InitializeComponent();
         }
 
@@ -24,7 +24,7 @@ namespace Grader.gui {
 
             this.SelectedIndex = 0;
 
-            personFilter = new PersonFilter(dataAccess);
+            personFilter = new PersonFilter(et);
 
             personFilterPage = new TabPage("Фильтр");
             personFilterPage.Location = new Point(4, 22);
@@ -38,7 +38,7 @@ namespace Grader.gui {
             predefinedListsPage = new TabPage("Списки");
             predefinedListsPage.Location = new Point(4, 22);
             predefinedListsPage.UseVisualStyleBackColor = true;
-            predefinedPersonLists = new PredefinedPersonLists(dataAccess);
+            predefinedPersonLists = new PredefinedPersonLists(et);
             predefinedPersonLists.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             predefinedPersonLists.Size = new Size(personFilter.PreferredSize.Width - 47, personFilter.PreferredSize.Height - 37);
             predefinedListsPage.Controls.Add(predefinedPersonLists);
@@ -47,7 +47,7 @@ namespace Grader.gui {
             this.ResumeLayout(false);
         }
 
-        public List<ВоеннослужащийПоПодразделениям> GetPersonList() {
+        public List<Военнослужащий> GetPersonList() {
             if (this.SelectedTab == personFilterPage) {
                 return personFilter.GetPersonQuery().ToList();
             } else if (this.SelectedTab == predefinedListsPage) {
@@ -57,7 +57,7 @@ namespace Grader.gui {
             }
         }
 
-        public IQueryable<ВоеннослужащийПоПодразделениям> GetPersonQuery() {
+        public IQueryable<Военнослужащий> GetPersonQuery() {
             if (this.SelectedTab == personFilterPage) {
                 return personFilter.GetPersonQuery();
             } else if (this.SelectedTab == predefinedListsPage) {

@@ -6,36 +6,34 @@ using System.Data.Linq;
 using LibUtil.templates;
 using Grader.util;
 using LibUtil.wrapper.excel;
-using AccessApplication = Microsoft.Office.Interop.Access.Application;
 using LibUtil;
 
 namespace Grader.grades {
     public static class ClassActGenerator {
-        public static void GenerateClassAct(DataAccess dataAccess, Подразделение subunit, DateTime actDate, IQueryable<Оценка> gradeQuery) {
-            ExcelWorkbook wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation("акт_на_классность.xlsx"));
+        public static void GenerateClassAct(Entities et, Settings settings, Подразделение subunit, DateTime actDate, IQueryable<Оценка> gradeQuery) {
+            ExcelWorkbook wb = ExcelTemplates.LoadExcelTemplate(settings.GetTemplateLocation("акт_на_классность.xlsx"));
             ExcelWorksheet sh = wb.Worksheets.First();
-            FormatActSheet(sh, subunit, dataAccess.GetDataContext(), actDate, gradeQuery);
+            FormatActSheet(sh, subunit, et, actDate, gradeQuery);
             wb.Saved = true;
             ExcelTemplates.ActivateExcel(sh);
         }
 
-        public static void GenerateAllClassActs(DataAccess dataAccess, DateTime actDate, IQueryable<Оценка> gradeQuery) {
-            var wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation("акт_на_классность.xlsx"));
+        public static void GenerateAllClassActs(Entities et, Settings settings, DateTime actDate, IQueryable<Оценка> gradeQuery) {
+            var wb = ExcelTemplates.LoadExcelTemplate(settings.GetTemplateLocation("акт_на_классность.xlsx"));
             ExcelWorksheet templateSheet = wb.Worksheets.First();
-            DataContext dc = dataAccess.GetDataContext();
             var platoonIds =
-                Querying.GetSubunitsByType(dc, "взвод")
+                Querying.GetSubunitsByType(et, "взвод")
                 .Where(s => s.ТипОбучения == "срочники")
                 .Select(s => s.Код);
             ProgressDialogs.ForEach(platoonIds, subunitId => {
                 templateSheet.Copy(After: wb.Worksheets.Last());
                 ExcelWorksheet rsh = wb.Worksheets.Last();
-                rsh.Name = Querying.GetSubunitName(dc, subunitId);
+                rsh.Name = Querying.GetSubunitName(et, subunitId);
                 Подразделение subunit =
-                    dc.GetTable<Подразделение>()
+                    et.Подразделение
                     .Where(s => s.Код == subunitId)
-                    .ToListTimed().First();
-                FormatActSheet(rsh, subunit, dc, actDate, gradeQuery);
+                    .First();
+                FormatActSheet(rsh, subunit, et, actDate, gradeQuery);
             });
             templateSheet.Delete();
             wb.Saved = true;
@@ -46,7 +44,7 @@ namespace Grader.grades {
         public static void FormatActSheet(
                 ExcelWorksheet sh, 
                 Подразделение subunit, 
-                DataContext dc, 
+                Entities et,
                 DateTime actDate, 
                 IQueryable<Оценка> gradeQuery) {
 
@@ -55,18 +53,18 @@ namespace Grader.grades {
             ExcelTemplates.AppendRange(sh, "ИмяПодразделения", subunit.ИмяКраткое);
 
             IEnumerable<Военнослужащий> comissionMembers =
-                Querying.GetSubunitCommander(dc, subunit.Код).ToList()
-                .Concat(Querying.GetPostsForSubunit(dc, subunit.Код, "Преподаватель"))
-                .OrderBy(s => s.ФИО)
+                Querying.GetSubunitCommander(et, subunit.Код).ToList()
+                .Concat(Querying.GetPostsForSubunit(et, subunit.Код, "Преподаватель"))
+                .OrderBy(s => s.ФИО())
                 .OrderBy(s => s.Звание.order)
                 .Reverse();
             ExcelTemplates.InsertPlainListMulti(sh, "СписокЧленов1", comissionMembers,
-                new List<Func<Военнослужащий, string>> { s => s.Звание.Название, s => s.ФИО });
+                new List<Func<Военнослужащий, string>> { s => s.Звание.Название, s => s.ФИО() });
             ExcelTemplates.InsertPlainListMulti(sh, "СписокЧленов2", comissionMembers,
-                new List<Func<Военнослужащий, string>> { s => s.Звание.Название, s => "", s => "", s => s.ФИО });
+                new List<Func<Военнослужащий, string>> { s => s.Звание.Название, s => "", s => "", s => s.ФИО() });
 
             var gradeSets =
-                Grades.GradeSets(dc, Grades.GetGradesForSubunit(dc, gradeQuery, subunit.Код)).OrderBy(gs => gs.soldier.ФИО)
+                Grades.GradeSets(et, Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код)).OrderBy(gs => gs.soldier.ФИО())
                 .Where(gs => GradeCalcIndividual.ДопускНаКлассностьКурсанты(gs));
             var vusList = gradeSets.Select(gs => gs.soldier.ВУС).Distinct();
             if (vusList.Count() > 1) {

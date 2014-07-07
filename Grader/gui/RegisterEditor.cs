@@ -15,30 +15,12 @@ using Grader.gui.gridutil;
 
 namespace Grader.gui {
     public class RegisterEditor : Panel {
-        DataAccess dataAccess;
-        Dictionary<string, int> subjectNameToId;
-        Dictionary<int, string> subjectIdToName;
-        Dictionary<int, string> rankIdToName;
+        Entities et;
         public EventManager RegisterEdited = new EventManager();
 
-        public RegisterEditor(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public RegisterEditor(Entities et) {
+            this.et = et;
             this.InitializeComponent();
-            subjectNameToId = 
-                dataAccess.GetDataContext().GetTable<Предмет>()
-                .Select(s => new { id = s.Код, name = s.Название })
-                .ToListTimed()
-                .ToDictionary(s => s.name, s => s.id);
-            subjectIdToName =
-                dataAccess.GetDataContext().GetTable<Предмет>()
-                .Select(s => new { id = s.Код, name = s.Название })
-                .ToListTimed()
-                .ToDictionary(s => s.id, s => s.name);
-            rankIdToName =
-                dataAccess.GetDataContext().GetTable<Звание>()
-                .Select(r => new { id = r.Код, rank = r.Название })
-                .ToListTimed()
-                .ToDictionary(r => r.id, r => r.rank);
         }
 
         private Register currentRegister;
@@ -80,7 +62,7 @@ namespace Grader.gui {
             registerTags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             registerTags.AutoCompleteSource = AutoCompleteSource.CustomSource;
             registerTags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            registerTags.AutoCompleteCustomSource.AddRange(dataAccess.GetDataContext().GetTable<ВедомостьТег>().Select(t => t.Тег).Distinct().ToList().ToArray());
+            registerTags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToArray());
 
             layout.AddSpacer(10);
 
@@ -129,7 +111,7 @@ namespace Grader.gui {
                     });
 
                     MenuItem addSubjectSubmenu = new MenuItem("Добавить предмет");
-                    foreach (string subj in dataAccess.GetDataContext().GetTable<Предмет>().Select(s => s.Название).ToList().OrderBy(s => s)) {
+                    foreach (string subj in et.Предмет.Select(s => s.Название).ToList().OrderBy(s => s)) {
                         string subject = subj;
                         MenuItem subjectItem = new MenuItem(subj);
                         subjectItem.Click += new EventHandler(delegate {
@@ -172,11 +154,11 @@ namespace Grader.gui {
             });
 
             List<string> autocompleteRanks = 
-                dataAccess.GetDataContext().GetTable<Звание>().Select(r => r.Название).ToListTimed();
+                et.Звание.Select(r => r.Название).ToList();
             List<string> autocompleteNames =
-                dataAccess.GetDataContext().GetTable<Военнослужащий>()
-                .Where(v => v.Убыл == 0)
-                .Select(v => v.ФИО).ToListTimed();
+                et.Военнослужащий
+                .Where(v => !v.Убыл)
+                .ToList().Select(v => v.ФИО()).ToList();
 
             registerDataGridView.EditingControlShowing += 
                 new DataGridViewEditingControlShowingEventHandler(delegate(object sender, DataGridViewEditingControlShowingEventArgs args) {
@@ -204,16 +186,15 @@ namespace Grader.gui {
                         string surname = match.Groups[1].Value;
                         string name = match.Groups[2].Value;
                         string patronymic = match.Groups[3].Value;
-                        DataContext dc = dataAccess.GetDataContext();
                         var query =
-                            from v in dc.GetTable<Военнослужащий>()
-                            where v.Убыл == 0
+                            from v in et.Военнослужащий
+                            where !v.Убыл
                             where v.Фамилия == surname
                             where v.Имя.StartsWith(name)
                             where v.Отчество.StartsWith(patronymic)
-                            join r in dc.GetTable<Звание>() on v.КодЗвания equals r.Код
+                            join r in et.Звание on v.КодЗвания equals r.Код
                             select new { id = v.Код, rank = r.Название };
-                        var soldierList = query.ToListTimed();
+                        var soldierList = query.ToList();
                         if (soldierList.Count == 1) {
                             registerDataGridView.Rows[e.RowIndex].Cells[1].Value = soldierList[0].id.ToString();
                             registerDataGridView.Rows[e.RowIndex].Cells[2].Value = soldierList[0].rank;
@@ -276,15 +257,15 @@ namespace Grader.gui {
             registerDataTable.Columns.Add(new DataColumn("Фамилия И.О."));
 
             foreach (int subjectId in register.subjectIds) {
-                registerDataTable.Columns.Add(new DataColumn(subjectIdToName[subjectId]));
+                registerDataTable.Columns.Add(new DataColumn(et.subjectIdToName[subjectId]));
             }
 
             List<int> soldierIds = register.records.Select(rec => rec.soldierId).ToList();
             Dictionary<int, string> soldierIdToName =
-                dataAccess.GetDataContext().GetTable<Военнослужащий>()
+                et.Военнослужащий
                 .Where(s => soldierIds.Contains(s.Код))
-                .ToListTimed()
-                .Select(s => new { id = s.Код, name = s.ФИО })
+                .ToList()
+                .Select(s => new { id = s.Код, name = s.ФИО() })
                 .ToDictionary(s => s.id, s => s.name);
 
             int c = 1;
@@ -293,11 +274,11 @@ namespace Grader.gui {
                 cells.Add((c++).ToString());
                 cells.Add(record.soldierId.ToString());
                 if (record.marks.Count > 0) {
-                    cells.Add(rankIdToName[record.marks[0].КодЗвания]);
+                    cells.Add(et.rankIdToName[record.marks[0].КодЗвания]);
                     cells.Add(soldierIdToName[record.marks[0].КодПроверяемого]);
                 } else if (record.soldier != null) {
-                    cells.Add(record.soldier.Звание);
-                    cells.Add(record.soldier.ФИО);
+                    cells.Add(et.rankCache.Find(r => r.Код == record.soldier.КодЗвания).Название);
+                    cells.Add(record.soldier.ФИО());
                 } else {
                     cells.Add("");
                     cells.Add("");
@@ -330,7 +311,7 @@ namespace Grader.gui {
             List<int> subjectIds = 
                 registerDataGridView.Columns
                 .ToNormalList<DataGridViewColumn>().Skip(4)
-                .Select(col => subjectNameToId[col.Name]).ToList();
+                .Select(col => et.subjectNameToId[col.Name]).ToList();
             Dictionary<int, Подразделение> subunitCache = new Dictionary<int,Подразделение>();
             return new Register {
                 id = currentRegister.id,
@@ -356,7 +337,7 @@ namespace Grader.gui {
 
                         RegisterRecord record = currentRegister.records.Find(r => r.soldierId == soldierId);
 
-                        ВоеннослужащийПоПодразделениям maybeSoldier = null;
+                        Военнослужащий maybeSoldier = null;
                         if (record != null) {
                             maybeSoldier = record.soldier;
                         }
@@ -367,10 +348,7 @@ namespace Grader.gui {
                         }
 
                         if (previousMarks.Count == 0 && maybeSoldier == null) {
-                            maybeSoldier = 
-                                dataAccess.GetDataContext().GetTable<ВоеннослужащийПоПодразделениям>()
-                                .Where(s => s.Код == soldierId).Where(s => s.КодПодразделения == s.КодСтаршегоПодразделения)
-                                .ToList().First();
+                            maybeSoldier = et.Военнослужащий.Where(v => v.Код == soldierId).First();
                         }
 
                         List<Оценка> marks = new List<Оценка>();
@@ -404,7 +382,7 @@ namespace Grader.gui {
                                 }
                                 Util.ParseInt(row.Cells[col].Value.ToString()).Map(v => {
                                     g.ЭтоКомментарий = false;
-                                    g.Значение = v;
+                                    g.Значение = (sbyte) v;
                                     g.Текст = "";
                                     return true;
                                 }).GetOrElse(() => {

@@ -6,11 +6,99 @@ using System.IO;
 using System.Xml;
 using LibUtil;
 using System.Windows.Forms;
+using Grader.gui;
 
 namespace Grader {
+    public interface Setting<out T> {
+        T GetValue();
+        void SetValue(object value);
+        bool init();
+        bool read(XmlDocument doc);
+        void save(XmlDocument doc, XmlElement settings);
+    }
+
+    public abstract class AbstractStringSetting : Setting<string> {
+        protected string settingName;
+        protected string settingValue;
+
+        public AbstractStringSetting(string settingName) {
+            this.settingName = settingName;
+        }
+        public abstract bool init();
+        public bool read(XmlDocument doc) {
+            XmlNodeList nodes = doc.SelectNodes("/settings/" + settingName);
+            if (nodes.Count > 0) {
+                settingValue = nodes[0].InnerText;
+                return true;
+            } else {
+                return init();
+            }
+        }
+        public void save(XmlDocument doc, XmlElement settings) {
+            XmlElement xe = doc.CreateElement(settingName);
+            xe.AppendChild(doc.CreateTextNode(settingValue));
+            settings.AppendChild(xe);
+        }
+        public string GetValue() {
+            return settingValue;
+        }
+        public void SetValue(object value) {
+            settingValue = (string) value;
+        }
+    }
+
+    public class DbConnectionStringSetting : AbstractStringSetting {
+        public DbConnectionStringSetting(string settingName) : base(settingName) {}
+        public override bool init() {
+            Option<string> userDbConnectionString = DbConnectionDialog.ShowDbConnectionDialog();
+            userDbConnectionString.ForEach(cs => {
+                settingValue = cs;
+            });
+            return userDbConnectionString.NonEmpty();
+        }
+    }
+
+    public class DirSetting : AbstractStringSetting {
+        public DirSetting(string settingName) : base(settingName) {}
+        public override bool init() {
+            var fbd = new FolderBrowserDialog();
+            DialogResult result = fbd.ShowDialog();
+            if (result == DialogResult.OK) {
+                settingValue = fbd.SelectedPath;
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public class StringSetting : AbstractStringSetting {
+        public StringSetting(string settingName, string defaultValue = "") : base(settingName) {
+            settingValue = defaultValue;
+        }
+        public override bool init() { 
+            return true;
+        }
+    }
+
     public class Settings {
-        public string dbLocation { get; set; }
-        public string gradeViewTags { get; set; }
+        public DbConnectionStringSetting dbConnectionString = new DbConnectionStringSetting("dbConnectionString");
+        public DirSetting templatesLocation = new DirSetting("templatesLocation");
+        public StringSetting gradeViewTags = new StringSetting("gradeViewTags");
+
+        public string GetTemplateLocation(string templateName) {
+            return templatesLocation + "/" + templateName;
+        }
+
+        private List<Setting<object>> settings;
+
+        public Settings() {
+            settings = new List<Setting<object>> {
+                dbConnectionString,
+                templatesLocation,
+                gradeViewTags
+            };
+        }
 
         public void Save() {
             XmlDocument doc = new XmlDocument();
@@ -18,14 +106,9 @@ namespace Grader {
 
             XmlElement settings = doc.CreateElement("settings");
             doc.AppendChild(settings);
-
-            XmlElement dbLocation_setting = doc.CreateElement("dbLocation");
-            dbLocation_setting.AppendChild(doc.CreateTextNode(dbLocation));
-            settings.AppendChild(dbLocation_setting);
-
-            XmlElement gradeViewTags_setting = doc.CreateElement("gradeViewTags");
-            gradeViewTags_setting.AppendChild(doc.CreateTextNode(gradeViewTags));
-            settings.AppendChild(gradeViewTags_setting);
+            foreach (Setting<object> s in this.settings) {
+                s.save(doc, settings);
+            }
 
             XmlWriter xw = XmlWriter.Create(GetSettingsLocation());
             doc.WriteTo(xw);
@@ -38,35 +121,20 @@ namespace Grader {
                 XmlDocument doc = new XmlDocument();
                 doc.Load(GetSettingsLocation());
 
-                XmlNodeList dbLocation_setting = doc.SelectNodes("/settings/dbLocation");
-                if (dbLocation_setting.Count > 0) {
-                    settings.dbLocation = dbLocation_setting[0].InnerText;
-                } else {
-                    Option<string> userDbLocation = AskForDbLocation();
-                    if (userDbLocation.NonEmpty()) {
-                        settings.dbLocation = userDbLocation.Get();
-                    } else {
+                foreach (Setting<object> s in settings.settings) {
+                    if (!s.read(doc)) {
                         return new None<Settings>();
                     }
                 }
-
-                XmlNodeList gradeViewTags_setting = doc.SelectNodes("/settings/gradeViewTags");
-                if (gradeViewTags_setting.Count > 0) {
-                    settings.gradeViewTags = gradeViewTags_setting[0].InnerText;
-                } else {
-                    settings.gradeViewTags = "";
-                }
             } else {
-                Option<string> userDbLocation = AskForDbLocation();
-                if (userDbLocation.NonEmpty()) {
-                    settings.dbLocation = userDbLocation.Get();
-                } else {
-                    return new None<Settings>();
+                foreach (Setting<object> s in settings.settings) {
+                    if (!s.init()) {
+                        return new None<Settings>();
+                    }
                 }
-
-		        settings.gradeViewTags = "";
-                settings.Save();
+                settings.gradeViewTags.SetValue("");
             }
+            settings.Save();
             return new Some<Settings>(settings);
         }
 
@@ -74,16 +142,6 @@ namespace Grader {
             return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + 
                 Path.DirectorySeparatorChar + 
                 "grader.settings";
-        }
-
-        public static Option<string> AskForDbLocation() {
-            OpenFileDialog ofd = new OpenFileDialog();
-            DialogResult result = ofd.ShowDialog();
-            if (result == DialogResult.OK) {
-                return new Some<string>(ofd.FileName);
-            } else {
-                return new None<string>();
-            }
         }
     }
 }

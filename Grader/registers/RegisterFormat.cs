@@ -18,17 +18,17 @@ namespace Grader.registers {
         public RegisterType registerType { get; set; }
         public bool onlyKMN { get; set; }
         public bool strikeKMN { get; set; }
-        public List<ВоеннослужащийПоПодразделениям> soldiers { get; set; }
+        public List<Военнослужащий> soldiers { get; set; }
     }
 
     public abstract class RegisterSpec {
         public string templateName;
-        public abstract void Format(DataContext dc, ExcelWorksheet sh, RegisterSettings settings);
+        public abstract void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings);
     }
 
     public abstract class GeneralRegister : RegisterSpec {
         public int columnCount;
-        public override void Format(DataContext dc, ExcelWorksheet sh, RegisterSettings settings) {
+        public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             if (settings.onlyKMN) {
                 ExcelTemplates.SetRange(sh, "ИмяПодразделения", "кандидатов на замещение вакантных должностей");
             } else {
@@ -43,7 +43,7 @@ namespace Grader.registers {
             ExcelTemplates.ReplaceRange(sh, "RegisterDate", "$year$", settings.registerDate.ToString("yyyy"));
 
             if (settings.subunit != null && settings.subunit.Тип == "взвод") {
-                ExcelTemplates.AppendRange(sh, "КВ", Querying.GetSubunitCommander(dc, settings.subunit.Код).Map(s => s.GetFullName()).GetOrElse(""));
+                ExcelTemplates.AppendRange(sh, "КВ", Querying.GetSubunitCommander(et, settings.subunit.Код).Map(s => s.GetFullName(et)).GetOrElse(""));
             } else {
                 ExcelTemplates.DeleteRow(sh, "КВ");
             }
@@ -55,10 +55,10 @@ namespace Grader.registers {
                 Подразделение signatureSubunit;
 
                 if (settings.subunit.Тип == "взвод") {
-                    commander = Querying.GetCompanyCommander(dc, settings.subunit.Код);
-                    signatureSubunit = Querying.GetCompany(dc, settings.subunit.Код).Get();
+                    commander = Querying.GetCompanyCommander(et, settings.subunit.Код);
+                    signatureSubunit = Querying.GetCompany(et, settings.subunit.Код).Get();
                 } else {
-                    commander = settings.subunit.Командир(dc);
+                    commander = Querying.GetCommander(et, settings.subunit.Код);
                     signatureSubunit = settings.subunit;
                 }
                 ExcelTemplates.SetRange(
@@ -67,18 +67,18 @@ namespace Grader.registers {
                             "Командир {0}: {1}                    {2}",
                             signatureSubunit.ИмяРодительный,
                             commander.Map(c => c.Звание.Название).GetOrElse("???"),
-                            commander.Map(c => c.ФИО).GetOrElse("???")));
+                            commander.Map(c => c.ФИО()).GetOrElse("???")));
             }
 
             if (settings.registerType == RegisterType.экзамен && settings.subunit.Тип == "взвод") {
-                List<ВоеннослужащийПоПодразделениям> soldiers = new List<ВоеннослужащийПоПодразделениям>();
-                Querying.GetSubunitCommander2(dc, settings.subunit.Код).ForEach(commander => {
+                List<Военнослужащий> soldiers = new List<Военнослужащий>();
+                Querying.GetSubunitCommander(et, settings.subunit.Код).ForEach(commander => {
                     soldiers.Add(commander);
                 });
-                Querying.GetPostForSubunit2(dc, settings.subunit.Код, "ЗКВ").ForEach(zkv => {
+                Querying.GetPostForSubunit(et, settings.subunit.Код, "ЗКВ").ForEach(zkv => {
                     soldiers.Add(zkv);
                 });
-                Querying.GetPostForSubunit2(dc, settings.subunit.Код, "КО").ForEach(ko => {
+                Querying.GetPostForSubunit(et, settings.subunit.Код, "КО").ForEach(ko => {
                     soldiers.Add(ko);
                 });
                 soldiers.AddRange(settings.soldiers);
@@ -105,13 +105,13 @@ namespace Grader.registers {
     }
 
     public abstract class ВедомостьОВП : GeneralRegister {
-        public override void Format(DataContext dc, ExcelWorksheet sh, RegisterSettings settings) {
-            base.Format(dc, sh, settings);
+        public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
+            base.Format(et, sh, settings);
             ExcelTemplates.ReplaceRange(sh, "Заголовок", "$registerType$", GetRegisterHeader(settings.registerType));
-            var teachers = Querying.GetPostsForSubunit(dc, settings.subunit.Код, "преподаватель");
+            var teachers = Querying.GetPostsForSubunit(et, settings.subunit.Код, "преподаватель").ToList();
             if (settings.subunit.Тип == "взвод" && teachers.Count > 0) {
                 ExcelTemplates.AppendRange(sh, "Преподаватели", 
-                    teachers.Select(c => c.GetFullName()).MkString());
+                    teachers.Select(c => c.GetFullName(et)).MkString());
             } else {
                 ExcelTemplates.DeleteRow(sh, "Преподаватели");
             }
@@ -136,8 +136,8 @@ namespace Grader.registers {
             columnCount = 10;
             this.subject = subject;
         }
-        public override void Format(DataContext dc, ExcelWorksheet sh, RegisterSettings settings) {
-            base.Format(dc, sh, settings);
+        public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
+            base.Format(et, sh, settings);
             ExcelTemplates.ReplaceRange(sh, "Заголовок", "$subjectName$", GetHeaderSubject(subject));
         }
 
@@ -195,8 +195,8 @@ namespace Grader.registers {
         public override string ToString() { return "сводная (невыносимые)"; }
     }
     public class ВедомостьОВПиВУС : ВедомостьОВП {
-        public override void Format(DataContext dc, ExcelWorksheet sh, RegisterSettings settings) {
-            base.Format(dc, sh, settings);
+        public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
+            base.Format(et, sh, settings);
             List<int> vuses = settings.soldiers.Select(s => s.ВУС).Distinct().ToList();
             if (vuses.Count == 1) {
                 ExcelTemplates.AppendRange(sh, "ВУС", vuses.First());
@@ -246,11 +246,11 @@ namespace Grader.registers {
             templateName = "ведомость_курсанты_сверка.xlsx";
             columnCount = 2;
         }
-        public override void Format(DataContext dc, ExcelWorksheet sh, RegisterSettings settings) {
-            base.Format(dc, sh, settings);
-            ExcelTemplates.AppendRange(sh, "ЗКВ", Querying.GetPostForSubunit(dc, settings.subunit.Код, "ЗКВ").Map(c => c.GetFullName()).GetOrElse(""));
-            ExcelTemplates.AppendRange(sh, "КО", Querying.GetPostForSubunit(dc, settings.subunit.Код, "КО").Map(c => c.GetFullName()).GetOrElse(""));
-            ExcelTemplates.AppendRange(sh, "Преподаватели", Querying.GetPostsForSubunit(dc, settings.subunit.Код, "преподаватель").Select(c => c.GetFullName()).MkString());
+        public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
+            base.Format(et, sh, settings);
+            ExcelTemplates.AppendRange(sh, "ЗКВ", Querying.GetPostForSubunit(et, settings.subunit.Код, "ЗКВ").Map(c => c.GetFullName(et)).GetOrElse(""));
+            ExcelTemplates.AppendRange(sh, "КО", Querying.GetPostForSubunit(et, settings.subunit.Код, "КО").Map(c => c.GetFullName(et)).GetOrElse(""));
+            ExcelTemplates.AppendRange(sh, "Преподаватели", Querying.GetPostsForSubunit(et, settings.subunit.Код, "преподаватель").Select(c => c.GetFullName(et)).MkString());
         }
         public override void InsertSoldiers(ExcelWorksheet sh, RegisterSettings settings) {
             RegisterFormat.InsertSoldierList(sh, settings.soldiers,
@@ -266,9 +266,9 @@ namespace Grader.registers {
     }
 
     public static class RegisterFormat {
-        public static void InsertSoldierList(ExcelWorksheet sh, List<ВоеннослужащийПоПодразделениям> soldiers, 
+        public static void InsertSoldierList(ExcelWorksheet sh, List<Военнослужащий> soldiers, 
                 bool isExam = false, bool useShortNames = false, bool strikeKMN = false, int strikeLen = 1, 
-                Action<ExcelRange, ВоеннослужащийПоПодразделениям> additionalFormatting = null) {
+                Action<ExcelRange, Военнослужащий> additionalFormatting = null) {
             sh.GetRange("SoldierList").EntireRow.Copy();
             for (int i = 0; i < soldiers.Count - 1; i++) {
                 sh.GetRange("SoldierList").GetOffset(1, 0).EntireRow.Insert(ExcelEnums.Direction.Down);
@@ -279,19 +279,19 @@ namespace Grader.registers {
                 c.Value = r++;
                 c.GetOffset(0, 1).Value = soldier.Звание;
                 if (useShortNames) {
-                    c.GetOffset(0, 2).Value = soldier.ФИО;
+                    c.GetOffset(0, 2).Value = soldier.ФИО();
                 } else {
                     c.GetOffset(0, 2).Value = soldier.Фамилия + " " + soldier.Имя + " " + soldier.Отчество;
                 }
                 if (additionalFormatting != null) {
                     additionalFormatting(c, soldier);
                 }
-                if ((strikeKMN && soldier.КМН == 1) || (isExam && soldier.НетДопускаНаЭкзамен)) {
+                if ((strikeKMN && soldier.КМН) || (isExam && soldier.НетДопускаНаЭкзамен)) {
                     ExcelRange strike = c.GetOffset(0, 3).GetResize(1, strikeLen);
                     if (strikeLen > 1) {
                         strike.Merge();
                     }
-                    if (soldier.КМН == 1) {
+                    if (soldier.КМН) {
                         strike.Value = "Представлен на экзамен в составе уч. гр. кандидатов на должности МК";
                     } else if (soldier.НетДопускаНаЭкзамен) {
                         strike.Value = "Не допущен решением УМС. Протокол № 5 от 11 апреля 2014 года";

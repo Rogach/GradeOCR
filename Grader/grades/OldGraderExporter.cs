@@ -90,15 +90,17 @@ namespace Grader.grades {
         };
 
         public static void ExportToOldGrader(
-                DataAccess dataAccess, 
+                Entities et,
+                Settings settings,
                 IQueryable<Оценка> gradeQuery, 
-                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery, 
+                IQueryable<Военнослужащий> soldierQuery, 
                 bool selectCadets, 
                 bool selectContract) {
 
             if (selectCadets) {
                 DoExport(
-                    dataAccess,
+                    et,
+                    settings,
                     gradeQuery,
                     soldierQuery,
                     "старая_учетка_курсанты.xlsm",
@@ -107,7 +109,8 @@ namespace Grader.grades {
                 );
             } else if (selectContract) {
                 DoExport(
-                    dataAccess,
+                    et,
+                    settings,
                     gradeQuery,
                     soldierQuery,
                     "старая_учетка_контрактники.xlsx",
@@ -120,33 +123,34 @@ namespace Grader.grades {
         }
 
         static void DoExport(
-                DataAccess dataAccess, 
+                Entities et,
+                Settings settings,
                 IQueryable<Оценка> gradeQuery, 
-                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery,
+                IQueryable<Военнослужащий> soldierQuery,
                 string templateName, 
                 List<string> subjects, 
                 List<ExportUnit> exports) {
                 
-            DataContext dc = dataAccess.GetDataContext();
-            var wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
+            var wb = ExcelTemplates.LoadExcelTemplate(settings.GetTemplateLocation(templateName));
             ProgressDialogs.ForEach(exports, e => {
                 try {
                     ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                     ExcelRange c = sh.GetRange(e.rangeName);
-                    var subunitId = (from s in dc.GetTable<Подразделение>() where s.ИмяКраткое == e.subunitName select s.Код).ToListTimed().First();
+                    var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
                     var soldiers = e.exactSubunit ?
-                        Querying.GetSubunitSoldiersExact(dc, subunitId, soldierQuery) :
-                        Querying.GetSubunitSoldiers(dc, subunitId, soldierQuery);
-                    var grades = Grades.GradeSets(dc,
+                        Querying.GetSubunitSoldiersExact(et, subunitId, soldierQuery) :
+                        Querying.GetSubunitSoldiers(et, subunitId, soldierQuery);
+                    var grades = Grades.GradeSets(et,
                         e.exactSubunit ?
-                            Grades.GetGradesForSubunitExact(dc, gradeQuery, subunitId) :
-                            Grades.GetGradesForSubunit(dc, gradeQuery, subunitId))
+                            Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
+                            Grades.GetGradesForSubunit(et, gradeQuery, subunitId))
                         .ToDictionary(g => g.soldier.Код);
 
-                    ProgressDialogs.ForEach(soldiers.Where(s => s.Звание != "ГП"), s => {
+                    List<Военнослужащий> realSoldiers = soldiers.Where(s => et.rankCache.Find(r => r.Код == s.КодЗвания).Название != "ГП").ToList();
+                    ProgressDialogs.ForEach(realSoldiers, s => {
                         var r = c;
-                        r.Value = s.Звание;
-                        r.GetOffset(0, 1).Value = s.ФИО;
+                        r.Value = et.rankCache.Find(rk => rk.Код == s.КодЗвания).Название;
+                        r.GetOffset(0, 1).Value = s.ФИО();
                         grades.GetOption(s.Код).ForEach(g => {
                             r = r.GetOffset(0, 2);
                             foreach (string subj in subjects) {

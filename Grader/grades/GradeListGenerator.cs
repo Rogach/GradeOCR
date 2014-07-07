@@ -12,9 +12,8 @@ using LibUtil;
 namespace Grader.grades {
     public static class GradeListGenerator {
 
-        public static void GenerateGradeList(DataAccess dataAccess, IQueryable<Оценка> gradeQuery, string subjectName) {
-            DataContext dc = dataAccess.GetDataContext();
-            List<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
+        public static void GenerateGradeList(Entities et, IQueryable<Оценка> gradeQuery, string subjectName) {
+            List<GradeSet> gradeSets = Grades.GradeSets(et, gradeQuery);
 
             ExcelWorksheet sh = ExcelTemplates.CreateEmptyExcelTable();
             sh.GetRange("A1").Value = "дата";
@@ -32,7 +31,7 @@ namespace Grader.grades {
                     c.Value = s.gradeDate.ToString("MM.yyyy");
                     c.GetOffset(0, 1).Value = s.subunit.Имя;
                     c.GetOffset(0, 2).Value = s.rank.Название;
-                    c.GetOffset(0, 3).Value = s.soldier.ФИО;
+                    c.GetOffset(0, 3).Value = s.soldier.ФИО();
                     c.GetOffset(0, 4).Value = s.soldier.Фамилия;
                     c.GetOffset(0, 5).Value = s.soldier.Имя;
                     c.GetOffset(0, 6).Value = s.soldier.Отчество;

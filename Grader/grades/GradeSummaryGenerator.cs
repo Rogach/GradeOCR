@@ -11,7 +11,7 @@ using LibUtil;
 namespace Grader.grades {
     public static class GradeSummaryGenerator {
         public static void GenerateSummary(
-                DataContext dc, 
+                Entities et, 
                 Подразделение subunit, 
                 IQueryable<Оценка> gradeQuery, 
                 string subjectName, 
@@ -19,7 +19,7 @@ namespace Grader.grades {
                 bool cadetsSelected,
                 bool selectRelatedSubunits) {
 
-            List<int> grades = Grades.GetSubjectGrades(gradeQuery, dc, subjectName);
+            List<int> grades = Grades.GetSubjectGrades(gradeQuery, et, subjectName);
             if (grades.Count == 0) {
                 System.Windows.Forms.MessageBox.Show("Нет оценок!");
                 return;
@@ -39,7 +39,7 @@ namespace Grader.grades {
             sel.TypeText(String.Format("Средний балл\t- {0:F2}", grades.Mean()));
             sel.TypeParagraph();
             if (produceSummaryGrade) {
-                GradeCalcGroup.ОбщаяОценка(dc, gradeQuery, subunit, subjectName, cadetsSelected, selectRelatedSubunits).ForEach(summaryGrade => {
+                GradeCalcGroup.ОбщаяОценка(et, gradeQuery, subunit, subjectName, cadetsSelected, selectRelatedSubunits).ForEach(summaryGrade => {
                     sel.TypeText(String.Format("Общая оценка «{0}»", ReadableTextUtil.HumanReadableGradeLong(summaryGrade)));
                     sel.TypeParagraph();
                 });

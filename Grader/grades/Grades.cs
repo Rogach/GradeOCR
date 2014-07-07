@@ -13,27 +13,25 @@ namespace Grader.grades {
 
     public static class Grades {
 
-        public static IQueryable<Оценка> GetGradesForSubunit(DataContext dc, IQueryable<Оценка> gradeQuery, int subunitId) {
+        public static IQueryable<Оценка> GetGradesForSubunit(Entities et, IQueryable<Оценка> gradeQuery, int subunitId) {
             return
                 from g in gradeQuery
-                from subunitRel in dc.GetTable<ПодразделениеПодчинение>()
-                where g.КодПодразделения == subunitRel.КодПодразделения
+                join subunitRel in et.ПодразделениеПодчинение on g.КодПодразделения equals subunitRel.КодПодразделения
                 where subunitRel.КодСтаршегоПодразделения == subunitId
                 select g;
         }
 
-        public static IQueryable<Оценка> GetGradesForSubunitExact(DataContext dc, IQueryable<Оценка> gradeQuery, int subunitId) {
+        public static IQueryable<Оценка> GetGradesForSubunitExact(Entities et, IQueryable<Оценка> gradeQuery, int subunitId) {
             return
                 from g in gradeQuery
                 where g.КодПодразделения == subunitId
                 select g;
         }
 
-        public static IQueryable<Оценка> GetGradesOnCycle(DataContext dc, IQueryable<Оценка> gradeQuery, int cycleId) {
+        public static IQueryable<Оценка> GetGradesOnCycle(Entities et, IQueryable<Оценка> gradeQuery, int cycleId) {
             return
                 from g in gradeQuery
-                from vusRel in dc.GetTable<ВусНаЦикле>()
-                where g.ВУС == vusRel.ВУС
+                join vusRel in et.ВусНаЦикле on g.ВУС equals vusRel.ВУС
                 where vusRel.КодЦикла == cycleId
                 select g;
         }
@@ -42,28 +40,19 @@ namespace Grader.grades {
             return gradeSets.Select(g => GradeCalcIndividual.GetGrade(g, subjectName)).ToList().Flatten();
         }
 
-        public static List<int> GetSubjectGrades(this IQueryable<Оценка> grades, DataContext dc, string subjectName) {
-            return GradeSets(dc, grades).GetSubjectGrades(subjectName);
+        public static List<int> GetSubjectGrades(this IQueryable<Оценка> grades, Entities et, string subjectName) {
+            return GradeSets(et, grades).GetSubjectGrades(subjectName);
         }
 
-        public static List<GradeSet> GradeSets(DataContext dc, IQueryable<Оценка> gradeQuery) {
+        public static List<GradeSet> GradeSets(Entities et, IQueryable<Оценка> gradeQuery) {
             var query =
                 from g in gradeQuery
 
-                from subj in dc.GetTable<Предмет>()
-                where g.КодПредмета == subj.Код
-
-                from soldier in dc.GetTable<Военнослужащий>()
-                where g.КодПроверяемого == soldier.Код
-
-                from subunit in dc.GetTable<Подразделение>()
-                where g.КодПодразделения == subunit.Код
-
-                from rank in dc.GetTable<Звание>()
-                where g.КодЗвания == rank.Код
-
-                from register in dc.GetTable<Ведомость>()
-                where g.КодВедомости == register.Код
+                join subj in et.Предмет on g.КодПредмета equals subj.Код
+                join soldier in et.Военнослужащий on g.КодПроверяемого equals soldier.Код
+                join subunit in et.Подразделение on g.КодПодразделения equals subunit.Код
+                join rank in et.Звание on g.КодЗвания equals rank.Код
+                join register in et.Ведомость on g.КодВедомости equals register.Код
 
                 orderby register.ДатаЗаполнения
 
@@ -77,7 +66,7 @@ namespace Grader.grades {
                     subj = subj.Название 
                 };
             var gradeSets = new Dictionary<int, GradeSet>();
-            foreach (var g in query.ToListTimed("GradeSets")) {
+            foreach (var g in query) {
                 if (!g.isComment) {
                     var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, g.date));
                     gradeSet.AddGrade(g.subj, g.grade);

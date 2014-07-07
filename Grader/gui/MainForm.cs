@@ -4,17 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Data.EntityClient;
 
 namespace Grader.gui {
     public class MainForm : Form {
 
         private ApplicationContext context;
-        private DataAccess dataAccess;
+        private Entities et;
         private Settings settings;
 
         public MainForm(Settings settings, ApplicationContext context) {
             this.settings = settings;
-            this.dataAccess = new DataAccess(settings.dbLocation);
+            
+            EntityConnectionStringBuilder ecsb = new EntityConnectionStringBuilder();
+            ecsb.Provider = "MySql.Data.MySqlClient";
+            ecsb.ProviderConnectionString = settings.dbConnectionString.GetValue();
+            ecsb.Metadata = @"res://*/Entities.csdl|res://*/Entities.ssdl|res://*/Entities.msl";
+            this.et = new Entities(ecsb.ConnectionString);
+            this.et.Connection.Open();
+            this.et.initCache();
             this.context = context;
             this.InitializeComponent();
         }
@@ -38,19 +46,26 @@ namespace Grader.gui {
             ToolStripMenuItem menu_file_select_base = new ToolStripMenuItem("Выбрать базу");
             menu_file_select_base.Click += new EventHandler(delegate {
                 if (CheckForUnsavedChanges()) {
-                    Settings.AskForDbLocation().ForEach(newDbLocation => {
+                    if (settings.dbConnectionString.init()) {
                         context.MainForm = null;
                         this.Dispose();
 
-                        settings.dbLocation = newDbLocation;
                         MainForm newMainForm = new MainForm(settings, context);
                         context.MainForm = newMainForm;
                         newMainForm.Show();
                         settings.Save();
-                    });
+                    }
                 }
             });
             menu_file.DropDownItems.Add(menu_file_select_base);
+
+            ToolStripMenuItem menu_file_select_templates = new ToolStripMenuItem("Выбрать шаблоны");
+            menu_file_select_templates.Click += new EventHandler(delegate {
+                if (settings.templatesLocation.init()) {
+                    settings.Save();
+                }
+            });
+            menu_file.DropDownItems.Add(menu_file_select_templates);
 
             ToolStripMenuItem menu_file_reload_base = new ToolStripMenuItem("Перезагрузить базу");
             menu_file_reload_base.Click += new EventHandler(delegate {
@@ -87,13 +102,13 @@ namespace Grader.gui {
             tabs.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             tabs.Size = new System.Drawing.Size(1200, 776);
 
-            registerGenerationTab = new RegisterGenerationTab(dataAccess);
+            registerGenerationTab = new RegisterGenerationTab(et, settings);
             AddTab(tabs, registerGenerationTab);
-            registerImportTab = new RegisterImportTab(dataAccess);
+            registerImportTab = new RegisterImportTab(et);
             AddTab(tabs, registerImportTab);
-            gradeViewTab = new GradeViewTab(dataAccess, settings);
+            gradeViewTab = new GradeViewTab(et, settings);
             AddTab(tabs, gradeViewTab);
-            gradeAnalysisTab = new GradeAnalysisTab(dataAccess);
+            gradeAnalysisTab = new GradeAnalysisTab(et, settings);
             AddTab(tabs, gradeAnalysisTab);
 
             gradeViewTab.ChangesSaved.AddEventListener(() => {

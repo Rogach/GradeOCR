@@ -11,12 +11,12 @@ using Grader.util;
 
 namespace Grader.gui {
     class RegisterImportTab : TabPage {
-        private DataAccess dataAccess;
+        private Entities et;
 
         private static string TAB_NAME = "Внесение ведомостей";
 
-        public RegisterImportTab(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public RegisterImportTab(Entities et) {
+            this.et = et;
             this.InitializeComponent();
         }
 
@@ -75,7 +75,7 @@ namespace Grader.gui {
                     if (CheckForUnsavedChanges()) {
                         SetRegisterPanelEnabled(false);
                         SelectRegisterInList(rd.id);
-                        Register r = RegisterMarshaller.LoadRegister(rd.id, dataAccess.GetDataContext());
+                        Register r = RegisterMarshaller.LoadRegister(rd.id, et);
                         registerEditor.SetRegister(r);
                         changesPending = false;
                         SetRegisterPanelEnabled(true);
@@ -98,7 +98,7 @@ namespace Grader.gui {
                                 MessageBoxDefaultButton.Button1
                                 );
                         if (confirmationResult == DialogResult.OK) {
-                            RegisterMarshaller.DeleteRegister(rd.id, dataAccess.GetDataContext());
+                            RegisterMarshaller.DeleteRegister(rd.id, et);
                             UpdateRegisterList();
                         }
                     });
@@ -116,7 +116,7 @@ namespace Grader.gui {
             sep.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
             this.Controls.Add(sep);
 
-            registerEditor = new RegisterEditor(dataAccess);
+            registerEditor = new RegisterEditor(et);
             registerEditor.Location = new Point(220, 0);
             registerEditor.Size = new Size(970, 770);
             registerEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -133,7 +133,7 @@ namespace Grader.gui {
             saveRegister.Click += new EventHandler(delegate {
                 SetRegisterPanelEnabled(false);
                 Register register = Util.Timed<Register>("get register", () => registerEditor.GetRegister());
-                Util.Timed("save register", () => RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext()));
+                Util.Timed("save register", () => RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et));
                 changesPending = false;
                 UpdateRegisterList();
                 SelectRegisterInList(register.id);
@@ -163,7 +163,7 @@ namespace Grader.gui {
                 if (result == DialogResult.Cancel) {
                     return false;
                 } else if (result == DialogResult.OK) {
-                    RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), dataAccess.GetDataContext());
+                    RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et);
                     changesPending = false;
                     return true;
                 } else if (result == DialogResult.No) {
@@ -178,7 +178,7 @@ namespace Grader.gui {
 
         public void UpdateRegisterList() {
             registerList.Items.Clear();
-            dataAccess.GetDataContext().GetTable<Ведомость>()
+            et.Ведомость
                 .OrderByDescending(r => r.ДатаВнесения)
                 .Select(r => new RegisterDesc { 
                     id = r.Код, 
@@ -203,14 +203,14 @@ namespace Grader.gui {
         public void UpdateRegisterListColors() {
             foreach (ListViewItem item in registerList.Items) {
                 RegisterDesc rd = (RegisterDesc) item.Tag;
-                if (rd.virt == 1) {
-                    if (rd.enabled == 1) {
+                if (rd.virt) {
+                    if (rd.enabled) {
                         item.BackColor = Color.FromArgb(171, 191, 255);
                     } else {
                         item.BackColor = Color.FromArgb(250, 250, 150);
                     }
                 } else {
-                    if (rd.enabled == 0) {
+                    if (!rd.enabled) {
                         item.BackColor = Color.FromArgb(255, 200, 200);
                     } else {
                         item.BackColor = Color.White;
@@ -238,8 +238,8 @@ namespace Grader.gui {
             public int id { get; set; }
             public string name { get; set; }
             public DateTime fillDate { get; set; }
-            public int virt { get; set; }
-            public int enabled { get; set; }
+            public bool virt { get; set; }
+            public bool enabled { get; set; }
             public override string ToString() {
                 return String.Format("{0} ({1})", name, fillDate.ToString("dd.MM.yyyy"));
             }
@@ -250,7 +250,7 @@ namespace Grader.gui {
             f.Text = "Новая ведомость";
             f.SuspendLayout();
             
-            PersonSelector personSelector = new PersonSelector(dataAccess);
+            PersonSelector personSelector = new PersonSelector(et);
             personSelector.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             f.Location = new Point(0, 0);
             f.Size = new Size(personSelector.PreferredSize.Width + 15, personSelector.PreferredSize.Height + 105);
@@ -288,17 +288,16 @@ namespace Grader.gui {
             if (result == DialogResult.OK) {
                 Register reg = registerEditor.GetEmptyRegister();
 
-                DataContext dc = dataAccess.GetDataContext();
-                List<ВоеннослужащийПоПодразделениям> personList = new List<ВоеннослужащийПоПодразделениям>();
+                List<Военнослужащий> personList = new List<Военнослужащий>();
                 if (forExam.Checked && personSelector.IsFilter()) {
                     Подразделение subunit = (Подразделение) personSelector.personFilter.subunitSelector.SelectedItem;
-                    Querying.GetSubunitCommander2(dc, subunit.Код).ForEach(commander => {
+                    Querying.GetSubunitCommander(et, subunit.Код).ForEach(commander => {
                         personList.Add(commander);
                     });
-                    Querying.GetPostForSubunit2(dc, subunit.Код, "ЗКВ").ForEach(zkv => {
+                    Querying.GetPostForSubunit(et, subunit.Код, "ЗКВ").ForEach(zkv => {
                         personList.Add(zkv);
                     });
-                    Querying.GetPostForSubunit2(dc, subunit.Код, "КО").ForEach(ko => {
+                    Querying.GetPostForSubunit(et, subunit.Код, "КО").ForEach(ko => {
                         personList.Add(ko);
                     });
                 }

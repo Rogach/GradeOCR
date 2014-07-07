@@ -12,7 +12,7 @@ namespace Grader.grades {
     public static class GradeCalcGroup {
 
         public static Option<int> ОбщаяОценка(
-                DataContext dc, 
+                Entities et, 
                 IQueryable<Оценка> gradeQuery, 
                 Подразделение subunit, 
                 string subjectName, 
@@ -20,32 +20,32 @@ namespace Grader.grades {
                 bool selectRelatedSubunits) {
 
             if (subjectName == "ОБЩ (курсанты)" || subjectName == "ОВП (курсанты)" || cadetsSelected) {
-                return КурсантыПоПредмету(dc, gradeQuery, subunit, subjectName);
+                return КурсантыПоПредмету(et, gradeQuery, subunit, subjectName);
             } else if (subjectName == "командирск.подгот.") {
-                return КомандирскаяПодготовка(dc, gradeQuery, subunit);
+                return КомандирскаяПодготовка(et, gradeQuery, subunit);
             } else if (subjectName == "ОБЩ (контракт)" && !selectRelatedSubunits) {
-                IEnumerable<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
-                return БоеваяПодготовкаЗаПодразделение(dc, gradeSets, subunit.Код);
+                IEnumerable<GradeSet> gradeSets = Grades.GradeSets(et, gradeQuery);
+                return БоеваяПодготовкаЗаПодразделение(et, gradeSets, subunit.Код);
             } else if (subjectName == "ОБЩ (контракт)") {
-                return БоеваяПодготвкаОбщая(dc, gradeQuery, subunit);
+                return БоеваяПодготвкаОбщая(et, gradeQuery, subunit);
             } else {
-                return БоеваяПодготовкаПоПредмету(dc, gradeQuery, subunit, subjectName);
+                return БоеваяПодготовкаПоПредмету(et, gradeQuery, subunit, subjectName);
             }
         }
 
         public static Option<int> ОбщаяОценка( 
-                DataContext dc, 
+                Entities et,
                 IQueryable<Оценка> gradeQuery, 
                 string subjectName, 
                 bool cadetsSelected) {
 
-            IEnumerable<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
+            IEnumerable<GradeSet> gradeSets = Grades.GradeSets(et, gradeQuery);
             if (subjectName == "ОБЩ (курсанты)" || subjectName == "ОВП (курсанты)" || cadetsSelected) {
-                return КурсантыПоПредметуЗаЧасть(dc, gradeSets, subjectName);
+                return КурсантыПоПредметуЗаЧасть(et, gradeSets, subjectName);
             } else if (subjectName == "ОБЩ (контракт)") {
-                return БоеваяПодготовкаЗаЧасть(dc, gradeSets);
+                return БоеваяПодготовкаЗаЧасть(et, gradeSets);
             } else {
-                return БоеваяПодготовкаПоПредметуЗаЧасть(dc, gradeSets, subjectName);
+                return БоеваяПодготовкаПоПредметуЗаЧасть(et, gradeSets, subjectName);
             }
         }
 
@@ -139,16 +139,16 @@ namespace Grader.grades {
 
         // ПОДГОТОВКА КУРСАНТОВ ПО ПРЕДМЕТУ
 
-        public static Option<int> КурсантыПоПредмету(DataContext dc, IQueryable<Оценка> gradeQuery, Подразделение subunit, string subjectName) {
-            List<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
+        public static Option<int> КурсантыПоПредмету(Entities et, IQueryable<Оценка> gradeQuery, Подразделение subunit, string subjectName) {
+            List<GradeSet> gradeSets = Grades.GradeSets(et, gradeQuery);
             if (subunit.Тип == "взвод") {
                 return КурсантыПоПредметуЗаВзвод(gradeSets, subunit.Код, subjectName);
             } else if (subunit.Тип == "рота") {
-                return КурсантыПоПредметуЗаРоту(dc, gradeSets, subunit.Код, subjectName);
+                return КурсантыПоПредметуЗаРоту(et, gradeSets, subunit.Код, subjectName);
             } else if (subunit.Тип == "батальон") {
-                return КурсантыПоПредметуЗаБатальон(dc, gradeSets, subunit.Код, subjectName);
+                return КурсантыПоПредметуЗаБатальон(et, gradeSets, subunit.Код, subjectName);
             } else if (subunit.Имя == "часть") {
-                return КурсантыПоПредметуЗаЧасть(dc, gradeSets, subjectName);
+                return КурсантыПоПредметуЗаЧасть(et, gradeSets, subjectName);
             } else {
                 throw new Exception("Unexpected subunit type");
             }
@@ -169,52 +169,51 @@ namespace Grader.grades {
             }
         }
 
-        public static Option<int> КурсантыПоПредметуЗаРоту(DataContext dc, IEnumerable<GradeSet> gradeQuery, int companyId, string subjectName) {
+        public static Option<int> КурсантыПоПредметуЗаРоту(Entities et, IEnumerable<GradeSet> gradeQuery, int companyId, string subjectName) {
             return
-                Querying.GetSlaveSubunitsByType(dc, "взвод", companyId)
+                Querying.GetSlaveSubunitsByType(et, "взвод", companyId).ToList()
                 .ConvertAll(subunit => КурсантыПоПредметуЗаВзвод(gradeQuery, subunit.Код, subjectName)).Flatten()
                 .ФормулаНольПять();
         }
 
-        public static Option<int> КурсантыПоПредметуЗаБатальон(DataContext dc, IEnumerable<GradeSet> gradeQuery, int batallionId, string subjectName) {
+        public static Option<int> КурсантыПоПредметуЗаБатальон(Entities et, IEnumerable<GradeSet> gradeQuery, int batallionId, string subjectName) {
             return
-                Querying.GetSlaveSubunitsByType(dc, "рота", batallionId)
-                .ConvertAll(subunit => КурсантыПоПредметуЗаРоту(dc, gradeQuery, subunit.Код, subjectName)).Flatten()
+                Querying.GetSlaveSubunitsByType(et, "рота", batallionId).ToList()
+                .ConvertAll(subunit => КурсантыПоПредметуЗаРоту(et, gradeQuery, subunit.Код, subjectName)).Flatten()
                 .ФормулаНольПять();
         }
 
-        public static Option<int> КурсантыПоПредметуЗаЦикл(DataContext dc, IQueryable<Оценка> gradeQuery, int cycleId, string subjectName) {
+        public static Option<int> КурсантыПоПредметуЗаЦикл(Entities et, IQueryable<Оценка> gradeQuery, int cycleId, string subjectName) {
             return (
                 from g in gradeQuery
-                from cycleRel in dc.GetTable<ВусНаЦикле>()
-                where g.ВУС == cycleRel.ВУС
+                join cycleRel in et.ВусНаЦикле on g.ВУС equals cycleRel.ВУС
                 where cycleRel.КодЦикла == cycleId
                 select g)
-                .GetSubjectGrades(dc, subjectName)
+                .GetSubjectGrades(et, subjectName)
                 .ФормулаКурсантыПоПредмету();
         }
 
-        public static Option<int> КурсантыПоПредметуЗаЧасть(DataContext dc, IEnumerable<GradeSet> gradeQuery, string subjectName) {
+        public static Option<int> КурсантыПоПредметуЗаЧасть(Entities et, IEnumerable<GradeSet> gradeQuery, string subjectName) {
             // в руководящих документах оценка по предмету за часть
             // не описана, поэтому здесь она рассчитывается подобно
             // тому, как рассчитываются оценки за батальон и роту
             return
-                Querying.GetSubunitsByType(dc, "батальон")
-                .ConvertAll(subunit => КурсантыПоПредметуЗаБатальон(dc, gradeQuery, subunit.Код, subjectName)).Flatten()
+                Querying.GetSubunitsByType(et, "батальон").ToList()
+                .ConvertAll(subunit => КурсантыПоПредметуЗаБатальон(et, gradeQuery, subunit.Код, subjectName)).Flatten()
                 .ФормулаНольПять();
         }
 
         
         // БОЕВАЯ ПОДГОТОВКА ПО ПРЕДМЕТУ
 
-        public static Option<int> БоеваяПодготовкаПоПредмету(DataContext dc, IQueryable<Оценка> gradeQuery, Подразделение subunit, string subjectName) {
-            IEnumerable<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
+        public static Option<int> БоеваяПодготовкаПоПредмету(Entities et, IQueryable<Оценка> gradeQuery, Подразделение subunit, string subjectName) {
+            IEnumerable<GradeSet> gradeSets = Grades.GradeSets(et, gradeQuery);
             if (subunit.Тип == "взвод" || subunit.Тип == "рота" || subunit.Тип == "цикл" || subunit.Имя == "управление") {
-                return БоеваяПодготовкаПоПредметуЗаПодразделение(dc, gradeSets, subunit.Код, subjectName);
+                return БоеваяПодготовкаПоПредметуЗаПодразделение(et, gradeSets, subunit.Код, subjectName);
             } else if (subunit.Тип == "батальон") {
-                return БоеваяПодготовкаПоПредметуЗаБатальон(dc, gradeSets, subunit.Код, subjectName);
+                return БоеваяПодготовкаПоПредметуЗаБатальон(et, gradeSets, subunit.Код, subjectName);
             } else if (subunit.Имя == "часть") {
-                return БоеваяПодготовкаПоПредметуЗаЧасть(dc, gradeSets, subjectName);
+                return БоеваяПодготовкаПоПредметуЗаЧасть(et, gradeSets, subjectName);
             } else {
                 throw new Exception("Unexpected subunit type");
             }
@@ -223,40 +222,40 @@ namespace Grader.grades {
         /* Боевая подготовка по отдельному предмету за простое подразделение -
          * за взвод, роту, цикл, управление батальона или учебного центра
          */
-        public static Option<int> БоеваяПодготовкаПоПредметуЗаПодразделение(DataContext dc, IEnumerable<GradeSet> gradeQuery, int subunitId, string subjectName) {
+        public static Option<int> БоеваяПодготовкаПоПредметуЗаПодразделение(Entities et, IEnumerable<GradeSet> gradeQuery, int subunitId, string subjectName) {
             return (
                 from g in gradeQuery
-                join subunitRel in Cache.ПодразделениеПодчинение(dc) on g.subunit.Код equals subunitRel.КодПодразделения
+                join subunitRel in et.subunitRelCache on g.subunit.Код equals subunitRel.КодПодразделения
                 where subunitRel.КодСтаршегоПодразделения == subunitId
                 select g)
                 .GetSubjectGrades(subjectName)
                 .ФормулаПостоянныйСоставПоПредмету();
         }
 
-        public static Option<int> БоеваяПодготовкаПоПредметуЗаБатальон(DataContext dc, IEnumerable<GradeSet> gradeQuery, int batallionId, string subjectName) {
+        public static Option<int> БоеваяПодготовкаПоПредметуЗаБатальон(Entities et, IEnumerable<GradeSet> gradeQuery, int batallionId, string subjectName) {
             Option<int> hqGrade = 
                 gradeQuery.Where(g => g.subunit.Код == batallionId)
                 .GetSubjectGrades(subjectName)
                 .ФормулаПостоянныйСоставПоПредмету();
             List<int> subunitGrades =
-                Querying.GetSlaveSubunitsByType(dc, "рота", batallionId)
-                .ConvertAll(subunit => БоеваяПодготовкаПоПредметуЗаПодразделение(dc, gradeQuery, subunit.Код, subjectName)).Flatten();
+                Querying.GetSlaveSubunitsByType(et, "рота", batallionId).ToList()
+                .ConvertAll(subunit => БоеваяПодготовкаПоПредметуЗаПодразделение(et, gradeQuery, subunit.Код, subjectName)).Flatten();
             return ФормулаПостоянныйСоставПоПредметуСУправлением(hqGrade, subunitGrades);
         }
 
-        public static Option<int> БоеваяПодготовкаПоПредметуЗаЧасть(DataContext dc, IEnumerable<GradeSet> gradeQuery, string subjectName) {
-            int hqId = (from subunit in dc.GetTable<Подразделение>() where subunit.Имя == "управление" select subunit.Код).ToListTimed().First();
-            Option<int> hqGrade = 
+        public static Option<int> БоеваяПодготовкаПоПредметуЗаЧасть(Entities et, IEnumerable<GradeSet> gradeQuery, string subjectName) {
+            int hqId = (from subunit in et.Подразделение where subunit.Имя == "управление" select subunit.Код).First();
+            Option<int> hqGrade =
                 gradeQuery.Where(g => g.subunit.Код == hqId)
                 .GetSubjectGrades(subjectName)
                 .ФормулаПостоянныйСоставПоПредмету();
 
             List<int> batallionGrades =
-                Querying.GetSubunitsByType(dc, "батальон")
-                .ConvertAll(batallion => БоеваяПодготовкаПоПредметуЗаБатальон(dc, gradeQuery, batallion.Код, subjectName)).Flatten();
+                Querying.GetSubunitsByType(et, "батальон").ToList()
+                .ConvertAll(batallion => БоеваяПодготовкаПоПредметуЗаБатальон(et, gradeQuery, batallion.Код, subjectName)).Flatten();
             Option<int> ursGrade =
-                БоеваяПодготовкаПоПредметуЗаПодразделение(dc, gradeQuery,
-                    (from s in dc.GetTable<Подразделение>() where s.Имя == "УРС" select s.Код).ToListTimed().First(),
+                БоеваяПодготовкаПоПредметуЗаПодразделение(et, gradeQuery,
+                    (from s in et.Подразделение where s.Имя == "УРС" select s.Код).First(),
                     subjectName);
             List<int> subunitGrades = batallionGrades.Concat(ursGrade.ToList()).ToList();
             return ФормулаПостоянныйСоставПоПредметуСУправлением(hqGrade, subunitGrades);
@@ -265,14 +264,14 @@ namespace Grader.grades {
 
         // БОЕВАЯ ПОДГОТОВКА - ОБЩАЯ
 
-        public static Option<int> БоеваяПодготвкаОбщая(DataContext dc, IQueryable<Оценка> gradeQuery, Подразделение subunit) {
-            IEnumerable<GradeSet> gradeSets = Grades.GradeSets(dc, gradeQuery);
+        public static Option<int> БоеваяПодготвкаОбщая(Entities et, IQueryable<Оценка> gradeQuery, Подразделение subunit) {
+            IEnumerable<GradeSet> gradeSets = Grades.GradeSets(et, gradeQuery);
             if (subunit.Тип == "взвод" || subunit.Тип == "рота" || subunit.Тип == "цикл" || subunit.Имя == "управление") {
-                return БоеваяПодготовкаЗаПодразделение(dc, gradeSets, subunit.Код);
+                return БоеваяПодготовкаЗаПодразделение(et, gradeSets, subunit.Код);
             } else if (subunit.Тип == "батальон") {
-                return БоеваяПодготовкаЗаБатальон(dc, gradeSets, subunit.Код);
+                return БоеваяПодготовкаЗаБатальон(et, gradeSets, subunit.Код);
             } else if (subunit.Имя == "часть") {
-                return БоеваяПодготовкаЗаЧасть(dc, gradeSets);
+                return БоеваяПодготовкаЗаЧасть(et, gradeSets);
             } else {
                 throw new Exception("Unexpected subunit type");
             }
@@ -281,14 +280,14 @@ namespace Grader.grades {
         /* Общая оценка за боевую подготовку в простом подразделении -
          * за взвод, роту, цикл, управление батальона или учебного центра
          */
-        public static Option<int> БоеваяПодготовкаЗаПодразделение(DataContext dc, IEnumerable<GradeSet> gradeQuery, int subunitId) {
+        public static Option<int> БоеваяПодготовкаЗаПодразделение(Entities et, IEnumerable<GradeSet> gradeQuery, int subunitId) {
             List<string> subjects = gradeQuery.SelectMany(g => g.grades.Keys).Where(subj => subj != "МОБ").Distinct().ToList();
-            Подразделение subunit = (from s in dc.GetTable<Подразделение>() where s.Код == subunitId select s).ToListTimed().First();
+            Подразделение subunit = (from s in et.Подразделение where s.Код == subunitId select s).First();
             if (subjects.Count == 0) {
                 return new None<int>();
             } else {
                 Dictionary<string, int> grades =
-                    subjects.Select(subj => new { subj = subj, grade = БоеваяПодготовкаПоПредметуЗаПодразделение(dc, gradeQuery, subunitId, subj) })
+                    subjects.Select(subj => new { subj = subj, grade = БоеваяПодготовкаПоПредметуЗаПодразделение(et, gradeQuery, subunitId, subj) })
                     .Where(g => g.grade.NonEmpty()).ToDictionary(g => g.subj, g => g.grade.Get());
                 List<string> importantSubjects;
                 if (subunit.ПодразделениеОхраны) {
@@ -302,11 +301,11 @@ namespace Grader.grades {
             }
         }
 
-        public static Option<int> БоеваяПодготовкаЗаБатальон(DataContext dc, IEnumerable<GradeSet> gradeQuery, int batallionId) {
-            Option<int> hqGrade = БоеваяПодготовкаЗаПодразделение(dc, gradeQuery, batallionId);
+        public static Option<int> БоеваяПодготовкаЗаБатальон(Entities et, IEnumerable<GradeSet> gradeQuery, int batallionId) {
+            Option<int> hqGrade = БоеваяПодготовкаЗаПодразделение(et, gradeQuery, batallionId);
             List<int> rotaGrades =
-                Querying.GetSlaveSubunitsByType(dc, "рота", batallionId)
-                .ConvertAll(subunit => БоеваяПодготовкаЗаПодразделение(dc, gradeQuery, subunit.Код)).Flatten();
+                Querying.GetSlaveSubunitsByType(et, "рота", batallionId).ToList()
+                .ConvertAll(subunit => БоеваяПодготовкаЗаПодразделение(et, gradeQuery, subunit.Код)).Flatten();
             Func<int, float> gradeCount = c => (float) rotaGrades.Where(g => g == c).Count() / rotaGrades.Count;
             if (rotaGrades.Count == 0) {
                 return new None<int>();
@@ -323,15 +322,15 @@ namespace Grader.grades {
             }
         }
 
-        public static Option<int> БоеваяПодготовкаЗаЧасть(DataContext dc, IEnumerable<GradeSet> gradeQuery) {
-            int hqId = (from s in dc.GetTable<Подразделение>() where s.Имя == "управление" select s.Код).ToListTimed().First();
-            Option<int> hqGradeOpt = БоеваяПодготовкаЗаПодразделение(dc, gradeQuery, hqId);
+        public static Option<int> БоеваяПодготовкаЗаЧасть(Entities et, IEnumerable<GradeSet> gradeQuery) {
+            int hqId = (from s in et.Подразделение where s.Имя == "управление" select s.Код).First();
+            Option<int> hqGradeOpt = БоеваяПодготовкаЗаПодразделение(et, gradeQuery, hqId);
             List<int> batallionGrades =
-                Querying.GetSubunitsByType(dc, "батальон")
-                .ConvertAll(batallion => БоеваяПодготовкаЗаБатальон(dc, gradeQuery, batallion.Код)).Flatten();
+                Querying.GetSubunitsByType(et, "батальон").ToList()
+                .ConvertAll(batallion => БоеваяПодготовкаЗаБатальон(et, gradeQuery, batallion.Код)).Flatten();
             Option<int> ursGrade =
-                БоеваяПодготовкаЗаПодразделение(dc, gradeQuery,
-                    (from s in dc.GetTable<Подразделение>() where s.Имя == "УРС" select s.Код).ToListTimed().First());
+                БоеваяПодготовкаЗаПодразделение(et, gradeQuery,
+                    (from s in et.Подразделение where s.Имя == "УРС" select s.Код).First());
             List<int> subunitGrades = batallionGrades.Concat(ursGrade.ToList()).ToList();
             if (hqGradeOpt.IsEmpty() || subunitGrades.Count == 0) {
                 return new None<int>();
@@ -352,9 +351,9 @@ namespace Grader.grades {
 
         // КОМАНДИРСКАЯ ПОДГОТОВКА
 
-        public static Option<int> КомандирскаяПодготовка(DataContext dc, IQueryable<Оценка> gradeQuery, Подразделение subunit) {
-            Option<int> mpGrade = БоеваяПодготовкаПоПредмету(dc, gradeQuery, subunit, "МЕТ");
-            List<int> commandGradeList = Grades.GetSubjectGrades(Grades.GradeSets(dc, Grades.GetGradesForSubunit(dc, gradeQuery, subunit.Код)), "командирск.подгот.");
+        public static Option<int> КомандирскаяПодготовка(Entities et, IQueryable<Оценка> gradeQuery, Подразделение subunit) {
+            Option<int> mpGrade = БоеваяПодготовкаПоПредмету(et, gradeQuery, subunit, "МЕТ");
+            List<int> commandGradeList = Grades.GetSubjectGrades(Grades.GradeSets(et, Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код)), "командирск.подгот.");
             Option<int> commandGrade = ФормулаПостоянныйСоставПоПредмету(commandGradeList);
             return mpGrade.FlatMap(mp => commandGrade.Map(cm => Math.Min(mp, cm))).OrElse(commandGrade);
         }

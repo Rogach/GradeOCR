@@ -11,7 +11,7 @@ using LibUtil;
 namespace Grader.grades {
     public static class GradeAnalysisGenerator {
         public static void GenerateGradeAnalysis(
-                DataContext dc, 
+                Entities et, 
                 IQueryable<Оценка> gradeQuery, 
                 string subjectName, 
                 string analysisType,
@@ -25,20 +25,20 @@ namespace Grader.grades {
                 Func<Подразделение, Option<double>> avgSubunitGrade;
                 
                 if (analysisType == "по курсантам на циклах") {
-                    subunits = Querying.GetSubunitsByType(dc, "цикл");
-                    subunitGrades = cycle => Grades.GetSubjectGrades(Grades.GetGradesOnCycle(dc, gradeQuery, cycle.Код), dc, subjectName);
+                    subunits = Querying.GetSubunitsByType(et, "цикл").ToList();
+                    subunitGrades = cycle => Grades.GetSubjectGrades(Grades.GetGradesOnCycle(et, gradeQuery, cycle.Код), et, subjectName);
                 } else if (analysisType == "по батальонам/ротам") {
-                    subunits = Querying.GetSubunitsByType(dc, "батальон");
-                    subunitGrades = batallion => Grades.GetSubjectGrades(Grades.GetGradesForSubunit(dc, gradeQuery, batallion.Код), dc, subjectName);
+                    subunits = Querying.GetSubunitsByType(et, "батальон").ToList();
+                    subunitGrades = batallion => Grades.GetSubjectGrades(Grades.GetGradesForSubunit(et, gradeQuery, batallion.Код), et, subjectName);
                 } else if (analysisType == "по батальонам/циклам") {
                     if (selectCadets) {
                         throw new Exception("expecting contract soldiers for this analysis type");
                     }
-                    subunits = Querying.GetSubunitsByType(dc, "батальон");
-                    subunitGrades = subunit => Grades.GetSubjectGrades(Grades.GetGradesForSubunit(dc, gradeQuery, subunit.Код), dc, subjectName);
+                    subunits = Querying.GetSubunitsByType(et, "батальон").ToList();
+                    subunitGrades = subunit => Grades.GetSubjectGrades(Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код), et, subjectName);
                 } else if (analysisType == "по циклам") {
-                    subunits = Querying.GetSubunitsByType(dc, "цикл");
-                    subunitGrades = cycle => Grades.GetSubjectGrades(Grades.GetGradesForSubunit(dc, gradeQuery, cycle.Код), dc, subjectName);
+                    subunits = Querying.GetSubunitsByType(et, "цикл").ToList();
+                    subunitGrades = cycle => Grades.GetSubjectGrades(Grades.GetGradesForSubunit(et, gradeQuery, cycle.Код), et, subjectName);
                 } else {
                     throw new Exception("Unknown analysis type: " + analysisType);
                 }
@@ -59,22 +59,22 @@ namespace Grader.grades {
                     Func<Подразделение, string> resFunc = cycle =>
                         String.Format("показали курсанты, обучающиеся на {0}, командир - {1} (средний балл - {2:F2})",
                             cycle.ИмяПредложный,
-                            cycle.Командир(dc).Map(c => c.GetFullName()).GetOrElse("???"),
+                            Querying.GetCommander(et, cycle.Код).Map(c => c.GetFullName(et)).GetOrElse("???"),
                             avgSubunitGrade(cycle).Get()
                             );
                     res = "\tЛучшие результаты " + resFunc(maxSubunit.Get()) + ".\n\tНиже результаты " + resFunc(minSubunit.Get()) + ".";
                 } else if (analysisType == "по батальонам/ротам") {
                     if (selectCadets) {
-                        List<Подразделение> companies = Querying.GetSubunitsByType(dc, "рота");
+                        List<Подразделение> companies = Querying.GetSubunitsByType(et, "рота").ToList();
                         Подразделение maxCompany = companies.MaxByOption(avgSubunitGrade).Get();
                         Подразделение minCompany = companies.MinByOption(avgSubunitGrade).Get();
                         Func<Подразделение, Подразделение, string> resFunc = (batallion, company) =>
                             String.Format("показали курсанты {0}, командир - {1} (средний балл - {2:F2}), {3}, командир - {4} (средний балл - {5:F2})",
                                 batallion.ИмяРодительный,
-                                batallion.Командир(dc).Map(b => b.GetFullName()).GetOrElse("???"),
+                                Querying.GetCommander(et, batallion.Код).Map(b => b.GetFullName(et)).GetOrElse("???"),
                                 avgSubunitGrade(batallion).Get(),
                                 company.ИмяРодительный,
-                                company.Командир(dc).Map(b => b.GetFullName()).GetOrElse("???"),
+                                Querying.GetCommander(et, company.Код).Map(b => b.GetFullName(et)).GetOrElse("???"),
                                 avgSubunitGrade(company).Get()
                                 );
                         res = "\tЛучшие результаты " + resFunc(maxSubunit.Get(), maxCompany) + ".\n\tНиже результаты " + resFunc(minSubunit.Get(), minCompany) + ".";
@@ -82,13 +82,13 @@ namespace Grader.grades {
                         Func<Подразделение, string> resFunc = subunit =>
                             String.Format("показал постоянный состав {0}, командир - {1} (средний балл - {2:F2})",
                                 subunit.ИмяРодительный,
-                                subunit.Командир(dc).Map(c => c.GetFullName()).GetOrElse("???"),
+                                Querying.GetCommander(et, subunit.Код).Map(c => c.GetFullName(et)).GetOrElse("???"),
                                 avgSubunitGrade(subunit).Get()
                                 );
                         res = "\tЛучшие результаты " + resFunc(maxSubunit.Get()) + ".\n\tНиже результаты " + resFunc(minSubunit.Get()) + ".";
                     }
                 } else if (analysisType == "по батальонам/циклам") {
-                    List<Подразделение> cycles = Querying.GetSubunitsByType(dc, "цикл");
+                    List<Подразделение> cycles = Querying.GetSubunitsByType(et, "цикл").ToList();
                     Option<Подразделение> maxCycle = cycles.MaxByOption(avgSubunitGrade);
                     Option<Подразделение> minCycle = cycles.MinByOption(avgSubunitGrade);
                     if (maxCycle.IsEmpty() || minCycle.IsEmpty()) {
@@ -98,17 +98,17 @@ namespace Grader.grades {
                     Func<Подразделение, Подразделение, string> resFunc = (batallion, cycle) =>
                         String.Format("показал постоянный состав {0}, командир - {1} (средний балл - {2:F2}), {3}, начальник цикла - {4} (средний балл - {5:F2})",
                             batallion.ИмяРодительный,
-                            batallion.Командир(dc).Map(b => b.GetFullName()).GetOrElse("???"),
+                            Querying.GetCommander(et, batallion.Код).Map(b => b.GetFullName(et)).GetOrElse("???"),
                             avgSubunitGrade(batallion).Get(),
                             cycle.ИмяРодительный,
-                            cycle.Командир(dc).Map(b => b.GetFullName()).GetOrElse("???"),
+                            Querying.GetCommander(et, cycle.Код).Map(b => b.GetFullName(et)).GetOrElse("???"),
                             avgSubunitGrade(cycle).Get());
                     res = "\tЛучшие результаты " + resFunc(maxSubunit.Get(), maxCycle.Get()) + ".\n\tНиже результаты " + resFunc(minSubunit.Get(), minCycle.Get()) + ".";
                 } else if (analysisType == "по циклам") {
                     Func<Подразделение, string> resFunc = cycle =>
                         String.Format("показал постоянный состав {0}, начальник цикла - {1} (средний балл - {2:F2})",
                             cycle.ИмяРодительный,
-                            cycle.Командир(dc).Map(c => c.GetFullName()).GetOrElse("???"),
+                            Querying.GetCommander(et, cycle.Код).Map(c => c.GetFullName(et)).GetOrElse("???"),
                             avgSubunitGrade(cycle).Get()
                             );
                     res = "\tЛучшие результаты " + resFunc(maxSubunit.Get()) + ".\n\tНиже результаты " + resFunc(minSubunit.Get()) + ".";
@@ -117,11 +117,11 @@ namespace Grader.grades {
                 }
 
                 string fullRes =
-                    GradeCalcGroup.ОбщаяОценка(dc, gradeQuery, subjectName, selectCadets)
+                    GradeCalcGroup.ОбщаяОценка(et, gradeQuery, subjectName, selectCadets)
                     .Map(summGrade =>
                         String.Format("\tОбщая оценка: «{0}», средний балл - {1:F2}.\n{2}",
                         ReadableTextUtil.HumanReadableGradeLong(summGrade),
-                        Grades.GetSubjectGrades(gradeQuery, dc, subjectName).Mean(),
+                        Grades.GetSubjectGrades(gradeQuery, et, subjectName).Mean(),
                         res)
                     ).GetOrElse(String.Format("\tНет общей оценки.\n{0}", res));
 

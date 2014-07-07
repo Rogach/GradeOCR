@@ -51,11 +51,13 @@ namespace Grader.grades {
         };
 
         public static void ContractGradeListExport(
-                DataAccess dataAccess, 
+                Entities et,
+                Settings settings,
                 IQueryable<Оценка> gradeQuery,
-                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery) {
+                IQueryable<Военнослужащий> soldierQuery) {
             DoContractGradeListExport(
-                dataAccess,
+                et,
+                settings,
                 gradeQuery,
                 soldierQuery,
                 "список_оценок_контрактники.xlsx",
@@ -65,30 +67,31 @@ namespace Grader.grades {
         }
 
         static void DoContractGradeListExport(
-                DataAccess dataAccess, 
+                Entities et,
+                Settings settings,
                 IQueryable<Оценка> gradeQuery, 
-                IQueryable<ВоеннослужащийПоПодразделениям> soldierQuery,
+                IQueryable<Военнослужащий> soldierQuery,
                 string templateName, 
                 List<string> subjects, List<ExportUnit> exports) {
 
-            DataContext dc = dataAccess.GetDataContext();
-            var wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(templateName));
+            var wb = ExcelTemplates.LoadExcelTemplate(settings.GetTemplateLocation(templateName));
             ProgressDialogs.ForEach(exports, e => {
                 ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
-                var subunitId = (from s in dc.GetTable<Подразделение>() where s.ИмяКраткое == e.subunitName select s.Код).ToListTimed().First();
+                var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
                 var soldiers = e.exactSubunit ?
-                    Querying.GetSubunitSoldiersExact(dc, subunitId, soldierQuery) :
-                    Querying.GetSubunitSoldiers(dc, subunitId, soldierQuery);
-                var grades = Grades.GradeSets(dc, e.exactSubunit ?
-                    Grades.GetGradesForSubunitExact(dc, gradeQuery, subunitId) :
-                    Grades.GetGradesForSubunit(dc, gradeQuery, subunitId))
+                    Querying.GetSubunitSoldiersExact(et, subunitId, soldierQuery) :
+                    Querying.GetSubunitSoldiers(et, subunitId, soldierQuery);
+                var grades = Grades.GradeSets(et, e.exactSubunit ?
+                    Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
+                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId))
                     .ToDictionary(g => g.soldier.Код);
                 int c = 1;
-                ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), soldiers.Where(s => s.Звание != "ГП"), displayProgress: true, format: (s, rng) => {
+                List<Военнослужащий> realSoldiers = soldiers.Where(s => et.rankCache.Find(r => r.Код == s.КодЗвания).Название != "ГП").ToList();
+                ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), realSoldiers, displayProgress: true, format: (s, rng) => {
                     var r = rng;
                     r.GetOffset(0, -1).Value = c++;
-                    r.Value = s.Звание;
-                    r.GetOffset(0, 1).Value = s.ФИО;
+                    r.Value = et.rankCache.Find(rk => rk.Код == s.КодЗвания).Название;
+                    r.GetOffset(0, 1).Value = s.ФИО();
                     grades.GetOption(s.Код).ForEach(g => {
                         r = r.GetOffset(0, 2);
                         foreach (string subj in subjects) {

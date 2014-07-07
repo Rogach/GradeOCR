@@ -11,36 +11,34 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class PerDaySummaryGenerator {
-        public static void GenerateSummaryPerDay(DataAccess dataAccess, IQueryable<Оценка> gradeQuery, bool excludeKMN) {
-            DataContext dc = dataAccess.GetDataContext();
-
-            var wb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation("день_за_днем.xlsx"));
+        public static void GenerateSummaryPerDay(Entities et, Settings settings, IQueryable<Оценка> gradeQuery, bool excludeKMN) {
+            var wb = ExcelTemplates.LoadExcelTemplate(settings.GetTemplateLocation("день_за_днем.xlsx"));
             ExcelWorksheet sh = wb.Worksheets.First();
 
             IQueryable<Оценка> genGradeQuery =
                 from g in gradeQuery
-                from soldier in dc.GetTable<Военнослужащий>()
+                from soldier in et.Военнослужащий
                 where g.КодПроверяемого == soldier.Код
-                where (!excludeKMN) || (soldier.КМН == 0)
+                where (!excludeKMN) || (!soldier.КМН)
                 select g;
 
-            var subjects = (from subj in dc.GetTable<Предмет>() select subj).ToListTimed().Where(subj => subj.ДЗД);
+            var subjects = (from subj in et.Предмет select subj).Where(subj => subj.ДЗД).ToList();
             ExcelTemplates.WithTemplateRow(sh.GetRange("A2:L8"), subjects, displayProgress: true, format: (subj, subjectRange) => {
-                return OutputSubject(subj, subjectRange, genGradeQuery, dc);
+                return OutputSubject(subj, subjectRange, genGradeQuery, et);
             });
             sh.ResetPrintArea();
             ExcelTemplates.ActivateExcel(sh);
         }
 
-        static bool OutputSubject(Предмет subj, ExcelRange subjectRange, IQueryable<Оценка> genGradeQuery, DataContext dc) {
+        static bool OutputSubject(Предмет subj, ExcelRange subjectRange, IQueryable<Оценка> genGradeQuery, Entities et) {
             var dateQuery =
                 from g in genGradeQuery
-                from register in dc.GetTable<Ведомость>()
+                from register in et.Ведомость
                 where g.КодВедомости == register.Код
                 where g.КодПредмета == subj.Код
                 orderby register.ДатаЗаполнения
                 select register.ДатаЗаполнения;
-            var dateList = dateQuery.Distinct().ToListTimed();
+            var dateList = dateQuery.Distinct().ToList();
             if (dateList.Count == 0) {
                 return false;
             } else {
@@ -60,12 +58,12 @@ namespace Grader.grades {
                     var subunitSummaryGrades = new List<int>();
                     var gradeQuery =
                         from g in subjectGradeQuery
-                        from register in dc.GetTable<Ведомость>()
+                        from register in et.Ведомость
                         where g.КодВедомости == register.Код
                         where register.ДатаЗаполнения == date
                         select g;
-                    foreach (var subunitGrades in gradeQuery.ToListTimed().GroupBy(g => g.КодПодразделения)) {
-                        var grades = subunitGrades.Select(g => g.Значение).ToList();
+                    foreach (var subunitGrades in gradeQuery.ToList().GroupBy(g => g.КодПодразделения)) {
+                        var grades = subunitGrades.Select(g => (int) g.Значение).ToList();
                         totalDateGrades.AddRange(grades);
                         GradeCalcGroup.ФормулаКурсантыПоПредмету(grades).ForEach(subjectGrade => {
                             subunitSummaryGrades.Add(subjectGrade);
@@ -85,7 +83,7 @@ namespace Grader.grades {
                         cell.GetOffset(0, 12 - a).Value = totalDateGrades.Count(g => g == a);
                         cell.GetOffset(0, 12 - a).GetOffset(1, 0).Value = totalDateGrades.PercentWhere(g => g == a);
                     }
-                    GradeCalcGroup.КурсантыПоПредметуЗаЧасть(dc, Grades.GradeSets(dc, gradeQuery), subj.Название).ForEach(summGrade => {
+                    GradeCalcGroup.КурсантыПоПредметуЗаЧасть(et, Grades.GradeSets(et, gradeQuery), subj.Название).ForEach(summGrade => {
                         cell.GetOffset(0, 11).Value = summGrade;
                     });
                     cell.GetOffset(0, 11).GetOffset(1, 0).Value = totalDateGrades.Mean();
@@ -101,7 +99,7 @@ namespace Grader.grades {
                     sumCell.GetOffset(0, 12 - a).Value = totalSubjectGrades.Count(g => g == a);
                     sumCell.GetOffset(0, 12 - a).GetOffset(1, 0).Value = totalSubjectGrades.PercentWhere(g => g == a);
                 }
-                GradeCalcGroup.КурсантыПоПредметуЗаЧасть(dc, Grades.GradeSets(dc, subjectGradeQuery), subj.Название).ForEach(summaryGrade => {
+                GradeCalcGroup.КурсантыПоПредметуЗаЧасть(et, Grades.GradeSets(et, subjectGradeQuery), subj.Название).ForEach(summaryGrade => {
                     sumCell.GetOffset(0, 11).Value = summaryGrade;
                 });
                 sumCell.GetOffset(0, 11).GetOffset(1, 0).Value = totalSubjectGrades.Mean();

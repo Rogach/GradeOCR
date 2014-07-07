@@ -8,10 +8,10 @@ using System.Data.Linq;
 
 namespace Grader.gui {
     public class PredefinedPersonLists : ListBox {
-        private DataAccess dataAccess;
+        private Entities et;
 
-        public PredefinedPersonLists(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public PredefinedPersonLists(Entities et) {
+            this.et = et;
             this.InitializeComponent();
         }
 
@@ -27,26 +27,23 @@ namespace Grader.gui {
         }
 
         public IQueryable<Оценка> GetGradeQuery() {
-            DataContext dc = dataAccess.GetDataContext();
             return
-                from grade in dc.GetTable<Оценка>()
+                from grade in et.Оценка
                 from soldier in GetPersonQuery()
                 where grade.КодПроверяемого == soldier.Код
                 select grade;
         }
 
-        public IQueryable<ВоеннослужащийПоПодразделениям> GetPersonQuery() {
-            DataContext dc = dataAccess.GetDataContext();
+        public IQueryable<Военнослужащий> GetPersonQuery() {
             List<int> personIds = GetSelectedList().soldierIds;
             return
-                from s in dc.GetTable<ВоеннослужащийПоПодразделениям>()
+                from s in et.Военнослужащий
                 where personIds.Contains(s.Код)
-                where s.КодСтаршегоПодразделения == s.КодПодразделения
-                where s.Убыл == 0
+                where !s.Убыл
                 select s;
         }
 
-        public List<ВоеннослужащийПоПодразделениям> GetPersonList() {
+        public List<Военнослужащий> GetPersonList() {
             List<int> personIds = GetSelectedList().soldierIds;
             return GetPersonQuery().ToList().OrderBy(p => personIds.IndexOf(p.Код)).ToList();
         }

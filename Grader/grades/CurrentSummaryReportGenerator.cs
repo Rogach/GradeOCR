@@ -10,9 +10,9 @@ using LibUtil;
 
 namespace Grader.grades {
     public class CurrentSummaryReportGenerator {
-        public static void GenerateCurrentSummaryReport(DataContext dc, IQueryable<Оценка> gradeQuery) {
+        public static void GenerateCurrentSummaryReport(Entities et, IQueryable<Оценка> gradeQuery) {
 
-            var perPlatoon = gradeQuery.ToListTimed().GroupBy(g => g.КодПодразделения);
+            var perPlatoon = gradeQuery.ToList().GroupBy(g => g.КодПодразделения);
 
             var doc = WordTemplates.CreateEmptyWordDoc();
             var sel = doc.Application.Selection;
@@ -20,9 +20,9 @@ namespace Grader.grades {
             sel.TypeText("По состоянию на " + DateTime.Now.ToString("HH:mm dd.MM.yyyy года") + "\n\n");
             sel.TypeText(String.Format("Обработаны результаты по {0} взводам, сдававших ВЭ.\n\n", perPlatoon.Count()));
             
-            List<Предмет> subjects = (from subj in dc.GetTable<Предмет>() select subj).ToListTimed();
+            List<Предмет> subjects = (from subj in et.Предмет select subj).ToList();
             foreach (var subj in subjects) {
-                List<int> grades = gradeQuery.Where(g => g.КодПредмета == subj.Код).Select(g => g.Значение).ToListTimed();
+                List<int> grades = gradeQuery.Where(g => g.КодПредмета == subj.Код).Select(g => (int) g.Значение).ToList();
                 Func<int, int> countGrades = x => grades.Where(g => g == x).Count();
                 Func<int, double> percentGrades = x => (double) countGrades(x) / grades.Count * 100;
                 if (grades.Count > 0) {

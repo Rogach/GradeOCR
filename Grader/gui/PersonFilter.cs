@@ -12,10 +12,10 @@ using Grader.enums;
 namespace Grader.gui {
     public class PersonFilter : Panel {
 
-        private DataAccess dataAccess;
+        private Entities et;
 
-        public PersonFilter(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public PersonFilter(Entities et) {
+            this.et = et;
             this.InitializeComponent();
         }
 
@@ -28,12 +28,11 @@ namespace Grader.gui {
         public CheckBox selectContract;
 
         private void InitializeComponent() {
-            DataContext dc = dataAccess.GetDataContext();
 
             FormLayout layout = new FormLayout(this, x: 0, y: 0);
 
             subunitSelector = layout.Add("Подразделение", new ComboBox());
-            subunitSelector.Items.AddRange(dc.GetTable<Подразделение>().ToListTimed().ToArray());
+            subunitSelector.Items.AddRange(et.Подразделение.ToArray());
             subunitSelector.SelectedIndex = 0;
             subunitSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             subunitSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -64,8 +63,8 @@ namespace Grader.gui {
 
             vusSelector = layout.Add("ВУС", new ComboBox());
             string[] possibleVuses =
-                dc.GetTable<Военнослужащий>().Select(v => v.ВУС).Distinct().ToListTimed()
-                .Where(v => v != 0).Select(v => v.ToString()).ToArray();
+                et.Военнослужащий.Select(v => v.ВУС).Distinct()
+                .Where(v => v != 0).ToList().Select(v => v.ToString()).ToArray();
             vusSelector.Items.AddRange(possibleVuses);
             vusSelector.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             vusSelector.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -88,7 +87,6 @@ namespace Grader.gui {
         }
 
         public IQueryable<Оценка> GetGradeQuery() {
-            DataContext dc = dataAccess.GetDataContext();
             Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
             StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
             Option<int> vus;
@@ -98,15 +96,13 @@ namespace Grader.gui {
                 vus = new Some<int>(Int32.Parse((string) vusSelector.SelectedItem));
             }
             IQueryable<Оценка> gradeQuery =
-                from grade in dc.GetTable<Оценка>()
+                from grade in et.Оценка
 
-                from subunitRel in dc.GetTable<ПодразделениеПодчинение>()
-                where grade.КодПодразделения == subunitRel.КодПодразделения
+                join subunitRel in et.ПодразделениеПодчинение on grade.КодПодразделения equals subunitRel.КодПодразделения
                 where subunitRel.КодСтаршегоПодразделения == selectedSubunit.Код
                 where (selectRelatedSubunits.Checked || grade.КодПодразделения == selectedSubunit.Код)
 
-                from subunit in dc.GetTable<Подразделение>()
-                where grade.КодПодразделения == subunit.Код
+                join subunit in et.Подразделение on grade.КодПодразделения equals subunit.Код
                 where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
 
                 where
@@ -119,8 +115,7 @@ namespace Grader.gui {
             return gradeQuery;
         }
 
-        public IQueryable<ВоеннослужащийПоПодразделениям> GetPersonQuery() {
-            DataContext dc = dataAccess.GetDataContext();
+        public IQueryable<Военнослужащий> GetPersonQuery() {
             StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
             Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
             Option<int> vus;
@@ -131,10 +126,10 @@ namespace Grader.gui {
             }
 
             var query =
-                from soldier in dc.GetTable<ВоеннослужащийПоПодразделениям>()
-                from subunit in dc.GetTable<Подразделение>()
-                where soldier.КодПодразделения == subunit.Код
-                where soldier.КодСтаршегоПодразделения == selectedSubunit.Код
+                from soldier in et.Военнослужащий
+                join subunitRel in et.ПодразделениеПодчинение on soldier.КодПодразделения equals subunitRel.КодПодразделения
+                join subunit in et.Подразделение on soldier.КодПодразделения equals subunit.Код
+                where subunitRel.КодСтаршегоПодразделения == selectedSubunit.Код
 
                 where selectRelatedSubunits.Checked || soldier.КодПодразделения == selectedSubunit.Код
 
@@ -146,7 +141,7 @@ namespace Grader.gui {
                     (soldier.ТипВоеннослужащего == "контрактник" && selectContract.Checked)
                 where vus.IsEmpty() || soldier.ВУС == vus.GetOrElse(-1)
                 select soldier;
-            return Querying.GetSubunitSoldiersQuery(dc, selectedSubunit.Код, query);
+            return Querying.GetSubunitSoldiers(et, selectedSubunit.Код, query);
         }
 
     }

@@ -19,7 +19,7 @@ namespace Grader.model {
 
     public class RegisterRecord {
         public int soldierId { get; set; }
-        public ВоеннослужащийПоПодразделениям soldier { get; set; }
+        public Военнослужащий soldier { get; set; }
         public List<Оценка> marks { get; set; }
     }
 }

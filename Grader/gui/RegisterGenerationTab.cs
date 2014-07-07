@@ -14,10 +14,12 @@ using LibUtil.wrapper.excel;
 
 namespace Grader.gui {
     class RegisterGenerationTab : TabPage {
-        private DataAccess dataAccess;
+        private Entities et;
+        private Settings settings;
 
-        public RegisterGenerationTab(DataAccess dataAccess) {
-            this.dataAccess = dataAccess;
+        public RegisterGenerationTab(Entities et, Settings settings) {
+            this.et = et;
+            this.settings = settings;
             this.InitializeComponent();
         }
 
@@ -58,11 +60,9 @@ namespace Grader.gui {
         private void InitializeComponent() {
             this.Text = "Печать ведомостей";
 
-            personSelector = new PersonSelector(dataAccess);
+            personSelector = new PersonSelector(et);
             personSelector.Location = new Point(3, 3);
             this.Controls.Add(personSelector);
-
-            DataContext dc = dataAccess.GetDataContext();
 
             FormLayout layout = new FormLayout(this, maxLabelWidth: 90, y: 6 + personSelector.PreferredSize.Height);
 
@@ -104,12 +104,12 @@ namespace Grader.gui {
         }
 
         private class SoldierGrouping {
-            public Func<ВоеннослужащийПоПодразделениям, int> keySelector { get; set; }
+            public Func<Военнослужащий, int> keySelector { get; set; }
             public Func<int, string> registerName { get; set; }
-            public Func<List<ВоеннослужащийПоПодразделениям>, Подразделение> subunit { get; set; }
+            public Func<List<Военнослужащий>, Подразделение> subunit { get; set; }
         }
 
-        private SoldierGrouping GetGrouping(DataContext dc) {
+        private SoldierGrouping GetGrouping(Entities et) {
             if (groupingNone.Checked) {
                 return new SoldierGrouping {
                     keySelector = v => 0,
@@ -125,8 +125,8 @@ namespace Grader.gui {
             } else if (groupingByPlatoon.Checked) {
                 return new SoldierGrouping {
                     keySelector = v => v.КодПодразделения,
-                    registerName = subunitId => Querying.GetSubunitName(dc, subunitId),
-                    subunit = soldiers => dc.GetTable<Подразделение>().Where(s => s.Код == soldiers.First().КодПодразделения).ToListTimed().First()
+                    registerName = subunitId => Querying.GetSubunitName(et, subunitId),
+                    subunit = soldiers => et.Подразделение.Where(s => s.Код == soldiers.First().КодПодразделения).First()
                 };
             } else if (groupingByVus.Checked) {
                 return new SoldierGrouping {
@@ -146,7 +146,6 @@ namespace Grader.gui {
         }
 
         private void GenerateRegister() {
-            DataContext dc = dataAccess.GetDataContext();
             RegisterSpec spec = (RegisterSpec) registerSubjectSelect.SelectedItem;
             RegisterSettings settings = new RegisterSettings {
                 registerType = registerTypeSelect.GetComboBoxEnumValue<RegisterType>(),
@@ -154,17 +153,17 @@ namespace Grader.gui {
                 strikeKMN = strikeKMN.Checked,
                 registerDate = registerDate.Value
             };
-            List<ВоеннослужащийПоПодразделениям> soldiers =
+            List<Военнослужащий> soldiers =
                 personSelector.GetPersonList();
             if (onlyKMN.Checked) {
-                soldiers = soldiers.Where(v => v.КМН == 1).ToList();
+                soldiers = soldiers.Where(v => v.КМН).ToList();
             }
             if (soldiers.Count == 0) {
                 System.Windows.Forms.MessageBox.Show("Нет соответствующих фильтру военнослужащих!");
             }
-            SoldierGrouping grouping = GetGrouping(dc);
+            SoldierGrouping grouping = GetGrouping(et);
 
-            var rwb = ExcelTemplates.LoadExcelTemplate(dataAccess.GetTemplateLocation(spec.templateName));
+            var rwb = ExcelTemplates.LoadExcelTemplate(this.settings.GetTemplateLocation(spec.templateName));
             ExcelWorksheet templateSheet = rwb.Worksheets.First();
             ProgressDialogs.ForEach(soldiers.GroupBy(grouping.keySelector), group => {
                 templateSheet.Copy(After: rwb.Worksheets.Last());
@@ -175,7 +174,7 @@ namespace Grader.gui {
                 if (personSelector.IsPredefinedList()) {
                     settings.subunitName = personSelector.predefinedPersonLists.GetRegisterName();
                 }
-                spec.Format(dc, rsh, settings);
+                spec.Format(et, rsh, settings);
             });
 
             templateSheet.Delete();
