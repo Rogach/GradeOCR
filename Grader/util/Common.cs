@@ -13,7 +13,7 @@ namespace Grader.util {
 
         public static string GetFullName(this Военнослужащий v, Entities et) {
             Звание rank = et.rankCache.Find(r => r.Код == v.КодЗвания);
-            return rank + " " + v.ФИО();
+            return rank.Название + " " + v.ФИО();
         }
     }
 }

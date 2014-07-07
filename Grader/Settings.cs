@@ -87,7 +87,7 @@ namespace Grader {
         public StringSetting gradeViewTags = new StringSetting("gradeViewTags");
 
         public string GetTemplateLocation(string templateName) {
-            return templatesLocation + "/" + templateName;
+            return templatesLocation.GetValue() + "/" + templateName;
         }
 
         private List<Setting<object>> settings;

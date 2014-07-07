@@ -59,9 +59,9 @@ namespace Grader.grades {
                 .OrderBy(s => s.Звание.order)
                 .Reverse();
             ExcelTemplates.InsertPlainListMulti(sh, "СписокЧленов1", comissionMembers,
-                new List<Func<Военнослужащий, string>> { s => s.Звание.Название, s => s.ФИО() });
+                new List<Func<Военнослужащий, string>> { s => et.rankIdToName[s.КодЗвания], s => s.ФИО() });
             ExcelTemplates.InsertPlainListMulti(sh, "СписокЧленов2", comissionMembers,
-                new List<Func<Военнослужащий, string>> { s => s.Звание.Название, s => "", s => "", s => s.ФИО() });
+                new List<Func<Военнослужащий, string>> { s => et.rankIdToName[s.КодЗвания], s => "", s => "", s => s.ФИО() });
 
             var gradeSets =
                 Grades.GradeSets(et, Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код)).OrderBy(gs => gs.soldier.ФИО())

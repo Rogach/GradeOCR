@@ -117,6 +117,7 @@ namespace Grader.gui {
 
         public IQueryable<Военнослужащий> GetPersonQuery() {
             StudyType st = studyType.GetComboBoxEnumValue<StudyType>();
+            string stString = st.ToString();
             Подразделение selectedSubunit = (Подразделение) subunitSelector.SelectedItem;
             Option<int> vus;
             if (vusSelector.SelectedItem == null) {
@@ -124,6 +125,8 @@ namespace Grader.gui {
             } else {
                 vus = new Some<int>(Int32.Parse((string) vusSelector.SelectedItem));
             }
+            bool vusIsEmpty = vus.IsEmpty();
+            int vusNum = vus.GetOrElse(-1);
 
             var query =
                 from soldier in et.Военнослужащий
@@ -133,13 +136,13 @@ namespace Grader.gui {
 
                 where selectRelatedSubunits.Checked || soldier.КодПодразделения == selectedSubunit.Код
 
-                where (st == StudyType.все || subunit.ТипОбучения == st.ToString())
+                where (st == StudyType.все || subunit.ТипОбучения == stString)
 
                 where
                     (soldier.ТипВоеннослужащего == "курсант" && selectCadets.Checked) ||
                     (soldier.ТипВоеннослужащего == "постоянный срочник" && selectPermanent.Checked) ||
                     (soldier.ТипВоеннослужащего == "контрактник" && selectContract.Checked)
-                where vus.IsEmpty() || soldier.ВУС == vus.GetOrElse(-1)
+                where vusIsEmpty || soldier.ВУС == vusNum
                 select soldier;
             return Querying.GetSubunitSoldiers(et, selectedSubunit.Код, query);
         }
