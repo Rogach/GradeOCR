@@ -19,6 +19,7 @@ namespace Grader {
                 MainForm mainForm = new MainForm(settings, ctx);
                 ctx.MainForm = mainForm;
                 Application.Run(ctx);
+                settings.Save();
             });
         }
     }

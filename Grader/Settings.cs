@@ -134,7 +134,6 @@ namespace Grader {
                 }
                 settings.gradeViewTags.SetValue("");
             }
-            settings.Save();
             return new Some<Settings>(settings);
         }
 
