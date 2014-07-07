@@ -55,6 +55,7 @@ namespace Grader.model {
                         rid = 1;
                     }
                 }
+                register.id = rid;
 
                 List<Action> commands = new List<Action>();
 

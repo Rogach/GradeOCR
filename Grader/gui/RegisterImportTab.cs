@@ -133,11 +133,10 @@ namespace Grader.gui {
             saveRegister.Click += new EventHandler(delegate {
                 SetRegisterPanelEnabled(false);
                 Register register = Util.Timed<Register>("get register", () => registerEditor.GetRegister());
-                Util.Timed("save register", () => RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et));
+                Util.Timed("save register", () => RegisterMarshaller.SaveRegister(register, et));
                 changesPending = false;
                 UpdateRegisterList();
-                SelectRegisterInList(register.id);
-                SetRegisterPanelEnabled(true);
+                registerEditor.SetRegister(registerEditor.GetEmptyRegister());
             });
             this.Controls.Add(saveRegister);
 
