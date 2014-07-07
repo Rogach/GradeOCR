@@ -113,6 +113,7 @@ namespace Grader {
             XmlWriter xw = XmlWriter.Create(GetSettingsLocation());
             doc.WriteTo(xw);
             xw.Flush();
+            xw.Close();
         }
 
         public static Option<Settings> Load() {
