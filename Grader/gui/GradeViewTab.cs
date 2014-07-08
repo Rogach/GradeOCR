@@ -186,6 +186,9 @@ namespace Grader.gui {
         private void showGrades_Click(object sender, EventArgs e) {
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
 
+            DateTime dtFrom = dateFrom.Value.Date;
+            DateTime dtTo = dateTo.Value.Date.AddDays(1);
+
             IQueryable<GradeDesc> gradeQuery =
                 from g in personSelector.GetGradeQuery()
 
@@ -196,8 +199,8 @@ namespace Grader.gui {
                 join r in et.Ведомость on g.КодВедомости equals r.Код
 
                 where r.Включена
-                where !dateFrom.Checked || r.ДатаЗаполнения >= dateFrom.Value.Date
-                where !dateTo.Checked || r.ДатаЗаполнения <= dateTo.Value.Date
+                where !dateFrom.Checked || r.ДатаЗаполнения >= dtFrom
+                where !dateTo.Checked || r.ДатаЗаполнения <= dtTo
 
                 where selectedTags.Count == 0 ||
                     (from t in et.ВедомостьТег

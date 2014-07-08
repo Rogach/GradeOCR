@@ -183,6 +183,8 @@ namespace Grader.gui {
 
         IQueryable<Оценка> GetGradeQuery() {
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
+            DateTime dtFrom = dateFrom.Value.Date;
+            DateTime dtTo = dateTo.Value.Date.AddDays(1);
             return
                 from grade in personFilter.GetGradeQuery()
 
@@ -200,8 +202,8 @@ namespace Grader.gui {
                 where grade.КодВедомости == r.Код
 
                 where r.Включена
-                where !dateFrom.Checked || r.ДатаЗаполнения >= dateFrom.Value.Date
-                where !dateTo.Checked || r.ДатаЗаполнения <= dateTo.Value.Date
+                where !dateFrom.Checked || r.ДатаЗаполнения >= dtFrom
+                where !dateTo.Checked || r.ДатаЗаполнения <= dtTo
 
                 where selectedTags.Count == 0 ||
                     (from t in et.ВедомостьТег
