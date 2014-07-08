@@ -178,11 +178,11 @@ namespace Grader.gui {
         public void UpdateRegisterList() {
             registerList.Items.Clear();
             et.Ведомость
-                .OrderByDescending(r => r.ДатаВнесения)
+                .OrderByDescending(r => r.ДатаЗаполнения)
                 .Select(r => new RegisterDesc { 
                     id = r.Код, 
                     name = r.Название,
-                    fillDate = r.ДатаВнесения, 
+                    fillDate = r.ДатаЗаполнения, 
                     virt = r.Виртуальная, 
                     enabled = r.Включена
                 })
