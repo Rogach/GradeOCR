@@ -27,9 +27,10 @@ namespace Grader.gui {
         }
 
         public IQueryable<Оценка> GetGradeQuery() {
+            IQueryable<Военнослужащий> personQuery = GetPersonQuery();
             return
                 from grade in et.Оценка
-                from soldier in GetPersonQuery()
+                from soldier in personQuery
                 where grade.КодПроверяемого == soldier.Код
                 select grade;
         }
