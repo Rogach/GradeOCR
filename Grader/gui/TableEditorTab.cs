@@ -18,11 +18,11 @@ namespace Grader.gui {
             this.et = et;
             tables = new List<TableDefinition> {
                 new TableDefinition(
-                    "Военнослужащий", 
-                    true,
-                    false,
-                    () => et.Военнослужащий.ToList().Select(o => (object) o).ToList(), 
-                    () => {
+                    name: "Военнослужащий", 
+                    allowToAddRows: true,
+                    allowToRemoveRows: false,
+                    getObjects: () => et.Военнослужащий.ToList().Select(o => (object) o).ToList(), 
+                    newObject: () => {
                         var v = et.Военнослужащий.CreateObject();
                         et.Военнослужащий.AddObject(v);
                         v.Фамилия = "";
@@ -34,10 +34,10 @@ namespace Grader.gui {
                         v.ТипВоеннослужащего = "курсант";
                         return v;
                     },
-                    obj => {
+                    deleteObject: obj => {
                         et.Военнослужащий.DeleteObject((Военнослужащий) obj);
                     },
-                    new List<ColumnDefinition> {
+                    Columns: new List<ColumnDefinition> {
                         new ColumnDefinition("Код", typeof(int), false, obj => ((Военнослужащий) obj).Код, null, null),
                         new ColumnDefinition("Фамилия", typeof(string), true, obj => ((Военнослужащий) obj).Фамилия, 
                             (obj, value) => ((Военнослужащий) obj).Фамилия = (string) value, null),
@@ -65,6 +65,30 @@ namespace Grader.gui {
                         new ColumnDefinition("Нет допуска на экзамен", typeof(bool), true, obj => ((Военнослужащий) obj).НетДопускаНаЭкзамен,
                             (obj, value) => ((Военнослужащий) obj).НетДопускаНаЭкзамен = (bool) value, null)
                     }
+                ),
+                new TableDefinition(
+                    name: "Должность",
+                    allowToAddRows: true,
+                    allowToRemoveRows: true,
+                    getObjects: () => et.Должность.ToList().Select(d => (object) d).ToList(),
+                    newObject: () => {
+                        var d = et.Должность.CreateObject();
+                        return d;
+                    },
+                    deleteObject: (obj) => {
+                        et.Должность.DeleteObject((Должность) obj);
+                    },
+                    Columns: new List<ColumnDefinition> {
+                        new ColumnDefinition("Код", typeof(int), false, (obj) => ((Должность) obj).Код, null, null),
+                        new ColumnDefinition("Название", typeof(string), true, (obj) => ((Должность) obj).Название, 
+                            (obj, value) => ((Должность) obj).Название = (string) value, et.Должность.Select(d => d.Название).Distinct().ToList()),
+                        new ColumnDefinition("Подразделение", typeof(string), true, obj => et.subunitIdToName[((Должность) obj).КодПодразделения],
+                            (obj, value) => ((Должность) obj).КодПодразделения = et.subunitNameToId[(string) value], 
+                            et.subunitCache.Select(s => s.Имя).ToList()),
+                        new ColumnDefinition("Военнослужащий", typeof(string), true, obj => et.soldierIdToName[((Должность) obj).КодВоеннослужащего],
+                            (obj, value) => ((Должность) obj).КодВоеннослужащего = et.soldierNameToId[(string) value],
+                            et.soldierNameCache)
+                    }
                 )
             };
             this.InitializeComponent();
@@ -74,11 +98,11 @@ namespace Grader.gui {
             public string name;
             public bool allowToAddRows;
             public bool allowToRemoveRows;
-            public List<ColumnDefinition> Columns;
             public Func<List<object>> getObjects;
             public Func<object> newObject;
             public Action<object> deleteObject;
-
+            public List<ColumnDefinition> Columns;
+            
             public TableDefinition(
                 string name, 
                 bool allowToAddRows, 
