@@ -178,7 +178,7 @@ namespace Grader.gui {
 
             FluidGradeEntering.EnableFluidGradeEntering(gradeView, gradeViewDataTable, col => col >= 4 && col != gradeView.ColumnCount - 1);
             GridPasteSupport.AddPasteSupport(gradeView, gradeViewDataTable);
-            GridDeleteKeySupport.AddDeleteKeySupport(gradeView, fromColumn: 4);
+            GridDeleteKeySupport.AddDeleteKeySupport(gradeView, isEditingAllowed: col => col >= 4 && col != gradeView.ColumnCount - 1);
 
             this.ResumeLayout(false);
         }
@@ -315,13 +315,18 @@ namespace Grader.gui {
 
             GradeSet gs = new GradeSet() { grades = grades, subunit = et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
 
-            GradeCalcIndividual.ОценкаОБЩ(
-                gs,
-                et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
-                someGradeDesc.grade.ТипВоеннослужащего
-            ).ForEach(sg => {
+            Option<int> summaryGrade =
+                GradeCalcIndividual.ОценкаОБЩ(
+                    gs,
+                    et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
+                    someGradeDesc.grade.ТипВоеннослужащего
+                );
+            summaryGrade.ForEach(sg => {
                 gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
-            });    
+            });
+            if (summaryGrade.IsEmpty()) {
+                gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = "";
+            }
         }
 
         private class GradeDesc {
