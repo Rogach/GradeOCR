@@ -33,6 +33,7 @@ namespace Grader.gui {
         private RegisterImportTab registerImportTab;
         private GradeViewTab gradeViewTab;
         private GradeAnalysisTab gradeAnalysisTab;
+        private TableEditorTab tableEditorTab;
 
         private void InitializeComponent() {
             this.SuspendLayout();
@@ -103,13 +104,15 @@ namespace Grader.gui {
             tabs.Size = new System.Drawing.Size(1200, 776);
 
             registerGenerationTab = new RegisterGenerationTab(et, settings);
-            AddTab(tabs, registerGenerationTab);
+            AddTab(registerGenerationTab);
             registerImportTab = new RegisterImportTab(et);
-            AddTab(tabs, registerImportTab);
+            AddTab(registerImportTab);
             gradeViewTab = new GradeViewTab(et, settings);
-            AddTab(tabs, gradeViewTab);
+            AddTab(gradeViewTab);
             gradeAnalysisTab = new GradeAnalysisTab(et, settings);
-            AddTab(tabs, gradeAnalysisTab);
+            AddTab(gradeAnalysisTab);
+            tableEditorTab = new TableEditorTab(et);
+            AddTab(tableEditorTab);
 
             gradeViewTab.ChangesSaved.AddEventListener(() => {
                 registerImportTab.UpdateRegisterList();
@@ -132,7 +135,7 @@ namespace Grader.gui {
             });
         }
 
-        private void AddTab(TabControl tabs, TabPage tab) {
+        private void AddTab(TabPage tab) {
             tab.Location = new Point(4, 22);
             tab.UseVisualStyleBackColor = true;
             tabs.Controls.Add(tab);

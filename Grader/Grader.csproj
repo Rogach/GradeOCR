@@ -136,6 +136,9 @@
     <Compile Include="gui\Separator.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="gui\TableEditorTab.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="model\Register.cs" />
     <Compile Include="model\RegisterMarshaller.cs" />
     <Compile Include="Program.cs" />
