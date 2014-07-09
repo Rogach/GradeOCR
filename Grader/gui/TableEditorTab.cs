@@ -73,6 +73,9 @@ namespace Grader.gui {
                     getObjects: () => et.Должность.ToList().Select(d => (object) d).ToList(),
                     newObject: () => {
                         var d = et.Должность.CreateObject();
+                        d.КодПодразделения = 1;
+                        d.КодВоеннослужащего = et.soldierIdToName.Keys.First();
+                        et.Должность.AddObject(d);
                         return d;
                     },
                     deleteObject: (obj) => {
