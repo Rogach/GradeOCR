@@ -156,6 +156,7 @@ namespace Grader.gui {
             tableSelector = new ComboBox();
             tableSelector.Items.AddRange(tables.ToArray());
             tableSelector.SelectedIndexChanged += new EventHandler(delegate {
+                filterString.Text = "";
                 SetEditedTable((TableDefinition) tableSelector.SelectedItem, "");
             });
 
