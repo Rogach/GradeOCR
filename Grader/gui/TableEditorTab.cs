@@ -38,31 +38,31 @@ namespace Grader.gui {
                         et.Военнослужащий.DeleteObject((Военнослужащий) obj);
                     },
                     Columns: new List<ColumnDefinition> {
-                        new ColumnDefinition("Код", typeof(int), false, obj => ((Военнослужащий) obj).Код, null, null),
-                        new ColumnDefinition("Фамилия", typeof(string), true, obj => ((Военнослужащий) obj).Фамилия, 
+                        new ColumnDefinition("Код", 50, typeof(int), false, obj => ((Военнослужащий) obj).Код, null, null),
+                        new ColumnDefinition("Фамилия", 100, typeof(string), true, obj => ((Военнослужащий) obj).Фамилия, 
                             (obj, value) => ((Военнослужащий) obj).Фамилия = (string) value, null),
-                        new ColumnDefinition("Имя", typeof(string), true, obj => ((Военнослужащий) obj).Имя, 
+                        new ColumnDefinition("Имя", 100, typeof(string), true, obj => ((Военнослужащий) obj).Имя, 
                             (obj, value) => ((Военнослужащий) obj).Имя = (string) value, null),
-                        new ColumnDefinition("Отчество", typeof(string), true, obj => ((Военнослужащий) obj).Отчество, 
+                        new ColumnDefinition("Отчество", 100, typeof(string), true, obj => ((Военнослужащий) obj).Отчество, 
                             (obj, value) => ((Военнослужащий) obj).Отчество = (string) value, null),
-                        new ColumnDefinition("Звание", typeof(string), true, obj => et.rankIdToName[((Военнослужащий) obj).КодЗвания],
+                        new ColumnDefinition("Звание", 100, typeof(string), true, obj => et.rankIdToName[((Военнослужащий) obj).КодЗвания],
                             (obj, value) => ((Военнослужащий) obj).КодЗвания = et.rankNameToId[(string) value], 
                             et.rankCache.Select(r => r.Название).ToList()),
-                        new ColumnDefinition("Подразделение", typeof(string), true, obj => et.subunitIdToName[((Военнослужащий) obj).КодПодразделения],
+                        new ColumnDefinition("Подразделение", 100, typeof(string), true, obj => et.subunitIdToName[((Военнослужащий) obj).КодПодразделения],
                             (obj, value) => ((Военнослужащий) obj).КодПодразделения = et.subunitNameToId[(string) value], 
                             et.subunitCache.Select(s => s.Имя).ToList()),
-                        new ColumnDefinition("ВУС", typeof(int), true, obj => ((Военнослужащий) obj).ВУС,
+                        new ColumnDefinition("ВУС", 50, typeof(int), true, obj => ((Военнослужащий) obj).ВУС,
                             (obj, value) => ((Военнослужащий) obj).ВУС = (int) value, null),
-                        new ColumnDefinition("ТипВоеннослужащего", typeof(string), true, obj => ((Военнослужащий) obj).ТипВоеннослужащего,
+                        new ColumnDefinition("ТипВоеннослужащего", 150, typeof(string), true, obj => ((Военнослужащий) obj).ТипВоеннослужащего,
                             (obj, value) => ((Военнослужащий) obj).ТипВоеннослужащего = (string) value,
                             et.Военнослужащий.Select(v => v.ТипВоеннослужащего).Distinct().ToList()),
-                        new ColumnDefinition("Убыл", typeof(bool), true, obj => ((Военнослужащий) obj).Убыл,
+                        new ColumnDefinition("Убыл", 50, typeof(bool), true, obj => ((Военнослужащий) obj).Убыл,
                             (obj, value) => ((Военнослужащий) obj).Убыл = (bool) value, null),
-                        new ColumnDefinition("КМН", typeof(bool), true, obj => ((Военнослужащий) obj).КМН,
+                        new ColumnDefinition("КМН", 50, typeof(bool), true, obj => ((Военнослужащий) obj).КМН,
                             (obj, value) => ((Военнослужащий) obj).КМН = (bool) value, null),
-                        new ColumnDefinition("sortWeight", typeof(int), true, obj => ((Военнослужащий) obj).sortWeight,
+                        new ColumnDefinition("sortWeight", 100, typeof(int), true, obj => ((Военнослужащий) obj).sortWeight,
                             (obj, value) => ((Военнослужащий) obj).sortWeight = (int) value, null),
-                        new ColumnDefinition("Нет допуска на экзамен", typeof(bool), true, obj => ((Военнослужащий) obj).НетДопускаНаЭкзамен,
+                        new ColumnDefinition("Нет допуска на экзамен", 150, typeof(bool), true, obj => ((Военнослужащий) obj).НетДопускаНаЭкзамен,
                             (obj, value) => ((Военнослужащий) obj).НетДопускаНаЭкзамен = (bool) value, null)
                     }
                 ),
@@ -79,13 +79,13 @@ namespace Grader.gui {
                         et.Должность.DeleteObject((Должность) obj);
                     },
                     Columns: new List<ColumnDefinition> {
-                        new ColumnDefinition("Код", typeof(int), false, (obj) => ((Должность) obj).Код, null, null),
-                        new ColumnDefinition("Название", typeof(string), true, (obj) => ((Должность) obj).Название, 
+                        new ColumnDefinition("Код", 50, typeof(int), false, (obj) => ((Должность) obj).Код, null, null),
+                        new ColumnDefinition("Название", 100, typeof(string), true, (obj) => ((Должность) obj).Название, 
                             (obj, value) => ((Должность) obj).Название = (string) value, et.Должность.Select(d => d.Название).Distinct().ToList()),
-                        new ColumnDefinition("Подразделение", typeof(string), true, obj => et.subunitIdToName[((Должность) obj).КодПодразделения],
+                        new ColumnDefinition("Подразделение", 150, typeof(string), true, obj => et.subunitIdToName[((Должность) obj).КодПодразделения],
                             (obj, value) => ((Должность) obj).КодПодразделения = et.subunitNameToId[(string) value], 
                             et.subunitCache.Select(s => s.Имя).ToList()),
-                        new ColumnDefinition("Военнослужащий", typeof(string), true, obj => et.soldierIdToName[((Должность) obj).КодВоеннослужащего],
+                        new ColumnDefinition("Военнослужащий", 250, typeof(string), true, obj => et.soldierIdToName[((Должность) obj).КодВоеннослужащего],
                             (obj, value) => ((Должность) obj).КодВоеннослужащего = et.soldierNameToId[(string) value],
                             et.soldierNameCache)
                     }
@@ -127,6 +127,7 @@ namespace Grader.gui {
 
         class ColumnDefinition {
             string name;
+            int columnWidth;
             Type type;
             bool editable;
             Func<object, object> getValue;
@@ -135,12 +136,14 @@ namespace Grader.gui {
 
             public ColumnDefinition(
                 string name,
+                int columnWidth,
                 Type type,
                 bool editable,
                 Func<object, object> getValue,
                 Action<object, object> setValue,
                 List<string> completions) {
                     this.name = name;
+                    this.columnWidth = columnWidth;
                     this.type = type;
                     this.editable = editable;
                     this.getValue = getValue;
@@ -150,6 +153,9 @@ namespace Grader.gui {
 
             public string Name() {
                 return name;
+            }
+            public int ColumnWidth() {
+                return columnWidth;
             }
             public Type GetColType() {
                 return type;
@@ -266,6 +272,10 @@ namespace Grader.gui {
                         }
                     }
                 });
+            tableView.ColumnAdded += new DataGridViewColumnEventHandler(delegate(object e, DataGridViewColumnEventArgs args) {
+                args.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                args.Column.Width = currentTable.Columns[args.Column.Index].ColumnWidth();
+            });
         }
 
         private void SetEditedTable(TableDefinition tdef, string filter) {
