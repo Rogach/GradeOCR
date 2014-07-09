@@ -352,7 +352,7 @@ namespace Grader.gui {
                 bool matches = false;
                 foreach (var col in tdef.Columns) {
                     object value = col.GetValue(obj);
-                    matches = matches || value.ToString().Contains(filter);
+                    matches = matches || value.ToString().ToLower().Contains(filter.ToLower());
                     cells.Add(col.GetValue(obj));
                 }
                 if (matches) {
