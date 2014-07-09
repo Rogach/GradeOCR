@@ -185,6 +185,8 @@ namespace Grader.gui {
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
             DateTime dtFrom = dateFrom.Value.Date;
             DateTime dtTo = dateTo.Value.Date.AddDays(1);
+            bool subjectIsComplex = ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem);
+
             return
                 from grade in personFilter.GetGradeQuery()
 
@@ -209,12 +211,12 @@ namespace Grader.gui {
                     (from t in et.ВедомостьТег
                      where t.КодВедомости == r.Код
                      where selectedTags.Contains(t.Тег)
-                     select t).SingleOrDefault() != default(ВедомостьТег)
+                     select t).FirstOrDefault() != default(ВедомостьТег)
 
                 from subj in et.Предмет
                 where grade.КодПредмета == subj.Код
                 where subjectSelector.SelectedItem == null
-                   || ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem)
+                   || subjectIsComplex
                    || subj.Название == ((string) subjectSelector.SelectedItem)
                 
                 select grade;
