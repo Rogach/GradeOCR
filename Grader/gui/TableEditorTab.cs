@@ -24,7 +24,6 @@ namespace Grader.gui {
                     getObjects: () => et.Военнослужащий.ToList().Select(o => (object) o).ToList(), 
                     newObject: () => {
                         var v = et.Военнослужащий.CreateObject();
-                        et.Военнослужащий.AddObject(v);
                         v.Фамилия = "";
                         v.Имя = "";
                         v.Отчество = "";
@@ -32,6 +31,7 @@ namespace Grader.gui {
                         v.КодПодразделения = 1;
                         v.ВУС = 0;
                         v.ТипВоеннослужащего = "курсант";
+                        et.Военнослужащий.AddObject(v);
                         return v;
                     },
                     deleteObject: obj => {
@@ -91,6 +91,58 @@ namespace Grader.gui {
                         new ColumnDefinition("Военнослужащий", 250, typeof(string), true, obj => et.soldierIdToName[((Должность) obj).КодВоеннослужащего],
                             (obj, value) => ((Должность) obj).КодВоеннослужащего = et.soldierNameToId[(string) value],
                             et.soldierNameCache)
+                    }
+                ),
+                new TableDefinition(
+                    name: "Подразделение",
+                    allowToAddRows: false,
+                    allowToRemoveRows: false,
+                    getObjects: () => et.Подразделение.ToList().Select(s => (object) s).ToList(),
+                    newObject: null,
+                    deleteObject: null,
+                    Columns: new List<ColumnDefinition> {
+                        new ColumnDefinition("Код", 50, typeof(int), false, (obj) => ((Подразделение) obj).Код, null, null),
+                        new ColumnDefinition("Имя", 150, typeof(string), true, obj => ((Подразделение) obj).Имя,
+                            (obj, value) => ((Должность) obj).КодПодразделения = et.subunitNameToId[(string) value], null),
+                        new ColumnDefinition("Тип", 100, typeof(string), true, obj => ((Подразделение) obj).Тип,
+                            (obj, value) => ((Подразделение) obj).Тип = (string) value,
+                            et.Подразделение.Select(s => s.Тип).Distinct().ToList()),
+                        new ColumnDefinition("ТипОбучения", 100, typeof(string), true, obj => ((Подразделение) obj).ТипОбучения,
+                            (obj, value) => ((Подразделение) obj).ТипОбучения = (string) value,
+                            et.Подразделение.Select(s => s.ТипОбучения).Distinct().ToList()),
+                        new ColumnDefinition("Актив", 50, typeof(bool), true, obj => ((Подразделение) obj).Актив,
+                            (obj, value) => ((Подразделение) obj).Актив = (bool) value, null),
+                        new ColumnDefinition("ИмяРодительный", 150, typeof(string), true, obj => ((Подразделение) obj).ИмяРодительный,
+                            (obj, value) => ((Подразделение) obj).ИмяРодительный = (string) value, null),
+                        new ColumnDefinition("ИмяПредложный", 150, typeof(string), true, obj => ((Подразделение) obj).ИмяПредложный,
+                            (obj, value) => ((Подразделение) obj).ИмяПредложный = (string) value, null),
+                        new ColumnDefinition("ИмяКраткое", 150, typeof(string), true, obj => ((Подразделение) obj).ИмяКраткое,
+                            (obj, value) => ((Подразделение) obj).ИмяКраткое = (string) value, null),
+                        new ColumnDefinition("ПодразделениеОхраны", 50, typeof(bool), true, obj => ((Подразделение) obj).ПодразделениеОхраны,
+                            (obj, value) => ((Подразделение) obj).ПодразделениеОхраны = (bool) value, null)
+                    }
+                ),
+                new TableDefinition(
+                    name: "ВусНаЦикле",
+                    allowToAddRows: true,
+                    allowToRemoveRows: true,
+                    getObjects: () => et.ВусНаЦикле.ToList().Select(v => (object) v).ToList(),
+                    newObject: () => {
+                        var v = et.ВусНаЦикле.CreateObject();
+                        v.КодЦикла = et.subunitNameToId["1 цикл"];
+                        et.ВусНаЦикле.AddObject(v);
+                        return v;
+                    },
+                    deleteObject: (obj) => {
+                        et.ВусНаЦикле.DeleteObject((ВусНаЦикле) obj);
+                    },
+                    Columns: new List<ColumnDefinition> {
+                        new ColumnDefinition("Код", 50, typeof(int), false, obj => ((ВусНаЦикле) obj).Код, null, null),
+                        new ColumnDefinition("Цикл", 150, typeof(string), true, obj => et.subunitIdToName[((ВусНаЦикле) obj).КодЦикла],
+                            (obj, value) => ((ВусНаЦикле) obj).КодЦикла = et.subunitNameToId[(string) value],
+                            et.subunitCache.Select(s => s.Имя).ToList()),
+                        new ColumnDefinition("ВУС", 50, typeof(int), true, obj => ((ВусНаЦикле) obj).ВУС,
+                            (obj, value) => ((ВусНаЦикле) obj).ВУС = (int) value, null)
                     }
                 )
             };
