@@ -86,7 +86,7 @@ namespace Grader.grades {
                     Grades.GetGradesForSubunit(et, gradeQuery, subunitId))
                     .ToDictionary(g => g.soldier.Код);
                 int c = 1;
-                List<Военнослужащий> realSoldiers = soldiers.Where(s => et.rankCache.Find(r => r.Код == s.КодЗвания).Название != "ГП").ToList();
+                List<Военнослужащий> realSoldiers = soldiers.ToList().Where(s => s.КодЗвания != et.rankNameToId["ГП"]).ToList();
                 ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), realSoldiers, displayProgress: true, format: (s, rng) => {
                     var r = rng;
                     r.GetOffset(0, -1).Value = c++;
