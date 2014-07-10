@@ -12,17 +12,17 @@ namespace Grader.grades {
     public class CurrentSummaryReportGenerator {
         public static void GenerateCurrentSummaryReport(Entities et, IQueryable<Оценка> gradeQuery) {
 
-            var perPlatoon = gradeQuery.ToList().GroupBy(g => g.КодПодразделения);
+            var gradeSets = Grades.GradeSets(et, gradeQuery);
+            var platoonCount = gradeSets.Select(gs => gs.subunit.Код).Distinct().Count();
 
             var doc = WordTemplates.CreateEmptyWordDoc();
             var sel = doc.Application.Selection;
             sel.TypeText("Справка хода ВЭ в 90 МРУЦ\n\n");
             sel.TypeText("По состоянию на " + DateTime.Now.ToString("HH:mm dd.MM.yyyy года") + "\n\n");
-            sel.TypeText(String.Format("Обработаны результаты по {0} взводам, сдававших ВЭ.\n\n", perPlatoon.Count()));
+            sel.TypeText(String.Format("Обработаны результаты по {0} взводам, сдававшим ВЭ.\n\n", platoonCount));
             
-            List<Предмет> subjects = (from subj in et.Предмет select subj).ToList();
-            foreach (var subj in subjects) {
-                List<int> grades = gradeQuery.Where(g => g.КодПредмета == subj.Код).Select(g => (int) g.Значение).ToList();
+            foreach (var subj in et.Предмет.ToList()) {
+                List<int> grades = gradeSets.GetSubjectGrades(subj.Название);
                 Func<int, int> countGrades = x => grades.Where(g => g == x).Count();
                 Func<int, double> percentGrades = x => (double) countGrades(x) / grades.Count * 100;
                 if (grades.Count > 0) {
