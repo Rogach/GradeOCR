@@ -65,7 +65,7 @@ namespace Grader.grades {
                 c.GetOffset(2, 0).Value = "общая";
                 c.GetOffset(3, 0).Value = "место";
                 c = c.GetOffset(0, 1);
-                var subunits = Querying.GetSubunitsByType(et, subunitType);
+                var subunits = Querying.GetSubunitsByType(et, subunitType).ToList();
                 var subunitGrades = ProgressDialogs.Map(subunits, subunit => 
                     new {
                         subunitId = subunit.Код,
