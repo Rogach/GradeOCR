@@ -93,6 +93,16 @@ namespace Grader.gui {
 
             menuStrip.Items.Add(menu_file);
 
+            ToolStripMenuItem menu_import = new ToolStripMenuItem("Импорт");
+
+            ToolStripMenuItem menu_import_cadets = new ToolStripMenuItem("Импортировать курсантов");
+            menu_import_cadets.Click += new EventHandler(delegate {
+                Import.ImportCadets(et);
+            });
+            menu_import.DropDownItems.Add(menu_import_cadets);
+
+            menuStrip.Items.Add(menu_import);
+
             this.Controls.Add(menuStrip);
             this.MainMenuStrip = menuStrip;
 
