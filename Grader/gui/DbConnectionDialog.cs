@@ -35,33 +35,54 @@ namespace Grader.gui {
             this.Hide();
         }
 
-        public string server {
+        protected override void OnActivated(EventArgs e) {
+            base.OnActivated(e);
+            if (FocusOnPassword) {
+                this.password_text.Focus();
+            }
+        }
+
+        public bool FocusOnPassword { get; set; }
+
+        public string Server {
             get {
                 return server_text.Text;
             }
+            set {
+                server_text.Text = value;
+            }
         }
 
-        public string port {
+        public string Port {
             get {
                 return port_text.Text;
             }
-        }
-
-        public string user {
-            get {
-                return user_text.Text;
+            set {
+                port_text.Text = value;
             }
         }
 
-        public string password {
+        public string User {
+            get {
+                return user_text.Text;
+            }
+            set {
+                user_text.Text = value;
+            }
+        }
+
+        public string Password {
             get {
                 return password_text.Text;
+            }
+            set {
+                password_text.Text = value;
             }
         }
 
         public string ConnectionString {
             get {
-                return String.Format("server={0};port={1};uid={2};password={3};database=grader;charset=utf8", server, port, user, password);
+                return String.Format("server={0};port={1};uid={2};password={3};database=grader;charset=utf8", Server, Port, User, Password);
             }
         }
     }

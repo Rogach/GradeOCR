@@ -147,11 +147,11 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button ok_button;
+        private System.Windows.Forms.Button cancel_button;
         private System.Windows.Forms.TextBox server_text;
         private System.Windows.Forms.TextBox port_text;
         private System.Windows.Forms.TextBox user_text;
         private System.Windows.Forms.TextBox password_text;
-        private System.Windows.Forms.Button ok_button;
-        private System.Windows.Forms.Button cancel_button;
     }
 }

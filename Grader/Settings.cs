@@ -9,80 +9,9 @@ using System.Windows.Forms;
 using Grader.gui;
 
 namespace Grader {
-    public interface Setting<out T> {
-        T GetValue();
-        void SetValue(object value);
-        bool init();
-        bool read(XmlDocument doc);
-        void save(XmlDocument doc, XmlElement settings);
-    }
-
-    public abstract class AbstractStringSetting : Setting<string> {
-        protected string settingName;
-        protected string settingValue;
-
-        public AbstractStringSetting(string settingName) {
-            this.settingName = settingName;
-        }
-        public abstract bool init();
-        public bool read(XmlDocument doc) {
-            XmlNodeList nodes = doc.SelectNodes("/settings/" + settingName);
-            if (nodes.Count > 0) {
-                settingValue = nodes[0].InnerText;
-                return true;
-            } else {
-                return init();
-            }
-        }
-        public void save(XmlDocument doc, XmlElement settings) {
-            XmlElement xe = doc.CreateElement(settingName);
-            xe.AppendChild(doc.CreateTextNode(settingValue));
-            settings.AppendChild(xe);
-        }
-        public string GetValue() {
-            return settingValue;
-        }
-        public void SetValue(object value) {
-            settingValue = (string) value;
-        }
-    }
-
-    public class DbConnectionStringSetting : AbstractStringSetting {
-        public DbConnectionStringSetting(string settingName) : base(settingName) {}
-        public override bool init() {
-            Option<string> userDbConnectionString = DbConnectionDialog.ShowDbConnectionDialog();
-            userDbConnectionString.ForEach(cs => {
-                settingValue = cs;
-            });
-            return userDbConnectionString.NonEmpty();
-        }
-    }
-
-    public class DirSetting : AbstractStringSetting {
-        public DirSetting(string settingName) : base(settingName) {}
-        public override bool init() {
-            var fbd = new FolderBrowserDialog();
-            DialogResult result = fbd.ShowDialog();
-            if (result == DialogResult.OK) {
-                settingValue = fbd.SelectedPath;
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
-
-    public class StringSetting : AbstractStringSetting {
-        public StringSetting(string settingName, string defaultValue = "") : base(settingName) {
-            settingValue = defaultValue;
-        }
-        public override bool init() { 
-            return true;
-        }
-    }
-
+    
     public class Settings {
-        public DbConnectionStringSetting dbConnectionString = new DbConnectionStringSetting("dbConnectionString");
+        public DbConnectionStringSetting dbConnectionString = new DbConnectionStringSetting();
         public DirSetting templatesLocation = new DirSetting("templatesLocation");
         public StringSetting gradeViewTags = new StringSetting("gradeViewTags");
 
@@ -143,5 +72,151 @@ namespace Grader {
                 Path.DirectorySeparatorChar + 
                 "grader.settings";
         }
+
+        public static Option<string> XmlValue(XmlDocument doc, string path) {
+            XmlNodeList nodes = doc.SelectNodes(path);
+            if (nodes.Count > 0) {
+                return new Some<string>(nodes[0].InnerText);
+            } else {
+                return new None<string>();
+            }
+        }
     }
+
+    public interface Setting<out T> {
+        T GetValue();
+        void SetValue(object value);
+        bool init();
+        bool read(XmlDocument doc);
+        void save(XmlDocument doc, XmlElement settings);
+    }
+
+    public abstract class AbstractStringSetting : Setting<string> {
+        protected string settingName;
+        protected string settingValue;
+
+        public AbstractStringSetting(string settingName) {
+            this.settingName = settingName;
+        }
+        public abstract bool init();
+        public bool read(XmlDocument doc) {
+            Option<string> settingOpt = Settings.XmlValue(doc, "/settings/" + settingName);
+            if (settingOpt.NonEmpty()) {
+                settingValue = settingOpt.Get();
+                return true;
+            } else {
+                return init();
+            }
+        }
+        public void save(XmlDocument doc, XmlElement settings) {
+            XmlElement xe = doc.CreateElement(settingName);
+            xe.AppendChild(doc.CreateTextNode(settingValue));
+            settings.AppendChild(xe);
+        }
+        public string GetValue() {
+            return settingValue;
+        }
+        public void SetValue(object value) {
+            settingValue = (string) value;
+        }
+    }
+
+    public class DbConnectionStringSetting : Setting<string> {
+        string settingValue;
+
+        string serverSetting;
+        string portSetting;
+        string userSetting;
+        string passwordSetting;
+
+        public DbConnectionStringSetting() { }
+        public bool read(XmlDocument doc) {
+            Option<string> serverSettingOpt = Settings.XmlValue(doc, "/settings/connection/server");
+            Option<string> portSettingOpt = Settings.XmlValue(doc, "/settings/connection/port");
+            Option<string> userSettingOpt = Settings.XmlValue(doc, "/settings/connection/user");
+            if (serverSettingOpt.NonEmpty() && portSettingOpt.NonEmpty() && userSettingOpt.NonEmpty()) {
+                DbConnectionDialog dcd = new DbConnectionDialog();
+                dcd.Server = serverSettingOpt.Get();
+                dcd.Port = portSettingOpt.Get();
+                dcd.User = userSettingOpt.Get();
+                dcd.FocusOnPassword = true;
+                if (dcd.ShowDialog() == DialogResult.OK) {
+                    settingValue = dcd.ConnectionString;
+                    serverSetting = dcd.Server;
+                    portSetting = dcd.Port;
+                    userSetting = dcd.User;
+                    passwordSetting = dcd.Password;
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return init();
+            }
+        }
+        public bool init() {
+            DbConnectionDialog dcd = new DbConnectionDialog();
+            dcd.Port = "3306";
+            if (dcd.ShowDialog() == DialogResult.OK) {
+                settingValue = dcd.ConnectionString;
+                serverSetting = dcd.Server;
+                portSetting = dcd.Port;
+                userSetting = dcd.User;
+                passwordSetting = dcd.Password;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public void save(XmlDocument doc, XmlElement settings) {
+            XmlElement connection = doc.CreateElement("connection");
+
+            XmlElement serverXe = doc.CreateElement("server");
+            serverXe.AppendChild(doc.CreateTextNode(serverSetting));
+            connection.AppendChild(serverXe);
+
+            XmlElement portXe = doc.CreateElement("port");
+            portXe.AppendChild(doc.CreateTextNode(portSetting));
+            connection.AppendChild(portXe);
+
+            XmlElement userXe = doc.CreateElement("user");
+            userXe.AppendChild(doc.CreateTextNode(userSetting));
+            connection.AppendChild(userXe);
+
+            settings.AppendChild(connection);
+        }
+
+        public string GetValue() {
+            return settingValue;
+        }
+        public void SetValue(object value) {
+            settingValue = (string) value;
+        }
+    }
+
+    public class DirSetting : AbstractStringSetting {
+        public DirSetting(string settingName) : base(settingName) { }
+        public override bool init() {
+            var fbd = new FolderBrowserDialog();
+            DialogResult result = fbd.ShowDialog();
+            if (result == DialogResult.OK) {
+                settingValue = fbd.SelectedPath;
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public class StringSetting : AbstractStringSetting {
+        public StringSetting(string settingName, string defaultValue = "")
+            : base(settingName) {
+            settingValue = defaultValue;
+        }
+        public override bool init() {
+            return true;
+        }
+    }
+
 }
