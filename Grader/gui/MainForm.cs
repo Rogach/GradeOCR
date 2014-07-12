@@ -128,6 +128,12 @@ namespace Grader.gui {
                 registerImportTab.UpdateRegisterList();
             });
 
+            registerImportTab.RegisterSaved.AddEventListener(() => {
+                registerImportTab.RefreshAutocomplete();
+                gradeViewTab.RefreshAutocomplete();
+                gradeAnalysisTab.RefreshAutocomplete();
+            });
+
             tabs.ResumeLayout(false);
 
             this.AutoScaleDimensions = new SizeF(6F, 13F);

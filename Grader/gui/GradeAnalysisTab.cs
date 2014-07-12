@@ -17,6 +17,7 @@ namespace Grader.gui {
             this.et = et;
             this.settings = settings;
             this.InitializeComponent();
+            this.RefreshAutocomplete();
         }
 
         private DateTimePicker dateFrom;
@@ -125,11 +126,7 @@ namespace Grader.gui {
             tags.TextChanged += new EventHandler(delegate {
                 errorProvider.SetError(tags, null);
             });
-            tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
-            tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            tags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToList().ToArray());
-
+            
             List<string> ranks = 
                 et.Звание
                 .OrderByDescending(r => r.order)
@@ -471,6 +468,13 @@ namespace Grader.gui {
                 displayAllSubjects.Checked,
                 personFilter.selectCadets.Checked
             );
+        }
+
+        public void RefreshAutocomplete() {
+            tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            tags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToList().ToArray());
         }
     }
 }

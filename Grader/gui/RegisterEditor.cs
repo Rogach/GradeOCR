@@ -21,6 +21,7 @@ namespace Grader.gui {
         public RegisterEditor(Entities et) {
             this.et = et;
             this.InitializeComponent();
+            this.RefreshAutocomplete();
         }
 
         private Register currentRegister;
@@ -59,11 +60,7 @@ namespace Grader.gui {
 
             registerTags = layout.Add("Тэги", new TextBox());
             registerTags.TextChanged += changeHandler;
-            registerTags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            registerTags.AutoCompleteSource = AutoCompleteSource.CustomSource;
-            registerTags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            registerTags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToArray());
-
+            
             layout.AddSpacer(10);
 
             layout.PerformLayout();
@@ -406,6 +403,14 @@ namespace Grader.gui {
 
         public static List<String> SplitTags(string tags) {
             return tags.Split(new char[] { ' ' }).Where(t => t.Trim().Length > 0).ToList();
+        }
+
+        public void RefreshAutocomplete() {
+            registerTags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            registerTags.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            registerTags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            registerTags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToArray());
+
         }
     }
 }

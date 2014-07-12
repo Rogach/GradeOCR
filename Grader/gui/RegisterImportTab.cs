@@ -25,6 +25,7 @@ namespace Grader.gui {
         private Button newRegisterButton;
         private Button saveRegister;
         private Button cancelRegister;
+        public EventManager RegisterSaved = new EventManager();
 
         private bool _changesPending = false;
         private bool changesPending {
@@ -137,6 +138,7 @@ namespace Grader.gui {
                 UpdateRegisterList();
                 registerEditor.SetRegister(registerEditor.GetEmptyRegister());
                 changesPending = false;
+                RegisterSaved.Invoke();
             });
             this.Controls.Add(saveRegister);
 
@@ -307,6 +309,10 @@ namespace Grader.gui {
             } else {
                 return new None<Register>();
             }
+        }
+
+        public void RefreshAutocomplete() {
+            registerEditor.RefreshAutocomplete();
         }
     }
 }

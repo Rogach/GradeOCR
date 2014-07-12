@@ -24,6 +24,7 @@ namespace Grader.gui {
             this.et = et;
             this.settings = settings;
             this.InitializeComponent();
+            this.RefreshAutocomplete();
         }
 
         private DateTimePicker dateFrom;
@@ -90,11 +91,7 @@ namespace Grader.gui {
             tags.Size = new Size(152, 20);
             tags.Text = settings.gradeViewTags.GetValue();
             this.Controls.Add(tags);
-            tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
-            tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
-            tags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToArray());
-
+            
             showGrades = new Button { Text = "Показать оценки" };
             showGrades.Location = new Point(3, layout.GetY() + 5 + personSelector.Height + 10 + 30);
             showGrades.Size = new Size(245, 25);
@@ -504,6 +501,14 @@ namespace Grader.gui {
                     showGrades_Click(null, null);
                 }
             }
+        }
+
+        public void RefreshAutocomplete() {
+            tags.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            tags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToArray());
+
         }
     }
 }
