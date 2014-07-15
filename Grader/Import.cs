@@ -20,7 +20,7 @@ namespace Grader {
                 Dictionary<string, int> headerOffset = new Dictionary<string, int>();
                 var h = sh.GetRange("A1");
                 while (h.Value != null) {
-                    headerOffset.Add(h.Value.ToString(), h.Column - 1);
+                    headerOffset.Add(h.Value.ToString().ToLower(), h.Column - 1);
                     h = h.GetOffset(0, 1);
                 }
                 
