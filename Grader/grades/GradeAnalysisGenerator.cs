@@ -138,5 +138,6 @@ namespace Grader.grades {
                 Logger.Log("Call to GradeAnalysis.GenerateAnalysis done");
             }
         }
+
     }
 }

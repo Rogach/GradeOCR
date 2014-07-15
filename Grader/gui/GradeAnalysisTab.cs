@@ -234,7 +234,9 @@ namespace Grader.gui {
                     return;
                 }
 
-                GradeListGenerator.GenerateGradeList(et, GetGradeQuery(), (string) subjectSelector.SelectedItem);
+                TimeAnalysis("список оценок", () => {
+                    GradeListGenerator.GenerateGradeList(et, GetGradeQuery(), (string) subjectSelector.SelectedItem);
+                });
             });
 
             gradeSummaryButton = layout.AddFullRow(new Button());
@@ -254,16 +256,18 @@ namespace Grader.gui {
                     return;
                 }
 
-                GradeSummaryGenerator.GenerateSummary(
-                    resultBox,
-                    et,
-                    (Подразделение) personFilter.subunitSelector.SelectedItem,
-                    GetGradeQuery(),
-                    (string) subjectSelector.SelectedItem,
-                    withSummaryGrade.Checked,
-                    personFilter.selectCadets.Checked,
-                    personFilter.selectRelatedSubunits.Checked
-                );
+                TimeAnalysis("сводка", () => {
+                    GradeSummaryGenerator.GenerateSummary(
+                        resultBox,
+                        et,
+                        (Подразделение) personFilter.subunitSelector.SelectedItem,
+                        GetGradeQuery(),
+                        (string) subjectSelector.SelectedItem,
+                        withSummaryGrade.Checked,
+                        personFilter.selectCadets.Checked,
+                        personFilter.selectRelatedSubunits.Checked
+                    );
+                });
             });
 
             withSummaryGrade = layout.AddFullRow(new CheckBox());
@@ -276,7 +280,9 @@ namespace Grader.gui {
             averageGradesForAllSubjectsButton.Text = "Средние оценки по всем предметам";
             averageGradesForAllSubjectsButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                AverageGradeSummaryGenerator.GenerateAverageGradeSummary(resultBox, et, GetGradeQuery());
+                TimeAnalysis("средние оценки по всем предметам", () => {
+                    AverageGradeSummaryGenerator.GenerateAverageGradeSummary(resultBox, et, GetGradeQuery());
+                });
             });
 
             layout.AddSpacer(15);
@@ -298,13 +304,15 @@ namespace Grader.gui {
                     return;
                 }
 
-                ClassActGenerator.GenerateClassAct(
-                    et,
-                    settings,
-                    (Подразделение) personFilter.subunitSelector.SelectedItem,
-                    dateTo.Value,
-                    GetGradeQuery()
-                );
+                TimeAnalysis("акт на классность", () => {
+                    ClassActGenerator.GenerateClassAct(
+                        et,
+                        settings,
+                        (Подразделение) personFilter.subunitSelector.SelectedItem,
+                        dateTo.Value,
+                        GetGradeQuery()
+                    );
+                });
             });
 
             allClassnostActsButton = layout.AddFullRow(new Button());
@@ -316,12 +324,14 @@ namespace Grader.gui {
                     return;
                 }
 
-                ClassActGenerator.GenerateAllClassActs(
-                    et,
-                    settings,
-                    dateTo.Value,
-                    GetGradeQuery()
-                );
+                TimeAnalysis("все акты на классность", () => {
+                    ClassActGenerator.GenerateAllClassActs(
+                        et,
+                        settings,
+                        dateTo.Value,
+                        GetGradeQuery()
+                    );
+                });
             });
 
             classnostListButton = layout.AddFullRow(new Button());
@@ -329,7 +339,9 @@ namespace Grader.gui {
             classnostListButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                ClassListGenerator.GenerateClassList(et, GetGradeQuery());
+                TimeAnalysis("список с классностью", () => {
+                    ClassListGenerator.GenerateClassList(et, GetGradeQuery());
+                });
             });
 
             layout.AddSpacer(15);
@@ -339,7 +351,9 @@ namespace Grader.gui {
             currentSummaryButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                CurrentSummaryReportGenerator.GenerateCurrentSummaryReport(resultBox, et, GetGradeQuery());
+                TimeAnalysis("справка хода экзаменов", () => {
+                    CurrentSummaryReportGenerator.GenerateCurrentSummaryReport(resultBox, et, GetGradeQuery());
+                });
             });
 
             layout.AddSpacer(15);
@@ -349,7 +363,9 @@ namespace Grader.gui {
             dzdButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                PerDaySummaryGenerator.GenerateSummaryPerDay(et, settings, GetGradeQuery(), withoutKMN.Checked);
+                TimeAnalysis("день за днем", () => {
+                    PerDaySummaryGenerator.GenerateSummaryPerDay(et, settings, GetGradeQuery(), withoutKMN.Checked);
+                });
             });
 
             withoutKMN = layout.AddFullRow(new CheckBox());
@@ -361,32 +377,44 @@ namespace Grader.gui {
             gradesByBatallionButton.Text = "Оценки по батальонам";
             gradesByBatallionButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                CallBySubunitTable("батальон", false);
+
+                TimeAnalysis("оценки по батальонам", () => {
+                    CallBySubunitTable("батальон", false);
+                });
             });
 
             gradesByCompanyButton = layout.AddFullRow(new Button());
             gradesByCompanyButton.Text = "Оценки по ротам";
             gradesByCompanyButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                CallBySubunitTable("рота", false);
+
+                TimeAnalysis("оценки по ротам", () => {
+                    CallBySubunitTable("рота", false);
+                });
             });
 
             gradesByPlatoonButton = layout.AddFullRow(new Button());
             gradesByPlatoonButton.Text = "Оценки по взводам";
             gradesByPlatoonButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                CallBySubunitTable("взвод", false);
+
+                TimeAnalysis("оценки по взводам", () => {
+                    CallBySubunitTable("взвод", false);
+                });
             });
 
             gradesByCycleButton = layout.AddFullRow(new Button());
             gradesByCycleButton.Text = "Оценки по циклам";
             gradesByCycleButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                if (personFilter.selectCadets.Checked) {
-                    CallBySubunitTable("цикл", true);
-                } else {
-                    CallBySubunitTable("цикл", false);
-                }
+
+                TimeAnalysis("оценки по циклам", () => {
+                    if (personFilter.selectCadets.Checked) {
+                        CallBySubunitTable("цикл", true);
+                    } else {
+                        CallBySubunitTable("цикл", false);
+                    }
+                });
             });
 
             displayAllSubunits = layout.AddFullRow(new CheckBox());
@@ -406,16 +434,18 @@ namespace Grader.gui {
                     return;
                 }
 
-                GradeAnalysisGenerator.GenerateGradeAnalysis(
-                    resultBox,
-                    et,
-                    GetGradeQuery(),
-                    (string) subjectSelector.SelectedItem,
-                    (string) analysisType.SelectedItem,
-                    personFilter.selectCadets.Checked,
-                    personFilter.selectPermanent.Checked,
-                    personFilter.selectContract.Checked
-                );
+                TimeAnalysis("сводка для подведения", () => {
+                    GradeAnalysisGenerator.GenerateGradeAnalysis(
+                        resultBox,
+                        et,
+                        GetGradeQuery(),
+                        (string) subjectSelector.SelectedItem,
+                        (string) analysisType.SelectedItem,
+                        personFilter.selectCadets.Checked,
+                        personFilter.selectPermanent.Checked,
+                        personFilter.selectContract.Checked
+                    );
+                });
             });
 
             analysisType = layout.Add("Тип сводки", new ComboBox());
@@ -436,14 +466,16 @@ namespace Grader.gui {
             exportToOldGrader.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                OldGraderExporter.ExportToOldGrader(
-                    et,
-                    settings,
-                    GetGradeQuery(),
-                    personFilter.GetPersonQuery(),
-                    personFilter.selectCadets.Checked,
-                    personFilter.selectContract.Checked
-                );
+                TimeAnalysis("экспорт в старую учетку", () => {
+                    OldGraderExporter.ExportToOldGrader(
+                        et,
+                        settings,
+                        GetGradeQuery(),
+                        personFilter.GetPersonQuery(),
+                        personFilter.selectCadets.Checked,
+                        personFilter.selectContract.Checked
+                    );
+                });
             });
 
             exportToGradeList = layout.AddFullRow(new Button());
@@ -451,12 +483,14 @@ namespace Grader.gui {
             exportToGradeList.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                GradeListExporter.ContractGradeListExport(
-                    et,
-                    settings,
-                    GetGradeQuery(),
-                    personFilter.GetPersonQuery()
-                );
+                TimeAnalysis("экспорт в список оценок", () => {
+                    GradeListExporter.ContractGradeListExport(
+                        et,
+                        settings,
+                        GetGradeQuery(),
+                        personFilter.GetPersonQuery()
+                    );
+                });
             });
             
             layout.PerformLayout();
@@ -488,6 +522,17 @@ namespace Grader.gui {
             tags.AutoCompleteSource = AutoCompleteSource.CustomSource;
             tags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
             tags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToList().ToArray());
+        }
+
+
+        public static void TimeAnalysis(string name, Action analysis) {
+            DateTime stt = DateTime.Now;
+            try {
+                analysis.Invoke();
+            } finally {
+                DateTime end = DateTime.Now;
+                Console.WriteLine("Analysis '{0}' took {1} ms", name, (end - stt).TotalMilliseconds);
+            }
         }
     }
 }
