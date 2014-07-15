@@ -140,7 +140,7 @@ namespace Grader {
                 dcd.Port = portSettingOpt.Get();
                 dcd.User = userSettingOpt.Get();
                 dcd.FocusOnPassword = true;
-                if (dcd.ShowDialog() == DialogResult.OK) {
+                if (dcd.ShowDialog() == DialogResult.OK && dcd.User != "root") {
                     settingValue = dcd.ConnectionString;
                     serverSetting = dcd.Server;
                     portSetting = dcd.Port;
@@ -157,7 +157,7 @@ namespace Grader {
         public bool init() {
             DbConnectionDialog dcd = new DbConnectionDialog();
             dcd.Port = "3306";
-            if (dcd.ShowDialog() == DialogResult.OK) {
+            if (dcd.ShowDialog() == DialogResult.OK && dcd.User != "root") {
                 settingValue = dcd.ConnectionString;
                 serverSetting = dcd.Server;
                 portSetting = dcd.Port;
