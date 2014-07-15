@@ -56,6 +56,8 @@ namespace Grader.gui {
         private Button exportToOldGrader;
         private Button exportToGradeList;
 
+        private RichTextBox resultBox;
+
         private ErrorProvider errorProvider;
 
         private void InitializeComponent() {
@@ -69,6 +71,7 @@ namespace Grader.gui {
 
             LayoutFilter();
             LayoutAnalysis();
+            LayoutResults();
 
             this.ResumeLayout(false);
         }
@@ -455,6 +458,14 @@ namespace Grader.gui {
             });
             
             layout.PerformLayout();
+        }
+
+        private void LayoutResults() {
+            resultBox = new RichTextBox();
+            resultBox.Location = new Point(550, 3);
+            resultBox.Size = new Size(645, 790);
+            resultBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            this.Controls.Add(resultBox);
         }
 
         private void CallBySubunitTable(string subunitType, bool byVus) {
