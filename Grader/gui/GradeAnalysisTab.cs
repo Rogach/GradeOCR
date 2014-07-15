@@ -255,6 +255,7 @@ namespace Grader.gui {
                 }
 
                 GradeSummaryGenerator.GenerateSummary(
+                    resultBox,
                     et,
                     (Подразделение) personFilter.subunitSelector.SelectedItem,
                     GetGradeQuery(),
@@ -275,7 +276,7 @@ namespace Grader.gui {
             averageGradesForAllSubjectsButton.Text = "Средние оценки по всем предметам";
             averageGradesForAllSubjectsButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
-                AverageGradeSummaryGenerator.GenerateAverageGradeSummary(et, GetGradeQuery());
+                AverageGradeSummaryGenerator.GenerateAverageGradeSummary(resultBox, et, GetGradeQuery());
             });
 
             layout.AddSpacer(15);
@@ -338,7 +339,7 @@ namespace Grader.gui {
             currentSummaryButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
-                CurrentSummaryReportGenerator.GenerateCurrentSummaryReport(et, GetGradeQuery());
+                CurrentSummaryReportGenerator.GenerateCurrentSummaryReport(resultBox, et, GetGradeQuery());
             });
 
             layout.AddSpacer(15);
@@ -406,6 +407,7 @@ namespace Grader.gui {
                 }
 
                 GradeAnalysisGenerator.GenerateGradeAnalysis(
+                    resultBox,
                     et,
                     GetGradeQuery(),
                     (string) subjectSelector.SelectedItem,

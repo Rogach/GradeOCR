@@ -7,10 +7,13 @@ using Microsoft.Office.Interop.Access;
 using LibUtil.templates;
 using Grader.util;
 using LibUtil;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace Grader.grades {
     public static class GradeSummaryGenerator {
         public static void GenerateSummary(
+                RichTextBox resultBox,
                 Entities et, 
                 Подразделение subunit, 
                 IQueryable<Оценка> gradeQuery, 
@@ -25,27 +28,28 @@ namespace Grader.grades {
                 return;
             }
 
-            var doc = WordTemplates.CreateEmptyWordDoc();
-            var sel = doc.Application.Selection;
-            sel.ParagraphFormat.LeftIndent = doc.Application.CentimetersToPoints(4);
-            sel.ParagraphFormat.SpaceBefore = 0;
-            sel.ParagraphFormat.SpaceBeforeAuto = 0;
-
+            resultBox.Clear();
+            
             foreach (int g in new int[] { 5, 4, 3, 2 }) {
                 int gCount = grades.Where(c => c == g).Count();
-                sel.TypeText(String.Format("«{0}»\t\t- {1}\t({2:F1}%)", ReadableTextUtil.HumanReadableGrade(g), gCount, (float) gCount / grades.Count * 100));
-                sel.TypeParagraph();
+                resultBox.Text += String.Format("«{0}»{1}- {2}\t({3:F1}%)\n", 
+                                    ReadableTextUtil.HumanReadableGrade(g), 
+                                    g == 5 ? "\t" : "\t\t", 
+                                    gCount, 
+                                    (float) gCount / grades.Count * 100);
             }
-            sel.TypeText(String.Format("Средний балл\t- {0:F2}", grades.Mean()));
-            sel.TypeParagraph();
+            resultBox.Text += String.Format("Средний балл\t- {0:F2}\n", grades.Mean());
+            
             if (produceSummaryGrade) {
                 GradeCalcGroup.ОбщаяОценка(et, gradeQuery, subunit, subjectName, cadetsSelected, selectRelatedSubunits).ForEach(summaryGrade => {
-                    sel.TypeText(String.Format("Общая оценка «{0}»", ReadableTextUtil.HumanReadableGradeLong(summaryGrade)));
-                    sel.TypeParagraph();
+                    resultBox.Text += String.Format("Общая оценка «{0}»\n", ReadableTextUtil.HumanReadableGradeLong(summaryGrade));
                 });
             }
-            doc.Saved = true;
-            WordTemplates.ActivateWord(doc);
+
+            resultBox.SelectAll();
+            resultBox.SelectionFont = new Font("Times New Roman", 14f, FontStyle.Regular);
+            resultBox.SelectionIndent = (int) (4 * (96 / 2.51)); // cm
+            Clipboard.SetText(resultBox.Rtf, TextDataFormat.Rtf);
         }
     }
 }

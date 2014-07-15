@@ -6,33 +6,37 @@ using System.Data.Linq;
 using Grader.util;
 using LibUtil.templates;
 using LibUtil;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace Grader.grades {
     public static class AverageGradeSummaryGenerator {
-        public static void GenerateAverageGradeSummary(Entities et, IQueryable<Оценка> gradeQuery) {
-            var doc = WordTemplates.CreateEmptyWordDoc();
-            var sel = doc.Application.Selection;
+        public static void GenerateAverageGradeSummary(RichTextBox resultBox, Entities et, IQueryable<Оценка> gradeQuery) {
             Dictionary<string, double> averageGrades = new Dictionary<string, double>();
+
+            resultBox.Clear();
 
             ProgressDialogs.ForEach(et.Предмет.ToList(), subj => {
                 List<int> grades = Grades.GetSubjectGrades(gradeQuery, et, subj.Название);
                 if (grades.Count > 0) {
                     double avgGrade = averageGrades.GetOrElseInsertAndGet(subj.Название, () => grades.Average());
-                    sel.TypeText(String.Format("- по {0} средний балл составил {1:F2}.\n", subj.НазваниеДательный, avgGrade));
+                    resultBox.Text += String.Format("- по {0} средний балл составил {1:F2}.\n", subj.НазваниеДательный, avgGrade);
                 }
             });
 
             if (averageGrades.Count > 0) {
-                sel.TypeText("\n\n");
+                resultBox.Text += "\n\n";
                 Func<double, string> subjectWithGrade = grade => averageGrades.Where(kv => kv.Value == grade).Select(kv => kv.Key).MkString(", ");
                 double maxGrade = averageGrades.Values.Max();
-                sel.TypeText("Лучше подготовка по предметам: " + subjectWithGrade(maxGrade) + "\n");
+
+                resultBox.Text += "Лучше подготовка по предметам: " + subjectWithGrade(maxGrade) + "\n";
                 double minGrade = averageGrades.Values.Min();
-                sel.TypeText("Хуже подготовка по предметам: " + subjectWithGrade(minGrade) + "\n");
+                resultBox.Text += "Хуже подготовка по предметам: " + subjectWithGrade(minGrade) + "\n";
             }
 
-            doc.Saved = true;
-            WordTemplates.ActivateWord(doc);
+            resultBox.SelectAll();
+            resultBox.SelectionFont = new Font("Times New Roman", 14f, FontStyle.Regular);
+            Clipboard.SetText(resultBox.Rtf, TextDataFormat.Rtf);
         }
     }
 }

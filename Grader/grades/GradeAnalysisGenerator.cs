@@ -7,10 +7,13 @@ using System.Data.Linq;
 using Grader.util;
 using LibUtil.templates;
 using LibUtil;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace Grader.grades {
     public static class GradeAnalysisGenerator {
         public static void GenerateGradeAnalysis(
+                RichTextBox resultBox,
                 Entities et, 
                 IQueryable<Оценка> gradeQuery, 
                 string subjectName, 
@@ -116,7 +119,8 @@ namespace Grader.grades {
                     throw new Exception("Unknown analysis type: " + analysisType);
                 }
 
-                string fullRes =
+                resultBox.Clear();
+                resultBox.Text +=
                     GradeCalcGroup.ОбщаяОценка(et, gradeQuery, subjectName, selectCadets)
                     .Map(summGrade =>
                         String.Format("\tОбщая оценка: «{0}», средний балл - {1:F2}.\n{2}",
@@ -124,12 +128,9 @@ namespace Grader.grades {
                         Grades.GetSubjectGrades(gradeQuery, et, subjectName).Mean(),
                         res)
                     ).GetOrElse(String.Format("\tНет общей оценки.\n{0}", res));
-
-                var doc = WordTemplates.CreateEmptyWordDoc();
-                doc.Range().Select();
-                doc.Application.Selection.TypeText(fullRes);
-                doc.Saved = true;
-                WordTemplates.ActivateWord(doc);
+                resultBox.SelectAll();
+                resultBox.SelectionFont = new Font("Times New Roman", 14f, FontStyle.Regular);
+                Clipboard.SetText(resultBox.Rtf, TextDataFormat.Rtf);
             } catch (Exception e) {
                 Logger.Log(e.ToString());
                 throw e;
