@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grader", "Grader\Grader.csproj", "{A8001116-C3BE-4A35-9677-52C33C5C7922}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeOCR", "GradeOCR\GradeOCR.csproj", "{F1213444-68AD-4C9C-A0A9-22E571412CCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{A8001116-C3BE-4A35-9677-52C33C5C7922}.Debug|x86.Build.0 = Debug|x86
 		{A8001116-C3BE-4A35-9677-52C33C5C7922}.Release|x86.ActiveCfg = Release|x86
 		{A8001116-C3BE-4A35-9677-52C33C5C7922}.Release|x86.Build.0 = Release|x86
+		{F1213444-68AD-4C9C-A0A9-22E571412CCD}.Debug|x86.ActiveCfg = Debug|x86
+		{F1213444-68AD-4C9C-A0A9-22E571412CCD}.Debug|x86.Build.0 = Debug|x86
+		{F1213444-68AD-4C9C-A0A9-22E571412CCD}.Release|x86.ActiveCfg = Release|x86
+		{F1213444-68AD-4C9C-A0A9-22E571412CCD}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
