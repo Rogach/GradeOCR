@@ -32,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LibUtil">
@@ -48,6 +49,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BWImage.cs" />
+    <Compile Include="ImageUtil.cs" />
+    <Compile Include="OcrResultForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OcrResultForm.Designer.cs">
+      <DependentUpon>OcrResultForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="PictureView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -56,6 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="hourglass.png" />
+    <EmbeddedResource Include="OcrResultForm.resx">
+      <DependentUpon>OcrResultForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

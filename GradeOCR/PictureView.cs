@@ -55,6 +55,15 @@ namespace GradeOCR {
             AddMouseZoom();
         }
 
+        public static PictureView InsertIntoPanel(Panel panel) {
+            PictureView pv = new PictureView();
+            pv.Size = panel.Size;
+            pv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+            pv.Location = new Point(0, 0);
+            panel.Controls.Add(pv);
+            return pv;
+        }
+
         private void AddMouseScroll() {
             hScrollBar.Scroll += new ScrollEventHandler(delegate {
                 offsetX = (_Image.Width - (this.Width - scrollBarWidth) / zoom) * ((float) hScrollBar.Value / 1000);
