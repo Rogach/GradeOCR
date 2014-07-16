@@ -35,8 +35,8 @@ namespace GradeOCR {
 
             BWImage bw = new BWImage((Bitmap) img.Clone());
 
-            float maxAngleFactor = 0.01f;
-            int minSegmentLength = 50;
+            float maxAngleFactor = 0.05f;
+            int minSegmentLength = 200;
             int maxSkipLength = 200;
 
             List<Tuple<Point, Point>> lines = new List<Tuple<Point, Point>>();
@@ -114,13 +114,16 @@ namespace GradeOCR {
 
             Bitmap drw = null;
             Util.Timed("Segment drawing", () => {
-                drw = new Bitmap(img);
+                drw = new Bitmap(bwImage);
 
                 Graphics g = Graphics.FromImage(drw);
 
                 Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 1);
                 foreach (var ln in lines) {
-                    g.DrawLine(p, ln.Item1, ln.Item2);
+                    int dist = (int) Math.Sqrt(Math.Pow(ln.Item1.X - ln.Item2.X, 2) + Math.Pow(ln.Item1.Y - ln.Item2.Y, 2));
+                    if (dist > 1000) {
+                        g.DrawLine(p, ln.Item1, ln.Item2);
+                    }
                 }
                 g.Dispose();
             });

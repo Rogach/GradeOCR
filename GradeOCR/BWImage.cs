@@ -25,7 +25,7 @@ namespace GradeOCR {
                 // image is layed out line-by-line, horizontally
                 byte* scan0 = (byte*) bd.Scan0.ToPointer();
                 for (int q = 0; q < bd.Width * bd.Height; q++) {
-                    if (*scan0 < 250) {
+                    if (*scan0 < 200) {
                         data[q] = true;
                     }
                     scan0++;
