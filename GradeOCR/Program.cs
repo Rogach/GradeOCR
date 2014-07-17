@@ -12,28 +12,53 @@ namespace GradeOCR {
         static void Main(string[] args) {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
+
             var form = new OcrResultForm();
 
-            ThreadPool.QueueUserWorkItem(new WaitCallback(delegate {
+            Thread worker = new Thread(new ThreadStart(delegate {
                 RunOCR(form);
             }));
+            worker.IsBackground = true;
+            worker.Start();
 
             Application.Run(form);
         }
 
         static void RunOCR(OcrResultForm form) {
-            Image img = Image.FromFile("E:/ocr/scan1.jpg");
+            Image img = Image.FromFile("E:/Pronko/prj/Grader/ocr-data/scan1.jpg");
 
             Image sourceImage = new Bitmap((Image) img.Clone());
-            form.sourcePV.Image = sourceImage;
-            form.sourcePV.ZoomToFit();
+            form.sourcePV.Invoke(new EventHandler(delegate {
+                form.sourcePV.Image = sourceImage;
+                form.sourcePV.ZoomToFit();
+            }));
+
+            Thread.Sleep(200);
 
             Image bwImage = ImageUtil.ToBlackAndWhite((Bitmap) img.Clone());
-            form.bwPV.Image = bwImage;
-            form.bwPV.ZoomToFit();
+            form.bwPV.Invoke(new EventHandler(delegate {
+                form.bwPV.Image = bwImage;
+                form.bwPV.ZoomToFit();
+            }));
 
-            List<Tuple<Point, Point>> lines = LineRecognition.RunRecognition((Bitmap) bwImage.Clone());
+            Thread.Sleep(200);
+
+            BWImage bw = new BWImage((Bitmap) img.Clone());
+
+            Thread.Sleep(200);
+
+            Image freqImage = null;
+            Util.Timed("freq", () => {
+                freqImage = LineRecognition.DisplayWhiteRows((Bitmap) bwImage.Clone(), bw);
+            });
+            form.freqPV.Invoke(new EventHandler(delegate {
+                form.freqPV.Image = freqImage;
+                form.freqPV.ZoomToFit();
+            }));
+
+            Thread.Sleep(200);
+
+            List<Tuple<Point, Point>> lines = LineRecognition.RunRecognition(bw);
 
             Bitmap drw = null;
             Util.Timed("Segment drawing", () => {
@@ -51,8 +76,10 @@ namespace GradeOCR {
                 g.Dispose();
             });
 
-            form.outputPV.Image = drw;
-            form.outputPV.ZoomToFit();
+            form.outputPV.Invoke(new EventHandler(delegate {
+                form.outputPV.Image = drw;
+                form.outputPV.ZoomToFit();
+            }));
         }
 
     }

@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 
 namespace GradeOCR {
     public class BWImage {
-        private bool[] data;
+        public bool[] data;
         public int Width { get; set;}
         public int Height { get; set; }
 
@@ -19,9 +19,9 @@ namespace GradeOCR {
             this.Height = b.Height;
             this.data = new bool[Width * Height];
 
-            BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
-
             unsafe {
+                BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+
                 // image is layed out line-by-line, horizontally
                 byte* scan0 = (byte*) bd.Scan0.ToPointer();
                 for (int q = 0; q < bd.Width * bd.Height; q++) {
@@ -30,9 +30,10 @@ namespace GradeOCR {
                     }
                     scan0++;
                 }
-            }
 
-            b.UnlockBits(bd);
+                b.UnlockBits(bd);
+            }
+            
         }
 
         public static Bitmap ToSimpleBitmap(Bitmap b) {
@@ -42,7 +43,7 @@ namespace GradeOCR {
             g.Dispose();
             return result;
         }
-
+        
         public bool Pixel(int x, int y) {
             return data[y * Width + x];
         }

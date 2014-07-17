@@ -33,7 +33,6 @@ namespace GradeOCR {
         public PictureView() : base() {
             this.BorderStyle = BorderStyle.FixedSingle;
             this.DoubleBuffered = true;
-            //this.BackColor = Color.White;
 
             _Image = LoadPlaceholder();
             this.Controls.Add(plug);
