@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="BWImage.cs" />
     <Compile Include="ImageUtil.cs" />
+    <Compile Include="LineRecognition.cs" />
     <Compile Include="OcrResultForm.cs">
       <SubType>Form</SubType>
     </Compile>
