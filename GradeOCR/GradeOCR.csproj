@@ -53,7 +53,7 @@
     <Compile Include="ImageUtil.cs" />
     <Compile Include="Line.cs" />
     <Compile Include="LineRecognition.cs" />
-    <Compile Include="MovingAverage.cs" />
+    <Compile Include="LineDetector.cs" />
     <Compile Include="OcrResultForm.cs">
       <SubType>Form</SubType>
     </Compile>
