@@ -58,7 +58,7 @@ namespace GradeOCR {
 
             Thread.Sleep(200);
 
-            List<Tuple<Point, Point>> lines = LineRecognition.RunRecognition(bw);
+            List<Line> lines = LineRecognition.RunRecognition(bw);
 
             Bitmap drw = null;
             Util.Timed("Segment drawing", () => {
@@ -68,10 +68,8 @@ namespace GradeOCR {
 
                 Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 1);
                 foreach (var ln in lines) {
-                    int dist = (int) Math.Sqrt(Math.Pow(ln.Item1.X - ln.Item2.X, 2) + Math.Pow(ln.Item1.Y - ln.Item2.Y, 2));
-                    if (dist > 1000) {
-                        g.DrawLine(p, ln.Item1, ln.Item2);
-                    }
+                    //if (ln.Length() > 1000)
+                        g.DrawLine(p, ln.p1, ln.p2);
                 }
                 g.Dispose();
             });

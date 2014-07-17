@@ -9,11 +9,9 @@ using LibUtil;
 namespace GradeOCR {
     public class LineRecognition {
         public static readonly float maxAngleFactor = 0.03f;
-        public static readonly int minSegmentLength = 200;
-        public static readonly int maxSkipLength = 200;
 
-        public static List<Tuple<Point, Point>> RunRecognition(BWImage bw) {
-            List<Tuple<Point, Point>> lines = new List<Tuple<Point, Point>>();
+        public static List<Line> RunRecognition(BWImage bw) {
+            List<Line> lines = new List<Line>();
             Util.Timed("sweepline segment detection", () => {
                 bool[] blackRows = DetectPossibleBlackRows(bw);
 
@@ -44,45 +42,16 @@ namespace GradeOCR {
                         int maxY = Math.Min(bw.Height - 1, Y + maxDy);
 
                         for (int y2 = minY; y2 <= maxY; y2++) {
-                            Point? rStt = null;
-                            Point? rEnd = null;
-                            Point? stt = null;
-                            Point? end = null;
-
+                            LineDetector mavg = new LineDetector(bw.Width);
                             int dy = y2 - Y;
 
                             for (int x = 0; x < bw.Width; x++) {
                                 short y = (short) (Y + inclination[maxDy + dy, x]);
                                 bool b = bw.data[y * bw.Width + x];
-                                if (b) {
-                                    if (!stt.HasValue) {
-                                        stt = new Point(x, y);
-                                    }
-                                    end = new Point(x, y);
-                                } else {
-                                    if (end.HasValue && end.Value.X + 1 == x) {
-                                        if (end.Value.X - stt.Value.X >= minSegmentLength) {
-                                            if (rStt.HasValue) {
-                                                if (rEnd.Value.X + maxSkipLength > stt.Value.X) {
-                                                    rEnd = end;
-                                                } else {
-                                                    lines.Add(new Tuple<Point, Point>(rStt.Value, rEnd.Value));
-                                                    rStt = stt;
-                                                    rEnd = end;
-                                                }
-                                            } else {
-                                                rStt = stt;
-                                                rEnd = end;
-                                            }
-                                        }
-                                        stt = null;
-                                        end = null;
-                                    }
-                                }
+                                mavg.Advance(b);
                             }
-                            if (rStt.HasValue && rEnd.HasValue) {
-                                lines.Add(new Tuple<Point, Point>(rStt.Value, rEnd.Value));
-                            }
+                            mavg.Finish();
+                            lines.AddRange(mavg.GetLines(getY: x => Y + inclination[maxDy + dy, x]));
                         }
                     }
                 }
@@ -113,9 +82,10 @@ namespace GradeOCR {
 
         public static bool[] DetectPossibleBlackRows(BWImage img) {
             int[] blackCount = TallyBlackPixels(img);
+            int max = blackCount.Max();
             bool[] blackRows = new bool[img.Height];
             for (int y = 0; y < img.Height; y++) {
-                if (blackCount[y] > img.Width) blackRows[y] = true;
+                if (blackCount[y] > max / 5) blackRows[y] = true;
             }
             return blackRows;
         }
@@ -126,7 +96,7 @@ namespace GradeOCR {
             Bitmap res = new Bitmap(src.Width + 200, src.Height, PixelFormat.Format8bppIndexed);
             res.Palette = src.Palette;
 
-            int[] blackCount = Util.Timed("TallyBlackPixels", () => { return TallyBlackPixels(bw); });
+            int[] blackCount = TallyBlackPixels(bw);
             bool[] blackRows = DetectPossibleBlackRows(bw);
 
             unsafe {
@@ -156,11 +126,6 @@ namespace GradeOCR {
                     }
                     for (int x = f; x < 200; x++) {
                         *(resPtr + y * (src.Width + 200) + src.Width + x) = 255;
-                    }
-                    for (int x = 0; x < 200; x++) {
-                        if ((src.Width) * 200 / maxCount == x) {
-                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 150;
-                        }
                     }
                 }
 
