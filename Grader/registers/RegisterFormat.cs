@@ -150,11 +150,12 @@ namespace Grader.registers {
                 case "ОЗГТ": return "основам защиты государственной тайны";
                 case "ЭО": return "экологическому обучению";
                 case "ОГП": return "общественно-государственной подготовке";
-                case "ИНЖ": return "инженерной подготовке";
+                case "ИНЖ": return "и   нженерной подготовке";
                 case "ВМП": return "военно-медицинской подготовке";
                 case "ТСП": return "тактико-специальной подготовке";
                 case "ТОП": return "топографической подготовке";
                 case "МП": return "методической подгтовке";
+                case "ТАК": return "тактической подготовке";
                 default: throw new ArgumentException("Unexpected subject: " + subject);
             }
         }

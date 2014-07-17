@@ -43,7 +43,8 @@ namespace Grader.gui {
             new GenericRegister("ВМП"),
             new GenericRegister("ТСП"),
             new GenericRegister("ТОП"),
-            new GenericRegister("МП")
+            new GenericRegister("МП"),
+            new GenericRegister("ТАК")
         };
 
         private PersonSelector personSelector;
