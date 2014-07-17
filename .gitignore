@@ -3,3 +3,4 @@ Grades.accdb
 bin/
 obj/
 *.suo
+ocr-data/
