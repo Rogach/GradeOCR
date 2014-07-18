@@ -43,8 +43,8 @@ namespace GradeOCR {
             Bitmap bwImageVert = Util.Timed("to black and white (vert)", () => ImageUtil.ToBlackAndWhite(sourceImageVert));
             form.bwPV_vert.Image = bwImageVert;
 
-            BWImage bw = new BWImage(sourceImage);
-            BWImage bwVert = new BWImage(sourceImageVert);
+            BWImage bw = Util.Timed("bw (horiz)", () => new BWImage(sourceImage));
+            BWImage bwVert = Util.Timed("bw (vert)", () => new BWImage(sourceImageVert));
 
             Bitmap freqImage = Util.Timed("freq", () => LineRecognition.DisplayWhiteRows(bwImage, bw));
             form.freqPV.Image = freqImage;
