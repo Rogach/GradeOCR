@@ -23,9 +23,6 @@ namespace GradeOCR {
             Console.WriteLine("optDy = " + optDy);
 
             for (int Y = 1; Y < bw.Height - 1; Y++) {
-                if (Y % 100 == 0) {
-                    Console.WriteLine("sweepline y = " + Y);
-                }
                 if (Y + optDy >= 0 && Y + optDy < bw.Height) {
 
                     LineDetector mavg = new LineDetector(bw.Width);
@@ -62,9 +59,6 @@ namespace GradeOCR {
 
         public static int DetectOptimalDy(BWImage bw, short[,] inclination, int maxDy, bool[] blackRows) {
             for (int Y = 0; Y < bw.Height; Y++) {
-                if (Y % 100 == 0) {
-                    Console.WriteLine("sweepline detect dy, Y = " + Y);
-                }
                 if (blackRows[Y]) {
                     int minY = Math.Max(0, Y - maxDy);
                     int maxY = Math.Min(bw.Height - 1, Y + maxDy);
@@ -100,10 +94,8 @@ namespace GradeOCR {
                                 }
                             }
 
-                            Console.WriteLine("opt lines found: " + optLines.Count);
                             double maxLength = optLines.MaxBy(ln => ln.Length()).Length();
                             optLines = optLines.Where(ln => ln.Length() > maxLength * 0.9).ToList();
-                            Console.WriteLine("opt lines found: " + optLines.Count);
 
                             int optimalOffset = (int) Math.Round(bw.Width * optLines.Select(ln => ln.Tangent()).Average());
                             return optimalOffset;
