@@ -41,22 +41,13 @@ namespace GradeOCR {
 
         public static Bitmap Rotate(Bitmap src) {
             Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format32bppArgb);
+            rotated.SetResolution(src.HorizontalResolution, src.VerticalResolution);
 
-            BitmapData srcBD = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-            BitmapData rotBD = rotated.LockBits(new Rectangle(0, 0, rotated.Width, rotated.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-            unsafe {
-                uint* srcPtr = (uint*) srcBD.Scan0.ToPointer();
-                uint* rotPtr = (uint*) rotBD.Scan0.ToPointer();
-
-                for (int y = 0; y < src.Height; y++) {
-                    for (int x = 0; x < src.Width; x++) {
-                        *(rotPtr + (src.Width - 1 - x) * src.Height + y) = *(srcPtr++);
-                    }
-                }
-            }
-
-            src.UnlockBits(srcBD);
-            rotated.UnlockBits(rotBD);
+            Graphics g = Graphics.FromImage(rotated);
+            g.TranslateTransform(0, rotated.Height);
+            g.RotateTransform(-90);
+            g.DrawImageUnscaled(src, 0, 0);
+            g.Dispose();
 
             return rotated;
         }
