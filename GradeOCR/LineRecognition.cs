@@ -12,53 +12,106 @@ namespace GradeOCR {
 
         public static List<Line> RunRecognition(BWImage bw) {
             List<Line> lines = new List<Line>();
-            Util.Timed("sweepline segment detection", () => {
-                bool[] blackRows = DetectPossibleBlackRows(bw);
 
-                int maxDy = (int) (bw.Width * maxAngleFactor);
+            bool[] blackRows = DetectPossibleBlackRows(bw);
 
-                // precompute inclination table
-                short[,] inclination = new short[maxDy * 2 + 1, bw.Width];
-                for (int dy = -maxDy; dy < 0; dy++) {
+            int maxDy = (int) (bw.Width * maxAngleFactor);
+
+            short[,] inclination = PrecomputeInclination(maxDy, bw.Width);
+
+            int optDy = DetectOptimalDy(bw, inclination, maxDy, blackRows);
+            Console.WriteLine("optDy = " + optDy);
+
+            for (int Y = 1; Y < bw.Height - 1; Y++) {
+                if (Y % 100 == 0) {
+                    Console.WriteLine("sweepline y = " + Y);
+                }
+                if (Y + optDy >= 0 && Y + optDy < bw.Height) {
+
+                    LineDetector mavg = new LineDetector(bw.Width);
                     for (int x = 0; x < bw.Width; x++) {
-                        inclination[maxDy + dy, x] = (short) Math.Round((float) x / (float) bw.Width * (float) dy + 0.5);
+                        short y = (short) (Y + inclination[maxDy + optDy, x]);
+                        mavg.Advance(bw.data[y * bw.Width + x] || bw.data[(y + 1) * bw.Width + x] || bw.data[(y - 1) * bw.Width + x]);
                     }
+                    mavg.Finish();
+                    lines.AddRange(mavg.GetLines(getY: x => Y + inclination[maxDy + optDy, x]));
                 }
-                for (int x = 0; x < bw.Width; x++) {
-                    inclination[maxDy, x] = 0;
+            }
+            Console.WriteLine("lines found: " + lines.Count);
+
+            return lines;
+        }
+
+        public static short[,] PrecomputeInclination(int maxDy, int width) {
+            short[,] inclination = new short[maxDy * 2 + 1, width];
+            for (int dy = -maxDy; dy < 0; dy++) {
+                for (int x = 0; x < width; x++) {
+                    inclination[maxDy + dy, x] = (short) Math.Round((float) x / (float) width * (float) dy + 0.5);
                 }
-                for (int dy = 1; dy <= maxDy; dy++) {
-                    for (int x = 0; x < bw.Width; x++) {
-                        inclination[maxDy + dy, x] = (short) Math.Round((float) x / (float) bw.Width * (float) dy - 0.5);
-                    }
+            }
+            for (int x = 0; x < width; x++) {
+                inclination[maxDy, x] = 0;
+            }
+            for (int dy = 1; dy <= maxDy; dy++) {
+                for (int x = 0; x < width; x++) {
+                    inclination[maxDy + dy, x] = (short) Math.Round((float) x / (float) width * (float) dy - 0.5);
                 }
+            }
+            return inclination;
+        }
 
-                for (int Y = 0; Y < bw.Height; Y++) {
-                    if (Y % 100 == 0) {
-                        Console.WriteLine("sweepline y = " + Y);
-                    }
-                    if (blackRows[Y]) {
-                        int minY = Math.Max(0, Y - maxDy);
-                        int maxY = Math.Min(bw.Height - 1, Y + maxDy);
+        public static int DetectOptimalDy(BWImage bw, short[,] inclination, int maxDy, bool[] blackRows) {
+            for (int Y = 0; Y < bw.Height; Y++) {
+                if (Y % 100 == 0) {
+                    Console.WriteLine("sweepline detect dy, Y = " + Y);
+                }
+                if (blackRows[Y]) {
+                    int minY = Math.Max(0, Y - maxDy);
+                    int maxY = Math.Min(bw.Height - 1, Y + maxDy);
 
-                        for (int y2 = minY; y2 <= maxY; y2++) {
-                            LineDetector mavg = new LineDetector(bw.Width);
-                            int dy = y2 - Y;
+                    for (int y2 = minY; y2 <= maxY; y2++) {
+                        LineDetector mavg = new LineDetector(bw.Width);
+                        int dy = y2 - Y;
 
-                            for (int x = 0; x < bw.Width; x++) {
-                                short y = (short) (Y + inclination[maxDy + dy, x]);
-                                bool b = bw.data[y * bw.Width + x];
-                                mavg.Advance(b);
+                        for (int x = 0; x < bw.Width; x++) {
+                            short y = (short) (Y + inclination[maxDy + dy, x]);
+                            bool b = bw.data[y * bw.Width + x];
+                            mavg.Advance(b);
+                        }
+                        mavg.Finish();
+
+                        List<Line> detectedLines = mavg.GetLines(getY: x => Y + inclination[maxDy + dy, x]);
+
+                        if (detectedLines.Count > 0) {
+                            List<Line> optLines = new List<Line>();
+                            for (int oY = Y; oY < bw.Height && oY < Y + 30; oY++) {
+                                int oMinY = Math.Max(0, oY - maxDy);
+                                int oMaxY = Math.Min(bw.Height - 1, oY + maxDy);
+                                for (int oy2 = oMinY; oy2 <= oMaxY; oy2++) {
+                                    LineDetector omavg = new LineDetector(bw.Width);
+                                    int ody = oy2 - oY;
+                                    for (int x = 0; x < bw.Width; x++) {
+                                        short oy = (short) (oY + inclination[maxDy + ody, x]);
+                                        bool b = bw.data[oy * bw.Width + x];
+                                        omavg.Advance(b);
+                                    }
+                                    omavg.Finish();
+                                    optLines.AddRange(omavg.GetLines(getY: x => Y + inclination[maxDy + ody, x]));
+                                }
                             }
-                            mavg.Finish();
-                            lines.AddRange(mavg.GetLines(getY: x => Y + inclination[maxDy + dy, x]));
+
+                            Console.WriteLine("opt lines found: " + optLines.Count);
+                            double maxLength = optLines.MaxBy(ln => ln.Length()).Length();
+                            optLines = optLines.Where(ln => ln.Length() > maxLength * 0.9).ToList();
+                            Console.WriteLine("opt lines found: " + optLines.Count);
+
+                            int optimalOffset = (int) Math.Round(bw.Width * optLines.Select(ln => ln.Tangent()).Average());
+                            return optimalOffset;
                         }
                     }
                 }
-                Console.WriteLine("lines found: " + lines.Count);
-            });
-
-            return lines;
+            }
+            throw new Exception("no optimal dy detected");
         }
 
         public static int[] TallyBlackPixels(BWImage img) {

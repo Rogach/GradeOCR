@@ -19,5 +19,15 @@ namespace GradeOCR {
             int dy = p1.Y - p2.Y;
             return Math.Sqrt(dx * dx + dy * dy);
         }
+
+        public double Tangent() {
+            int dx = p2.X - p1.X;
+            int dy = p2.Y - p1.Y;
+            return (double) dy / (double) dx;
+        }
+
+        public override string ToString() {
+            return String.Format("Line({0} -> {1})", p1, p2);
+        }
     }
 }

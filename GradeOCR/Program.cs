@@ -58,7 +58,7 @@ namespace GradeOCR {
 
             Thread.Sleep(200);
 
-            List<Line> lines = LineRecognition.RunRecognition(bw);
+            List<Line> lines = Util.Timed("sweepline segment detection", () => { return LineRecognition.RunRecognition(bw); });
 
             Bitmap drw = null;
             Util.Timed("Segment drawing", () => {
@@ -66,9 +66,11 @@ namespace GradeOCR {
 
                 Graphics g = Graphics.FromImage(drw);
 
-                Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 1);
+                Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
                 foreach (var ln in lines) {
-                    g.DrawLine(p, ln.p1, ln.p2);
+                    //if (ln.p1.X <= 150 && ln.p2.X >= 2340)
+                    //if (ln.Length() > 1500)
+                        g.DrawLine(p, ln.p1, ln.p2);
                 }
                 g.Dispose();
             });

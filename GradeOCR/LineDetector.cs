@@ -7,6 +7,7 @@ using System.Drawing;
 namespace GradeOCR {
     public class LineDetector {
         private static readonly int momentumFactor = 10;
+        private static readonly int minLineLength = 400;
 
         private int length;
         private bool[] data;
@@ -60,6 +61,22 @@ namespace GradeOCR {
             }
             data = transformed;
         }
+
+        public void DumpDebug(Func<int, int> getY) {
+            Console.WriteLine("pixels at line: " + data.Where(b => b == true).Count());
+
+            int? stt = null;
+            for (int x = 0; x < length; x++) {
+                if (data[x] && !stt.HasValue) {
+                    stt = x;
+                } else if (!data[x] && stt.HasValue) {
+                    Line l = new Line(new Point(stt.Value, getY(stt.Value)), new Point(x - 1, getY(x - 1)));
+                    Console.WriteLine(l);
+                    stt = null;
+                }
+            }
+        }
+
         public List<Line> GetLines(Func<int, int> getY) {
             List<Line> lines = new List<Line>();
             int? stt = null;
@@ -68,12 +85,17 @@ namespace GradeOCR {
                     stt = x;
                 } else if (!data[x] && stt.HasValue) {
                     Line l = new Line(new Point(stt.Value, getY(stt.Value)), new Point(x - 1, getY(x - 1)));
-                    if (l.Length() > 400) {
+                    if (l.Length() > minLineLength) {
                         lines.Add(l);
                     }
                     stt = null;
                 }
-
+            }
+            if (stt.HasValue) {
+                Line l = new Line(new Point(stt.Value, getY(stt.Value)), new Point(data.Length - 1, getY(data.Length - 1)));
+                if (l.Length() > minLineLength) {
+                    lines.Add(l);
+                }
             }
             return lines;
         }
