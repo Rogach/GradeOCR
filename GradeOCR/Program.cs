@@ -35,6 +35,15 @@ namespace GradeOCR {
 
             Thread.Sleep(200);
 
+            Image sourceImageVert = Util.Timed("rotate", () => { return ImageUtil.Rotate((Bitmap) img.Clone()); });
+            form.sourcePV_vert.Invoke(new EventHandler(delegate {
+                form.sourcePV_vert.Image = sourceImageVert;
+                form.sourcePV_vert.ZoomToFit();
+            }));
+
+
+            Thread.Sleep(200);
+
             Image bwImage = ImageUtil.ToBlackAndWhite((Bitmap) img.Clone());
             form.bwPV.Invoke(new EventHandler(delegate {
                 form.bwPV.Image = bwImage;
@@ -43,7 +52,16 @@ namespace GradeOCR {
 
             Thread.Sleep(200);
 
+            Image bwImageVert = ImageUtil.ToBlackAndWhite((Bitmap) sourceImageVert.Clone());
+            form.bwPV_vert.Invoke(new EventHandler(delegate {
+                form.bwPV_vert.Image = bwImageVert;
+                form.bwPV_vert.ZoomToFit();
+            }));
+
+            Thread.Sleep(200);
+
             BWImage bw = new BWImage((Bitmap) img.Clone());
+            BWImage bwVert = new BWImage((Bitmap) sourceImageVert.Clone());
 
             Thread.Sleep(200);
 
@@ -58,24 +76,47 @@ namespace GradeOCR {
 
             Thread.Sleep(200);
 
+            Image freqImageVert = null;
+            Util.Timed("freqVert", () => {
+                freqImageVert = LineRecognition.DisplayWhiteRows((Bitmap) bwImageVert.Clone(), bwVert);
+            });
+            form.freqPV_vert.Invoke(new EventHandler(delegate {
+                form.freqPV_vert.Image = freqImageVert;
+                form.freqPV_vert.ZoomToFit();
+            }));
+
+            Thread.Sleep(200);
+
             List<Line> lines = Util.Timed("sweepline segment detection", () => { return LineRecognition.RunRecognition(bw); });
 
-            Bitmap drw = null;
-            Util.Timed("Segment drawing", () => {
-                drw = new Bitmap(bwImage);
+            Bitmap drw = new Bitmap(bwImage);
 
-                Graphics g = Graphics.FromImage(drw);
+            Graphics g = Graphics.FromImage(drw);
 
-                Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
-                foreach (var ln in lines) {
-                    g.DrawLine(p, ln.p1, ln.p2);
-                }
-                g.Dispose();
-            });
+            Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
+            foreach (var ln in lines) {
+                g.DrawLine(p, ln.p1, ln.p2);
+            }
+            g.Dispose();
 
             form.outputPV.Invoke(new EventHandler(delegate {
                 form.outputPV.Image = drw;
                 form.outputPV.ZoomToFit();
+            }));
+
+            Thread.Sleep(200);
+
+            List<Line> linesVert = Util.Timed("sweepline segment detection (vert)", () => { return LineRecognition.RunRecognition(bwVert); });
+            Bitmap drwVert = new Bitmap(bwImage);
+
+            Graphics gVert = Graphics.FromImage(drwVert);
+            foreach (var ln in linesVert) {
+                gVert.DrawLine(p, drwVert.Width - 1 - ln.p1.Y, ln.p1.X, drwVert.Width - 1 - ln.p2.Y, ln.p2.X);
+            }
+            gVert.Dispose();
+            form.outputPV_vert.Invoke(new EventHandler(delegate {
+                form.outputPV_vert.Image = drwVert;
+                form.outputPV_vert.ZoomToFit();
             }));
         }
 

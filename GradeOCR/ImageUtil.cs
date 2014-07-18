@@ -13,20 +13,46 @@ namespace GradeOCR {
             BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
 
             unsafe {
-                byte* scan0 = (byte*) bd.Scan0.ToPointer();
+                byte* ptr = (byte*) bd.Scan0.ToPointer();
                 for (int q = 0; q < bd.Width * bd.Height; q++) {
-                    if (*scan0 < 200) {
-                        *scan0 = 0;
+                    if (*ptr < 200) {
+                        *ptr = 0;
                     } else {
-                        *scan0 = 255;
+                        *ptr = 255;
                     }
-                    scan0++;
+                    ptr++;
                 }
             }
             b.UnlockBits(bd);
 
             return b;
         }
+
+        public static Bitmap Rotate(Bitmap src) {
+            AssertImageFormat(src);
+
+            Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format8bppIndexed);
+            rotated.Palette = src.Palette;
+
+            BitmapData srcBD = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+            BitmapData rotBD = rotated.LockBits(new Rectangle(0, 0, rotated.Width, rotated.Height), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+            unsafe {
+                byte* srcPtr = (byte*) srcBD.Scan0.ToPointer();
+                byte* rotPtr = (byte*) rotBD.Scan0.ToPointer();
+
+                for (int y = 0; y < src.Height; y++) {
+                    for (int x = 0; x < src.Width; x++) {
+                        *(rotPtr + (src.Width - 1 - x) * src.Height + y) = *(srcPtr++);
+                    }
+                }
+            }
+
+            src.UnlockBits(srcBD);
+            rotated.UnlockBits(rotBD);
+
+            return rotated;
+        }
+
 
         public static void AssertImageFormat(Image img) {
             if (img.PixelFormat != System.Drawing.Imaging.PixelFormat.Format8bppIndexed) {
