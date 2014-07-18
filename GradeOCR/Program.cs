@@ -92,6 +92,11 @@ namespace GradeOCR {
             t.DrawTable(tableG, p);
             tableG.Dispose();
             form.resultPV.Image = tablePic;
+            form.resultPV.AddDoubleClickListener(pt => {
+                t.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                    Console.WriteLine(cell);
+                });
+            });
         }
 
     }

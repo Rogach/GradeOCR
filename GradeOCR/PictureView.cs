@@ -56,6 +56,7 @@ namespace GradeOCR {
             AddMouseScroll();
             AddMouseDrag();
             AddMouseZoom();
+            AddDoubleClickListener();
         }
 
         public static PictureView InsertIntoPanel(Panel panel) {
@@ -160,6 +161,23 @@ namespace GradeOCR {
             });
         }
 
+        private void AddDoubleClickListener() {
+            this.MouseDoubleClick += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
+                Point pt;
+                if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
+                    float dx = (this.Width - _Image.Width * zoom) / 2;
+                    float dy = (this.Height - _Image.Height * zoom) / 2;
+                    pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor((e.Y - dy) / zoom));
+                } else {
+                    pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
+                }
+                
+                foreach (var listener in OnDoubleClick) {
+                    listener.Invoke(pt);
+                }
+            });
+        }
+
         public static Image placeholderImage = null;
         public static Image LoadPlaceholder() {
             if (placeholderImage == null) {
@@ -254,6 +272,16 @@ namespace GradeOCR {
             zoom = Math.Min(zoomX, zoomY);
             this.PerformLayout();
             this.Invalidate();
+        }
+
+        private List<Action<Point>> OnDoubleClick = new List<Action<Point>>();
+
+        public void AddDoubleClickListener(Action<Point> listener) {
+            OnDoubleClick.Add(listener);
+        }
+
+        public void RemoveDoubleClickListener(Action<Point> listener) {
+            OnDoubleClick.Remove(listener);
         }
     }
 }

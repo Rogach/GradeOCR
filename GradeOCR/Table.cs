@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using LibUtil;
 
 namespace GradeOCR {
     
@@ -89,6 +90,33 @@ namespace GradeOCR {
                 }
             );
             return gp;
+        }
+
+        public Option<Tuple<int, int>> GetCellAtPoint(float px, float py) {
+            px -= origin.X;
+            py -= origin.Y;
+            float hx = horizontalNormal.X;
+            float hy = horizontalNormal.Y;
+            float vx = verticalNormal.X;
+            float vy = verticalNormal.Y;
+            float v = (py * hx - px * hy) / (hx * vy - vx * hy);
+            float h = (px - v * vx) / vy;
+
+            if (v < 0 || h < 0 || v >= totalHeight || h >= totalWidth) {
+                return new None<Tuple<int, int>>();
+            } else {
+                int col = 0;
+                while (h > columnWidths[col]) {
+                    h -= columnWidths[col];
+                    col++;
+                }
+                int row = 0;
+                while (v > rowHeights[row]) {
+                    v -= rowHeights[row];
+                    row++;
+                }
+                return new Some<Tuple<int, int>>(new Tuple<int, int>(col, row));
+            }
         }
 
     }
