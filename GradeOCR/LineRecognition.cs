@@ -22,7 +22,6 @@ namespace GradeOCR {
             short[,] inclination = PrecomputeInclination(maxDy, bw.Width);
 
             int optDy = DetectOptimalDy(bw, inclination, maxDy, blackRows, minLineLength);
-            Console.WriteLine("optDy = " + optDy);
 
             for (int Y = 1; Y < bw.Height - 1; Y++) {
                 if (Y + optDy >= 0 && Y + optDy < bw.Height) {
@@ -79,7 +78,6 @@ namespace GradeOCR {
                         List<Line> detectedLines = mavg.GetLines(getY: x => Y + inclination[maxDy + dy, x]);
 
                         if (detectedLines.Count > 0) {
-                            Console.WriteLine("detected first line at " + Y);
                             List<Line> optLines = new List<Line>();
                             for (int oY = Math.Max(0, Y - 40); oY < bw.Height && oY < Y + 40; oY++) {
                                 int oMinY = Math.Max(0, oY - maxDy);

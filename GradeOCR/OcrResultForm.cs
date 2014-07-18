@@ -19,6 +19,8 @@ namespace GradeOCR {
         public PictureView freqPV_vert;
         public PictureView outputPV_vert;
 
+        public PictureView resultPV;
+
         public OcrResultForm() {
             InitializeComponent();
             sourcePV = PictureView.InsertIntoPanel(this.sourcePanel);
@@ -30,10 +32,8 @@ namespace GradeOCR {
             bwPV_vert = PictureView.InsertIntoPanel(this.bwPanelVert);
             freqPV_vert = PictureView.InsertIntoPanel(this.freqPanelVert);
             outputPV_vert = PictureView.InsertIntoPanel(this.outputPanelVert);
-        }
 
-        private void label1_Click(object sender, EventArgs e) {
-
+            resultPV = PictureView.InsertIntoPanel(this.tableResultPanel);
         }
     }
 }

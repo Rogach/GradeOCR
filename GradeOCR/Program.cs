@@ -16,7 +16,9 @@ namespace GradeOCR {
             var form = new OcrResultForm();
 
             Thread worker = new Thread(new ThreadStart(delegate {
-                RunOCR(form);
+                Util.Timed("OCR run", () => {
+                    RunOCR(form);
+                });
             }));
             worker.IsBackground = true;
             worker.Start();
@@ -28,64 +30,31 @@ namespace GradeOCR {
             Image img = Image.FromFile("E:/Pronko/prj/Grader/ocr-data/scan1.jpg");
 
             Image sourceImage = new Bitmap((Image) img.Clone());
-            form.sourcePV.Invoke(new EventHandler(delegate {
-                form.sourcePV.Image = sourceImage;
-                form.sourcePV.ZoomToFit();
-            }));
-
-            Thread.Sleep(200);
+            form.sourcePV.Image = sourceImage;
 
             Image sourceImageVert = Util.Timed("rotate", () => { return ImageUtil.Rotate((Bitmap) img.Clone()); });
-            form.sourcePV_vert.Invoke(new EventHandler(delegate {
-                form.sourcePV_vert.Image = sourceImageVert;
-                form.sourcePV_vert.ZoomToFit();
-            }));
-
-
-            Thread.Sleep(200);
+            form.sourcePV_vert.Image = sourceImageVert;
 
             Image bwImage = ImageUtil.ToBlackAndWhite((Bitmap) img.Clone());
-            form.bwPV.Invoke(new EventHandler(delegate {
-                form.bwPV.Image = bwImage;
-                form.bwPV.ZoomToFit();
-            }));
-
-            Thread.Sleep(200);
+            form.bwPV.Image = bwImage;
 
             Image bwImageVert = ImageUtil.ToBlackAndWhite((Bitmap) sourceImageVert.Clone());
-            form.bwPV_vert.Invoke(new EventHandler(delegate {
-                form.bwPV_vert.Image = bwImageVert;
-                form.bwPV_vert.ZoomToFit();
-            }));
-
-            Thread.Sleep(200);
+            form.bwPV_vert.Image = bwImageVert;
 
             BWImage bw = new BWImage((Bitmap) img.Clone());
             BWImage bwVert = new BWImage((Bitmap) sourceImageVert.Clone());
-
-            Thread.Sleep(200);
 
             Image freqImage = null;
             Util.Timed("freq", () => {
                 freqImage = LineRecognition.DisplayWhiteRows((Bitmap) bwImage.Clone(), bw);
             });
-            form.freqPV.Invoke(new EventHandler(delegate {
-                form.freqPV.Image = freqImage;
-                form.freqPV.ZoomToFit();
-            }));
-
-            Thread.Sleep(200);
+            form.freqPV.Image = freqImage;
 
             Image freqImageVert = null;
             Util.Timed("freqVert", () => {
                 freqImageVert = LineRecognition.DisplayWhiteRows((Bitmap) bwImageVert.Clone(), bwVert);
             });
-            form.freqPV_vert.Invoke(new EventHandler(delegate {
-                form.freqPV_vert.Image = freqImageVert;
-                form.freqPV_vert.ZoomToFit();
-            }));
-
-            Thread.Sleep(200);
+            form.freqPV_vert.Image = freqImageVert;
 
             List<Line> lines = Util.Timed("sweepline segment detection", () => { 
                 return LineRecognition.RunRecognition(bw, (int) (bw.Width * LineRecognition.minHorizontalLineRatio)); 
@@ -101,27 +70,28 @@ namespace GradeOCR {
             }
             g.Dispose();
 
-            form.outputPV.Invoke(new EventHandler(delegate {
-                form.outputPV.Image = drw;
-                form.outputPV.ZoomToFit();
-            }));
-
-            Thread.Sleep(200);
+            form.outputPV.Image = drw;
 
             List<Line> linesVert = Util.Timed("sweepline segment detection (vert)", () => { 
                 return LineRecognition.RunRecognition(bwVert, (int) (bw.Height * LineRecognition.minVerticalLineRatio)); 
+            }).ConvertAll(ln => {
+                return new Line(new Point(bwImage.Width - 1 - ln.p1.Y, ln.p1.X), new Point(bwImage.Width - 1 - ln.p2.Y, ln.p2.X));
             });
             Bitmap drwVert = new Bitmap(bwImage);
 
             Graphics gVert = Graphics.FromImage(drwVert);
             foreach (var ln in linesVert) {
-                gVert.DrawLine(p, drwVert.Width - 1 - ln.p1.Y, ln.p1.X, drwVert.Width - 1 - ln.p2.Y, ln.p2.X);
+                gVert.DrawLine(p, ln.p1.X, ln.p1.Y, ln.p2.X, ln.p2.Y);
             }
             gVert.Dispose();
-            form.outputPV_vert.Invoke(new EventHandler(delegate {
-                form.outputPV_vert.Image = drwVert;
-                form.outputPV_vert.ZoomToFit();
-            }));
+            form.outputPV_vert.Image = drwVert;
+
+            Table t = new Table(lines, linesVert);
+            Bitmap tablePic = new Bitmap(bwImage);
+            Graphics tableG = Graphics.FromImage(tablePic);
+            t.DrawTable(tableG, p);
+            tableG.Dispose();
+            form.resultPV.Image = tablePic;
         }
 
     }

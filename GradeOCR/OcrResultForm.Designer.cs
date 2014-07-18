@@ -39,6 +39,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.sourcePanelVert = new System.Windows.Forms.Panel();
+            this.tableResultPanel = new System.Windows.Forms.Panel();
+            this.label9 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // sourcePanel
@@ -77,7 +79,6 @@
             this.label1.Size = new System.Drawing.Size(41, 13);
             this.label1.TabIndex = 4;
             this.label1.Text = "Source";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // label2
             // 
@@ -170,11 +171,30 @@
             this.sourcePanelVert.Size = new System.Drawing.Size(350, 448);
             this.sourcePanelVert.TabIndex = 1;
             // 
+            // tableResultPanel
+            // 
+            this.tableResultPanel.Location = new System.Drawing.Point(1439, 25);
+            this.tableResultPanel.Name = "tableResultPanel";
+            this.tableResultPanel.Size = new System.Drawing.Size(350, 448);
+            this.tableResultPanel.TabIndex = 2;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(1436, 9);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(90, 13);
+            this.label9.TabIndex = 12;
+            this.label9.Text = "Recognized table";
+            // 
             // OcrResultForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1865, 952);
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(1808, 952);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.tableResultPanel);
             this.Controls.Add(this.sourcePanelVert);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
@@ -216,5 +236,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Panel sourcePanelVert;
+        private System.Windows.Forms.Panel tableResultPanel;
+        private System.Windows.Forms.Label label9;
     }
 }

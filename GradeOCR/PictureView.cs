@@ -15,8 +15,12 @@ namespace GradeOCR {
                 return _Image;
             }
             set {
-                _Image = value;
-                this.Invalidate();
+                Bitmap copy = new Bitmap((Bitmap) value);
+                this.Invoke(new EventHandler(delegate {
+                    _Image = copy;
+                    this.Invalidate();
+                    this.ZoomToFit();
+                }));
             }
         }
 
