@@ -26,6 +26,14 @@ namespace GradeOCR {
             return (double) dy / (double) dx;
         }
 
+        public int Y_atZero() {
+            double dx = p2.X - p1.X;
+            double dy = p2.Y - p1.Y;
+            double k = dy / dx;
+            double a = p1.Y - k * p1.X;
+            return (int) Math.Round(a);
+        }
+
         public override string ToString() {
             return String.Format("Line({0} -> {1})", p1, p2);
         }

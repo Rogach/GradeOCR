@@ -37,7 +37,7 @@ namespace GradeOCR {
                     lines.AddRange(mavg.GetLines(getY: x => Y + inclination[maxDy + optDy, x]));
                 }
             }
-            Console.WriteLine("lines found: " + lines.Count);
+            lines = RemoveAdjacentLines(lines);
 
             return lines;
         }
@@ -187,6 +187,33 @@ namespace GradeOCR {
             }
 
             return res;
+        }
+
+        public static List<Line> RemoveAdjacentLines(List<Line> lines) {
+            List<Line> filteredLines = new List<Line>();
+
+            lines = lines.OrderBy(ln => ln.Y_atZero()).ToList();
+
+            bool[] used = new bool[lines.Count];
+            for (int q = 0; q < lines.Count; q++) {
+                if (!used[q]) {
+                    List<Line> adjacentLines = new List<Line>();
+                    adjacentLines.Add(lines[q]);
+                    used[q] = true;
+
+                    int y = lines[q].Y_atZero();
+                    int w = q + 1;
+                    while (w < lines.Count && lines[w].Y_atZero() - 10 < y) {
+                        used[w] = true;
+                        adjacentLines.Add(lines[w]);
+                        w++;
+                    }
+
+                    filteredLines.Add(adjacentLines.MaxBy(ln => ln.Length()));
+                }
+            }
+
+            return filteredLines;
         }
     }
 }

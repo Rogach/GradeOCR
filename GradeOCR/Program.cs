@@ -68,9 +68,7 @@ namespace GradeOCR {
 
                 Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
                 foreach (var ln in lines) {
-                    //if (ln.p1.X <= 150 && ln.p2.X >= 2340)
-                    //if (ln.Length() > 1500)
-                        g.DrawLine(p, ln.p1, ln.p2);
+                    g.DrawLine(p, ln.p1, ln.p2);
                 }
                 g.Dispose();
             });
