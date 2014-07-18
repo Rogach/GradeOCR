@@ -9,8 +9,10 @@ using LibUtil;
 namespace GradeOCR {
     public class LineRecognition {
         public static readonly float maxAngleFactor = 0.03f;
+        public static readonly float minHorizontalLineRatio = 0.5f;
+        public static readonly float minVerticalLineRatio = 0.1f;
 
-        public static List<Line> RunRecognition(BWImage bw) {
+        public static List<Line> RunRecognition(BWImage bw, int minLineLength) {
             List<Line> lines = new List<Line>();
 
             bool[] blackRows = DetectPossibleBlackRows(bw);
@@ -19,13 +21,13 @@ namespace GradeOCR {
 
             short[,] inclination = PrecomputeInclination(maxDy, bw.Width);
 
-            int optDy = DetectOptimalDy(bw, inclination, maxDy, blackRows);
+            int optDy = DetectOptimalDy(bw, inclination, maxDy, blackRows, minLineLength);
             Console.WriteLine("optDy = " + optDy);
 
             for (int Y = 1; Y < bw.Height - 1; Y++) {
                 if (Y + optDy >= 0 && Y + optDy < bw.Height) {
 
-                    LineDetector mavg = new LineDetector(bw.Width);
+                    LineDetector mavg = new LineDetector(bw.Width, minLineLength);
                     for (int x = 0; x < bw.Width; x++) {
                         short y = (short) (Y + inclination[maxDy + optDy, x]);
                         mavg.Advance(bw.data[y * bw.Width + x] || bw.data[(y + 1) * bw.Width + x] || bw.data[(y - 1) * bw.Width + x]);
@@ -57,14 +59,14 @@ namespace GradeOCR {
             return inclination;
         }
 
-        public static int DetectOptimalDy(BWImage bw, short[,] inclination, int maxDy, bool[] blackRows) {
+        public static int DetectOptimalDy(BWImage bw, short[,] inclination, int maxDy, bool[] blackRows, int minLineLength) {
             for (int Y = 0; Y < bw.Height; Y++) {
                 if (blackRows[Y]) {
                     int minY = Math.Max(0, Y - maxDy);
                     int maxY = Math.Min(bw.Height - 1, Y + maxDy);
 
                     for (int y2 = minY; y2 <= maxY; y2++) {
-                        LineDetector mavg = new LineDetector(bw.Width);
+                        LineDetector mavg = new LineDetector(bw.Width, minLineLength);
                         int dy = y2 - Y;
 
                         for (int x = 0; x < bw.Width; x++) {
@@ -77,12 +79,13 @@ namespace GradeOCR {
                         List<Line> detectedLines = mavg.GetLines(getY: x => Y + inclination[maxDy + dy, x]);
 
                         if (detectedLines.Count > 0) {
+                            Console.WriteLine("detected first line at " + Y);
                             List<Line> optLines = new List<Line>();
-                            for (int oY = Y; oY < bw.Height && oY < Y + 30; oY++) {
+                            for (int oY = Math.Max(0, Y - 40); oY < bw.Height && oY < Y + 40; oY++) {
                                 int oMinY = Math.Max(0, oY - maxDy);
                                 int oMaxY = Math.Min(bw.Height - 1, oY + maxDy);
                                 for (int oy2 = oMinY; oy2 <= oMaxY; oy2++) {
-                                    LineDetector omavg = new LineDetector(bw.Width);
+                                    LineDetector omavg = new LineDetector(bw.Width, minLineLength);
                                     int ody = oy2 - oY;
                                     for (int x = 0; x < bw.Width; x++) {
                                         short oy = (short) (oY + inclination[maxDy + ody, x]);

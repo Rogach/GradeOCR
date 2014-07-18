@@ -87,7 +87,9 @@ namespace GradeOCR {
 
             Thread.Sleep(200);
 
-            List<Line> lines = Util.Timed("sweepline segment detection", () => { return LineRecognition.RunRecognition(bw); });
+            List<Line> lines = Util.Timed("sweepline segment detection", () => { 
+                return LineRecognition.RunRecognition(bw, (int) (bw.Width * LineRecognition.minHorizontalLineRatio)); 
+            });
 
             Bitmap drw = new Bitmap(bwImage);
 
@@ -106,7 +108,9 @@ namespace GradeOCR {
 
             Thread.Sleep(200);
 
-            List<Line> linesVert = Util.Timed("sweepline segment detection (vert)", () => { return LineRecognition.RunRecognition(bwVert); });
+            List<Line> linesVert = Util.Timed("sweepline segment detection (vert)", () => { 
+                return LineRecognition.RunRecognition(bwVert, (int) (bw.Height * LineRecognition.minVerticalLineRatio)); 
+            });
             Bitmap drwVert = new Bitmap(bwImage);
 
             Graphics gVert = Graphics.FromImage(drwVert);

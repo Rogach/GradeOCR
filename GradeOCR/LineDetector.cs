@@ -6,14 +6,15 @@ using System.Drawing;
 
 namespace GradeOCR {
     public class LineDetector {
-        private static readonly int momentumFactor = 10;
-        private static readonly int minLineLength = 400;
+        private static readonly int momentumFactor = 7;
 
+        private int minLineLength;
         private int length;
         private bool[] data;
         private int X = 0;
 
-        public LineDetector(int length) {
+        public LineDetector(int length, int minLineLength) {
+            this.minLineLength = minLineLength;
             this.length = length;
             data = new bool[length];
         }
