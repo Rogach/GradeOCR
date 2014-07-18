@@ -138,19 +138,17 @@ namespace GradeOCR {
 
 
         public static Bitmap DisplayWhiteRows(Bitmap src, BWImage bw) {
-            ImageUtil.AssertImageFormat(src);
-            Bitmap res = new Bitmap(src.Width + 200, src.Height, PixelFormat.Format8bppIndexed);
-            res.Palette = src.Palette;
+            Bitmap res = new Bitmap(src.Width + 200, src.Height, PixelFormat.Format32bppArgb);
 
             int[] blackCount = TallyBlackPixels(bw);
             bool[] blackRows = DetectPossibleBlackRows(bw);
 
             unsafe {
-                BitmapData srcBD = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
-                BitmapData resBD = res.LockBits(new Rectangle(0, 0, res.Width, res.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
+                BitmapData srcBD = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+                BitmapData resBD = res.LockBits(new Rectangle(0, 0, res.Width, res.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 
-                byte* srcPtr = (byte*) srcBD.Scan0.ToPointer();
-                byte* resPtr = (byte*) resBD.Scan0.ToPointer();
+                uint* srcPtr = (uint*) srcBD.Scan0.ToPointer();
+                uint* resPtr = (uint*) resBD.Scan0.ToPointer();
 
                 for (int y = 0; y < src.Height; y++) {
                     int c = 0;
@@ -162,16 +160,20 @@ namespace GradeOCR {
                 }
 
                 int maxCount = (int) (blackCount.Max() * 1.1);
-                resPtr = (byte*) resBD.Scan0.ToPointer();
+                resPtr = (uint*) resBD.Scan0.ToPointer();
                 for (int y = 0; y < src.Height; y++) {
                     int f = blackCount[y] * 200 / maxCount;
                     if (!blackRows[y]) {
                         for (int x = 0; x < f; x++) {
-                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 150;
+                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 4288059030; // 150 gray
+                        }
+                    } else {
+                        for (int x = 0; x < f; x++) {
+                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 4278190080; // black
                         }
                     }
                     for (int x = f; x < 200; x++) {
-                        *(resPtr + y * (src.Width + 200) + src.Width + x) = 255;
+                        *(resPtr + y * (src.Width + 200) + src.Width + x) = 4294967295; // white
                     }
                 }
 

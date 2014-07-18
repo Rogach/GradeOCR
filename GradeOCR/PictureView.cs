@@ -172,7 +172,7 @@ namespace GradeOCR {
                     pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
                 }
                 if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Width) {
-                    foreach (var listener in OnDoubleClick) {
+                    foreach (var listener in DoubleClickListeners) {
                         listener.Invoke(pt);
                     }
                 }
@@ -275,14 +275,14 @@ namespace GradeOCR {
             this.Invalidate();
         }
 
-        private List<Action<Point>> OnDoubleClick = new List<Action<Point>>();
+        private List<Action<Point>> DoubleClickListeners = new List<Action<Point>>();
 
         public void AddDoubleClickListener(Action<Point> listener) {
-            OnDoubleClick.Add(listener);
+            DoubleClickListeners.Add(listener);
         }
 
         public void RemoveDoubleClickListener(Action<Point> listener) {
-            OnDoubleClick.Remove(listener);
+            DoubleClickListeners.Remove(listener);
         }
     }
 }

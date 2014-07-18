@@ -12,23 +12,21 @@ namespace GradeOCR {
         public int Height { get; set; }
 
         public BWImage(Bitmap b) {
-            //b = ToSimpleBitmap(b);
-            ImageUtil.AssertImageFormat(b);
-
             this.Width = b.Width;
             this.Height = b.Height;
             this.data = new bool[Width * Height];
 
             unsafe {
-                BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+                BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
                 // image is layed out line-by-line, horizontally
-                byte* scan0 = (byte*) bd.Scan0.ToPointer();
+                byte* ptr = (byte*) bd.Scan0.ToPointer();
                 for (int q = 0; q < bd.Width * bd.Height; q++) {
-                    if (*scan0 < 200) {
+                    int gray = (*ptr * 30 + *(ptr + 1) * 59 + *(ptr + 2) * 11) / 100;
+                    if (gray < 220) {
                         data[q] = true;
                     }
-                    scan0++;
+                    ptr += 4;
                 }
 
                 b.UnlockBits(bd);

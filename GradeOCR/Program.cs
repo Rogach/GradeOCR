@@ -27,37 +27,33 @@ namespace GradeOCR {
         }
 
         static void RunOCR(OcrResultForm form) {
-            Image img = Image.FromFile("E:/Pronko/prj/Grader/ocr-data/scan1.jpg");
+            Bitmap sourceImage = (Bitmap) Image.FromFile("E:/Pronko/prj/Grader/ocr-data/scan1.jpg");
+            Util.Timed("to std format", () => {
+                sourceImage = ImageUtil.ToStdFormat(sourceImage);
+            });
 
-            Image sourceImage = new Bitmap((Image) img.Clone());
             form.sourcePV.Image = sourceImage;
 
-            Image sourceImageVert = Util.Timed("rotate", () => { return ImageUtil.Rotate((Bitmap) img.Clone()); });
+            Bitmap sourceImageVert = Util.Timed("rotate", () => ImageUtil.Rotate(sourceImage));
             form.sourcePV_vert.Image = sourceImageVert;
 
-            Image bwImage = ImageUtil.ToBlackAndWhite((Bitmap) img.Clone());
+            Bitmap bwImage = Util.Timed("to black and white (horiz)", () => ImageUtil.ToBlackAndWhite(sourceImage));
             form.bwPV.Image = bwImage;
 
-            Image bwImageVert = ImageUtil.ToBlackAndWhite((Bitmap) sourceImageVert.Clone());
+            Bitmap bwImageVert = Util.Timed("to black and white (vert)", () => ImageUtil.ToBlackAndWhite(sourceImageVert));
             form.bwPV_vert.Image = bwImageVert;
 
-            BWImage bw = new BWImage((Bitmap) img.Clone());
-            BWImage bwVert = new BWImage((Bitmap) sourceImageVert.Clone());
+            BWImage bw = new BWImage(sourceImage);
+            BWImage bwVert = new BWImage(sourceImageVert);
 
-            Image freqImage = null;
-            Util.Timed("freq", () => {
-                freqImage = LineRecognition.DisplayWhiteRows((Bitmap) bwImage.Clone(), bw);
-            });
+            Bitmap freqImage = Util.Timed("freq", () => LineRecognition.DisplayWhiteRows(bwImage, bw));
             form.freqPV.Image = freqImage;
 
-            Image freqImageVert = null;
-            Util.Timed("freqVert", () => {
-                freqImageVert = LineRecognition.DisplayWhiteRows((Bitmap) bwImageVert.Clone(), bwVert);
-            });
+            Bitmap freqImageVert = Util.Timed("freqVert", () => LineRecognition.DisplayWhiteRows(bwImageVert, bwVert));
             form.freqPV_vert.Image = freqImageVert;
 
-            List<Line> lines = Util.Timed("sweepline segment detection", () => { 
-                return LineRecognition.RunRecognition(bw, (int) (bw.Width * LineRecognition.minHorizontalLineRatio)); 
+            List<Line> lines = Util.Timed("sweepline segment detection", () => {
+                return LineRecognition.RunRecognition(bw, (int) (bw.Width * LineRecognition.minHorizontalLineRatio));
             });
 
             Bitmap drw = new Bitmap(bwImage);
@@ -72,8 +68,8 @@ namespace GradeOCR {
 
             form.outputPV.Image = drw;
 
-            List<Line> linesVert = Util.Timed("sweepline segment detection (vert)", () => { 
-                return LineRecognition.RunRecognition(bwVert, (int) (bw.Height * LineRecognition.minVerticalLineRatio)); 
+            List<Line> linesVert = Util.Timed("sweepline segment detection (vert)", () => {
+                return LineRecognition.RunRecognition(bwVert, (int) (bw.Height * LineRecognition.minVerticalLineRatio));
             }).ConvertAll(ln => {
                 return new Line(new Point(bwImage.Width - 1 - ln.p1.Y, ln.p1.X), new Point(bwImage.Width - 1 - ln.p2.Y, ln.p2.X));
             });

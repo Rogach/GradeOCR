@@ -7,20 +7,31 @@ using System.Drawing.Imaging;
 
 namespace GradeOCR {
     public static class ImageUtil {
+        public static Bitmap ToStdFormat(Bitmap b) {
+            Bitmap res = new Bitmap(b.Width, b.Height, PixelFormat.Format32bppArgb);
+            res.SetResolution(b.HorizontalResolution, b.VerticalResolution);
+            Graphics g = Graphics.FromImage(res);
+            g.DrawImageUnscaled(b, 0, 0);
+            g.Dispose();
+            return res;
+        }
+
         public static Bitmap ToBlackAndWhite(Bitmap b) {
-            AssertImageFormat(b);
-
-            BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadWrite, PixelFormat.Format8bppIndexed);
-
+            BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
             unsafe {
                 byte* ptr = (byte*) bd.Scan0.ToPointer();
                 for (int q = 0; q < bd.Width * bd.Height; q++) {
-                    if (*ptr < 200) {
+                    int gray = (*ptr * 30 + *(ptr + 1) * 59 + *(ptr + 2) * 11) / 100;
+                    if (gray < 220) {
                         *ptr = 0;
+                        *(ptr + 1) = 0;
+                        *(ptr + 2) = 0;
                     } else {
                         *ptr = 255;
+                        *(ptr + 1) = 255;
+                        *(ptr + 2) = 255;
                     }
-                    ptr++;
+                    ptr += 4;
                 }
             }
             b.UnlockBits(bd);
@@ -29,16 +40,13 @@ namespace GradeOCR {
         }
 
         public static Bitmap Rotate(Bitmap src) {
-            AssertImageFormat(src);
+            Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format32bppArgb);
 
-            Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format8bppIndexed);
-            rotated.Palette = src.Palette;
-
-            BitmapData srcBD = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
-            BitmapData rotBD = rotated.LockBits(new Rectangle(0, 0, rotated.Width, rotated.Height), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+            BitmapData srcBD = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData rotBD = rotated.LockBits(new Rectangle(0, 0, rotated.Width, rotated.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
             unsafe {
-                byte* srcPtr = (byte*) srcBD.Scan0.ToPointer();
-                byte* rotPtr = (byte*) rotBD.Scan0.ToPointer();
+                uint* srcPtr = (uint*) srcBD.Scan0.ToPointer();
+                uint* rotPtr = (uint*) rotBD.Scan0.ToPointer();
 
                 for (int y = 0; y < src.Height; y++) {
                     for (int x = 0; x < src.Width; x++) {
@@ -51,23 +59,6 @@ namespace GradeOCR {
             rotated.UnlockBits(rotBD);
 
             return rotated;
-        }
-
-
-        public static void AssertImageFormat(Image img) {
-            if (img.PixelFormat != System.Drawing.Imaging.PixelFormat.Format8bppIndexed) {
-                throw new Exception("Unsupported pixel format: " + img.PixelFormat);
-            }
-            Color prev = img.Palette.Entries.First();
-            foreach (var c in img.Palette.Entries) {
-                if (c.A != 255) {
-                    throw new Exception("Unsupported alpha values in image");
-                }
-                if (c.R < prev.R || c.G < prev.G || c.B < prev.B) {
-                    throw new Exception("Unsupported palette in image");
-                }
-                prev = c;
-            }
         }
     }
 }
