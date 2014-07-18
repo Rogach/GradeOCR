@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace GradeOCR {
     
@@ -64,6 +65,30 @@ namespace GradeOCR {
                 c = PointOps.Add(c, PointOps.Mult(horizontalNormal, columnWidths[q]));
                 g.DrawLine(p, c, PointOps.Add(c, col));
             }
+        }
+
+        public PointF GetTopLeftCellCorner(int x, int y) {
+            PointF p = origin;
+            for (int q = 0; q < x; q++) {
+                p = PointOps.Add(p, PointOps.Mult(horizontalNormal, columnWidths[q]));
+            }
+            for (int q = 0; q < y; q++) {
+                p = PointOps.Add(p, PointOps.Mult(verticalNormal, rowHeights[q]));
+            }
+            return p;
+        }
+
+        public GraphicsPath GetCellContour(int x, int y) {
+            var gp = new GraphicsPath();
+            gp.AddPolygon(
+                new PointF[] { 
+                    GetTopLeftCellCorner(x, y),
+                    GetTopLeftCellCorner(x + 1, y),
+                    GetTopLeftCellCorner(x + 1, y + 1),
+                    GetTopLeftCellCorner(x, y + 1)
+                }
+            );
+            return gp;
         }
 
     }
