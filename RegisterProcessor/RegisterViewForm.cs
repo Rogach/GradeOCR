@@ -52,6 +52,7 @@ namespace RegisterProcessor {
                                     ProcessTableCell(x, y);
                                 }
                             }
+                            selectionStart = null;
                         } else {
                             selectionStart = new Point(cell.X, cell.Y);
                         }
