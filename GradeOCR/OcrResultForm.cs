@@ -61,10 +61,10 @@ namespace GradeOCR {
             BWImage bw = Util.Timed("bw (horiz)", () => new BWImage(sourceImage));
             BWImage bwVert = Util.Timed("bw (vert)", () => new BWImage(sourceImageVert));
 
-            Bitmap freqImage = Util.Timed("freq", () => LineRecognition.DisplayWhiteRows(bwImage, bw));
+            Bitmap freqImage = Util.Timed("freq", () => WhiteRowDetection.DisplayWhiteRows(bwImage, bw));
             this.freqPV.Image = freqImage;
 
-            Bitmap freqImageVert = Util.Timed("freqVert", () => LineRecognition.DisplayWhiteRows(bwImageVert, bwVert));
+            Bitmap freqImageVert = Util.Timed("freqVert", () => WhiteRowDetection.DisplayWhiteRows(bwImageVert, bwVert));
             this.freqPV_vert.Image = freqImageVert;
 
             List<Line> lines = Util.Timed("sweepline segment detection", () => {

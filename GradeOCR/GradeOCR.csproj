@@ -67,6 +67,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Table.cs" />
+    <Compile Include="WhiteRowDetection.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="hourglass.png" />
