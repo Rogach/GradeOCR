@@ -181,7 +181,7 @@ namespace GradeOCR {
                 }
                 if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Height) {
                     foreach (var listener in DoubleClickListeners) {
-                        listener.Invoke(pt);
+                        listener.Invoke(pt, e);
                     }
                 }
             });
@@ -283,13 +283,13 @@ namespace GradeOCR {
             this.Invalidate();
         }
 
-        private List<Action<Point>> DoubleClickListeners = new List<Action<Point>>();
+        private List<Action<Point, MouseEventArgs>> DoubleClickListeners = new List<Action<Point, MouseEventArgs>>();
 
-        public void AddDoubleClickListener(Action<Point> listener) {
+        public void AddDoubleClickListener(Action<Point, MouseEventArgs> listener) {
             DoubleClickListeners.Add(listener);
         }
 
-        public void RemoveDoubleClickListener(Action<Point> listener) {
+        public void RemoveDoubleClickListener(Action<Point, MouseEventArgs> listener) {
             DoubleClickListeners.Remove(listener);
         }
     }

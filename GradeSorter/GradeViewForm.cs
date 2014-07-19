@@ -9,7 +9,6 @@ using System.Windows.Forms;
 using LibUtil;
 using GradeOCR;
 using System.IO;
-using System.Drawing;
 
 namespace GradeSorter {
     public partial class GradeViewForm : Form {

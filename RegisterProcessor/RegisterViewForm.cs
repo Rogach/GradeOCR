@@ -38,19 +38,25 @@ namespace RegisterProcessor {
                 ProcessNextImage();
             });
 
-            this.registerPV.AddDoubleClickListener(pt => {
-                currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                    Bitmap cellImage = currentTable.GetCellImage(bwImage, cell.Item1, cell.Item2);
-
-                    cellImage.Save(GetNextUnsortGradeImageName());
-
-                    // color processed cell with green
-                    GraphicsPath cellPath = currentTable.GetCellContour(cell.Item1, cell.Item2);
-                    Graphics g = Graphics.FromImage(currentImage);
-                    g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
-                    g.Dispose();
-                    registerPV.SetImageKeepZoom(currentImage);
-                });
+            Point? selectionStart = null;
+            this.registerPV.AddDoubleClickListener((pt, e) => {
+                if (e.Button == MouseButtons.Left) {
+                    currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                        ProcessTableCell(cell.Item1, cell.Item2);
+                    });
+                } else if (e.Button == MouseButtons.Right) {
+                    currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                        if (selectionStart.HasValue) {
+                            for (int y = selectionStart.Value.Y; y <= cell.Item2; y++) {
+                                for (int x = selectionStart.Value.X; x <= cell.Item1; x++) {
+                                    ProcessTableCell(x, y);
+                                }
+                            }
+                        } else {
+                            selectionStart = new Point(cell.Item1, cell.Item2);
+                        }
+                    });
+                }
             });
 
             this.debugOcrButton.Click += new EventHandler(delegate {
@@ -73,6 +79,19 @@ namespace RegisterProcessor {
             g.Dispose();
 
             registerPV.Image = currentImage;
+        }
+
+        private void ProcessTableCell(int x, int y) {
+            Bitmap cellImage = currentTable.GetCellImage(bwImage, x, y);
+
+            cellImage.Save(GetNextUnsortGradeImageName());
+
+            // color processed cell with green
+            GraphicsPath cellPath = currentTable.GetCellContour(x, y);
+            Graphics g = Graphics.FromImage(currentImage);
+            g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+            g.Dispose();
+            registerPV.SetImageKeepZoom(currentImage);
         }
 
         private string GetNextUnsortGradeImageName() {
