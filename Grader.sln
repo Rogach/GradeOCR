@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeOCR", "GradeOCR\GradeO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterProcessor", "RegisterProcessor\RegisterProcessor.csproj", "{55037F42-399A-4261-BC29-33B84315F5F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeSorter", "GradeSorter\GradeSorter.csproj", "{32D946F6-43C7-48D5-B3C4-D25844A19FB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -25,6 +27,10 @@ Global
 		{55037F42-399A-4261-BC29-33B84315F5F4}.Debug|x86.Build.0 = Debug|x86
 		{55037F42-399A-4261-BC29-33B84315F5F4}.Release|x86.ActiveCfg = Release|x86
 		{55037F42-399A-4261-BC29-33B84315F5F4}.Release|x86.Build.0 = Release|x86
+		{32D946F6-43C7-48D5-B3C4-D25844A19FB8}.Debug|x86.ActiveCfg = Debug|x86
+		{32D946F6-43C7-48D5-B3C4-D25844A19FB8}.Debug|x86.Build.0 = Debug|x86
+		{32D946F6-43C7-48D5-B3C4-D25844A19FB8}.Release|x86.ActiveCfg = Release|x86
+		{32D946F6-43C7-48D5-B3C4-D25844A19FB8}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

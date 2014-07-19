@@ -94,7 +94,7 @@ namespace RegisterProcessor {
         }
 
         private string NextImageName() {
-            string[] images = Directory.GetFiles("E:/Pronko/prj/Grader/ocr-data/register-new/");
+            string[] images = Directory.GetFiles(OcrData + "/register-new/");
             if (images.Length > 0) {
                 return images[0];
             } else {
