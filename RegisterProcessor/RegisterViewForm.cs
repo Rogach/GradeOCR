@@ -112,7 +112,20 @@ namespace RegisterProcessor {
         }
 
         private void MoveImageToDone(string fileName) {
-            File.Move(fileName, "E:/Pronko/prj/Grader/ocr-data/register-old/" + Path.DirectorySeparatorChar + Path.GetFileName(fileName));
+            string dest = OcrData + "/register-old/" + Path.GetFileName(fileName);
+            if (File.Exists(dest)) {
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.InitialDirectory = OcrData + "/register-old/";
+                sfd.Title = "Выберите место для сохранения обработанной ведомости";
+                if (sfd.ShowDialog() == DialogResult.OK) {
+                    dest = sfd.FileName;
+                    File.Move(fileName, dest);
+                } else {
+                    throw new Exception("File name already exists!");
+                }
+            } else {
+                File.Move(fileName, dest);
+            }
         }
 
     }
