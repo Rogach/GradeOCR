@@ -37,13 +37,15 @@ namespace GradeOCR {
 
             resultPV = PictureView.InsertIntoPanel(this.tableResultPanel);
 
-            Thread worker = new Thread(new ThreadStart(delegate {
-                Util.Timed("OCR debug run", () => {
-                    RunOCR(sourceImage);
-                });
-            }));
-            worker.IsBackground = true;
-            worker.Start();
+            this.Shown += new EventHandler(delegate {
+                Thread worker = new Thread(new ThreadStart(delegate {
+                    Util.Timed("Table OCR debug run", () => {
+                        RunOCR(sourceImage);
+                    });
+                }));
+                worker.IsBackground = true;
+                worker.Start();
+            });
         }
 
         public void RunOCR(Bitmap sourceImage) {
@@ -106,6 +108,8 @@ namespace GradeOCR {
             this.resultPV.AddDoubleClickListener(pt => {
                 t.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
                     Console.WriteLine(cell);
+                    var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.Item1, cell.Item2));
+                    gradeRecognition.ShowDialog();
                 });
             });
         }

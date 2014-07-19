@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using LibUtil;
+using System.Drawing.Imaging;
 
 namespace GradeOCR {
     
@@ -117,6 +118,29 @@ namespace GradeOCR {
                 }
                 return new Some<Tuple<int, int>>(new Tuple<int, int>(col, row));
             }
+        }
+
+        public Bitmap GetCellImage(Bitmap img, int x, int y) {
+            int padding = 2;
+            int offsetY = 1;
+
+            int w = (int) Math.Floor(columnWidths[x]);
+            int h = (int) Math.Floor(rowHeights[y]);
+            float ang = (float) (Math.Atan(horizontalNormal.Y / horizontalNormal.X) / Math.PI * 180);
+            
+            Bitmap cell = new Bitmap(w - padding * 2, h - padding * 2, PixelFormat.Format32bppArgb);
+            PointF pt = GetTopLeftCellCorner(x, y);
+            Graphics g = Graphics.FromImage(cell);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+            g.RotateTransform(-ang);
+            g.DrawImage(
+                img,
+                new RectangleF(0, 0, w + 10, h + 10),
+                new RectangleF((float) Math.Floor(pt.X + padding), (float) Math.Floor(pt.Y + padding + offsetY), w + 10, h + 10),
+                GraphicsUnit.Pixel);
+            g.Dispose();
+            return cell;
         }
 
     }

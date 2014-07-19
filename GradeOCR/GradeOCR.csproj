@@ -50,15 +50,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BWImage.cs" />
+    <Compile Include="GradeRecognitionDebugView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GradeRecognitionDebugView.Designer.cs">
+      <DependentUpon>GradeRecognitionDebugView.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImageUtil.cs" />
     <Compile Include="Line.cs" />
     <Compile Include="LineRecognition.cs" />
     <Compile Include="LineDetector.cs" />
-    <Compile Include="OcrResultForm.cs">
+    <Compile Include="TableRecognitionDebugView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="OcrResultForm.Designer.cs">
-      <DependentUpon>OcrResultForm.cs</DependentUpon>
+    <Compile Include="TableRecognitionDebugView.Designer.cs">
+      <DependentUpon>TableRecognitionDebugView.cs</DependentUpon>
     </Compile>
     <Compile Include="PictureView.cs">
       <SubType>UserControl</SubType>
@@ -70,9 +76,12 @@
     <Compile Include="WhiteRowDetection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GradeRecognitionDebugView.resx">
+      <DependentUpon>GradeRecognitionDebugView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="hourglass.png" />
-    <EmbeddedResource Include="OcrResultForm.resx">
-      <DependentUpon>OcrResultForm.cs</DependentUpon>
+    <EmbeddedResource Include="TableRecognitionDebugView.resx">
+      <DependentUpon>TableRecognitionDebugView.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

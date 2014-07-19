@@ -270,7 +270,7 @@ namespace GradeOCR {
         public void ZoomToFit() {
             float zoomX = (float) this.Width / (float) _Image.Width;
             float zoomY = (float) this.Height / (float) _Image.Height;
-            zoom = Math.Min(zoomX, zoomY);
+            zoom = Math.Min(zoomX, zoomY) * 0.99f;
             this.PerformLayout();
             this.Invalidate();
         }
