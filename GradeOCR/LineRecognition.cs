@@ -121,7 +121,7 @@ namespace GradeOCR {
 
                     int y = lines[q].Y_atZero();
                     int w = q + 1;
-                    while (w < lines.Count && lines[w].Y_atZero() - 10 < y) {
+                    while (w < lines.Count && lines[w].Y_atZero() - 20 < y) {
                         used[w] = true;
                         adjacentLines.Add(lines[w]);
                         w++;
