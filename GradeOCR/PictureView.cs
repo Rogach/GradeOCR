@@ -179,7 +179,7 @@ namespace GradeOCR {
                 } else {
                     pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
                 }
-                if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Width) {
+                if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Height) {
                     foreach (var listener in DoubleClickListeners) {
                         listener.Invoke(pt);
                     }
