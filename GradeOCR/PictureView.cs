@@ -24,6 +24,14 @@ namespace GradeOCR {
             }
         }
 
+        public void SetImageKeepZoom(Image img) {
+            Bitmap copy = new Bitmap((Bitmap) img);
+            this.Invoke(new EventHandler(delegate {
+                _Image = copy;
+                this.Invalidate();
+            }));
+        }
+
         private float zoom = 1;
         private float offsetX = 0;
         private float offsetY = 0;
@@ -142,7 +150,6 @@ namespace GradeOCR {
                     dragStart = e.Location;
                     startOffsetX = offsetX;
                     startOffsetY = offsetY;
-                    this.Cursor = Cursors.NoMove2D;
                 }
             });
             this.MouseMove += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
@@ -151,6 +158,7 @@ namespace GradeOCR {
                     offsetY = startOffsetY + (dragStart.Y - e.Y) / zoom;
                     ClampOffsets();
                     UpdateScrollBars();
+                    this.Cursor = Cursors.NoMove2D;
                     this.Invalidate();
                 }
             });

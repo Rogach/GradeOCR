@@ -8,7 +8,7 @@ using LibUtil;
 using System.Threading;
 
 namespace GradeOCR {
-    class Program {
+    public class Program {
         static void Main(string[] args) {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
