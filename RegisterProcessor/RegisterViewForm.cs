@@ -42,18 +42,18 @@ namespace RegisterProcessor {
             this.registerPV.AddDoubleClickListener((pt, e) => {
                 if (e.Button == MouseButtons.Left) {
                     currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                        ProcessTableCell(cell.Item1, cell.Item2);
+                        ProcessTableCell(cell.X, cell.Y);
                     });
                 } else if (e.Button == MouseButtons.Right) {
                     currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
                         if (selectionStart.HasValue) {
-                            for (int y = selectionStart.Value.Y; y <= cell.Item2; y++) {
-                                for (int x = selectionStart.Value.X; x <= cell.Item1; x++) {
+                            for (int y = selectionStart.Value.Y; y <= cell.Y; y++) {
+                                for (int x = selectionStart.Value.X; x <= cell.X; x++) {
                                     ProcessTableCell(x, y);
                                 }
                             }
                         } else {
-                            selectionStart = new Point(cell.Item1, cell.Item2);
+                            selectionStart = new Point(cell.X, cell.Y);
                         }
                     });
                 }

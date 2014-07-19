@@ -93,7 +93,7 @@ namespace GradeOCR {
             return gp;
         }
 
-        public Option<Tuple<int, int>> GetCellAtPoint(float px, float py) {
+        public Option<Point> GetCellAtPoint(float px, float py) {
             px -= origin.X;
             py -= origin.Y;
             float hx = horizontalNormal.X;
@@ -104,7 +104,7 @@ namespace GradeOCR {
             float h = (px - v * vx) / vy;
 
             if (v < 0 || h < 0 || v >= totalHeight || h >= totalWidth) {
-                return new None<Tuple<int, int>>();
+                return new None<Point>();
             } else {
                 int col = 0;
                 while (h > columnWidths[col]) {
@@ -116,7 +116,7 @@ namespace GradeOCR {
                     v -= rowHeights[row];
                     row++;
                 }
-                return new Some<Tuple<int, int>>(new Tuple<int, int>(col, row));
+                return new Some<Point>(new Point(col, row));
             }
         }
 
