@@ -39,28 +39,21 @@ namespace GradeOCR {
 
         public static Bitmap DisplayWhiteRows(Bitmap src, BWImage bw) {
             Bitmap res = new Bitmap(src.Width + 200, src.Height, PixelFormat.Format32bppArgb);
+            res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
 
             int[] blackCount = TallyBlackPixels(bw);
             bool[] blackRows = DetectPossibleBlackRows(bw);
 
-            unsafe {
-                BitmapData srcBD = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-                BitmapData resBD = res.LockBits(new Rectangle(0, 0, res.Width, res.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage(res);
+            g.DrawImageUnscaled(src, 0, 0);
+            g.Dispose();
 
-                uint* srcPtr = (uint*) srcBD.Scan0.ToPointer();
+            int maxCount = (int) (blackCount.Max() * 1.1);
+
+            unsafe {
+                BitmapData resBD = res.LockBits(new Rectangle(0, 0, res.Width, res.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
                 uint* resPtr = (uint*) resBD.Scan0.ToPointer();
 
-                for (int y = 0; y < src.Height; y++) {
-                    int c = 0;
-                    for (int x = 0; x < src.Width; x++) {
-                        if (*(srcPtr) == 0) c++;
-                        *(resPtr++) = *(srcPtr++);
-                    }
-                    resPtr += 200;
-                }
-
-                int maxCount = (int) (blackCount.Max() * 1.1);
-                resPtr = (uint*) resBD.Scan0.ToPointer();
                 for (int y = 0; y < src.Height; y++) {
                     int f = blackCount[y] * 200 / maxCount;
                     if (!blackRows[y]) {
@@ -78,7 +71,6 @@ namespace GradeOCR {
                 }
 
                 res.UnlockBits(resBD);
-                src.UnlockBits(srcBD);
             }
 
             return res;
