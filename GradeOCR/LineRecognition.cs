@@ -79,7 +79,7 @@ namespace GradeOCR {
 
                         if (detectedLines.Count > 0) {
                             List<Line> optLines = new List<Line>();
-                            for (int oY = Math.Max(0, Y - 40); oY < bw.Height && oY < Y + 40; oY++) {
+                            for (int oY = Math.Max(0, Y - 40); oY < bw.Height && oY < Y + 80; oY++) {
                                 int oMinY = Math.Max(0, oY - maxDy);
                                 int oMaxY = Math.Min(bw.Height - 1, oY + maxDy);
                                 for (int oy2 = oMinY; oy2 <= oMaxY; oy2++) {
