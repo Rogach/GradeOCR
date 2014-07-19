@@ -13,7 +13,7 @@ namespace GradeOCR {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Bitmap sourceImage = (Bitmap) Image.FromFile("E:/Pronko/prj/Grader/ocr-data/scan1.jpg");
+            Bitmap sourceImage = (Bitmap) Image.FromFile("E:/Pronko/prj/Grader/ocr-data/register-new/scan1.jpg");
             Util.Timed("to std format", () => {
                 sourceImage = ImageUtil.ToStdFormat(sourceImage);
             });
