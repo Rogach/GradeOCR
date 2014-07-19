@@ -10,7 +10,7 @@ using System.Threading;
 using LibUtil;
 
 namespace GradeOCR {
-    public partial class OcrResultForm : Form {
+    public partial class TableRecognitionDebugView : Form {
         public PictureView sourcePV;
         public PictureView bwPV;
         public PictureView freqPV;
@@ -23,7 +23,7 @@ namespace GradeOCR {
 
         public PictureView resultPV;
 
-        public OcrResultForm(Bitmap sourceImage) {
+        public TableRecognitionDebugView(Bitmap sourceImage) {
             InitializeComponent();
             sourcePV = PictureView.InsertIntoPanel(this.sourcePanel);
             bwPV = PictureView.InsertIntoPanel(this.bwPanel);

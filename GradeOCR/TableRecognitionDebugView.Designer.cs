@@ -1,5 +1,5 @@
 ﻿namespace GradeOCR {
-    partial class OcrResultForm {
+    partial class TableRecognitionDebugView {
         /// <summary>
         /// Required designer variable.
         /// </summary>

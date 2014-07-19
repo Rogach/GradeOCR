@@ -18,7 +18,7 @@ namespace GradeOCR {
                 sourceImage = ImageUtil.ToStdFormat(sourceImage);
             });
 
-            Application.Run(new OcrResultForm(sourceImage));
+            Application.Run(new TableRecognitionDebugView(sourceImage));
         }
 
         public static Table RecognizeTable(Bitmap sourceImage) {
