@@ -107,7 +107,6 @@ namespace GradeOCR {
             this.resultPV.Image = tablePic;
             this.resultPV.AddDoubleClickListener(pt => {
                 t.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                    Console.WriteLine(cell);
                     var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.Item1, cell.Item2));
                     gradeRecognition.ShowDialog();
                 });

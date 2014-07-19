@@ -121,8 +121,7 @@ namespace GradeOCR {
         }
 
         public Bitmap GetCellImage(Bitmap img, int x, int y) {
-            int padding = 2;
-            int offsetY = 1;
+            int padding = 1;
 
             int w = (int) Math.Floor(columnWidths[x]);
             int h = (int) Math.Floor(rowHeights[y]);
@@ -137,7 +136,7 @@ namespace GradeOCR {
             g.DrawImage(
                 img,
                 new RectangleF(0, 0, w + 10, h + 10),
-                new RectangleF((float) Math.Floor(pt.X + padding), (float) Math.Floor(pt.Y + padding + offsetY), w + 10, h + 10),
+                new RectangleF((float) Math.Floor(pt.X + padding), (float) Math.Floor(pt.Y + padding), w + 10, h + 10),
                 GraphicsUnit.Pixel);
             g.Dispose();
             return cell;
