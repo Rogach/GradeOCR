@@ -9,16 +9,21 @@ using System.Threading;
 
 namespace GradeOCR {
     public class Program {
+        [STAThread]
         static void Main(string[] args) {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Bitmap sourceImage = (Bitmap) Image.FromFile("E:/Pronko/prj/Grader/ocr-data/register-new/scan1.jpg");
-            Util.Timed("to std format", () => {
-                sourceImage = ImageUtil.ToStdFormat(sourceImage);
-            });
+            OpenFileDialog fd = new OpenFileDialog();
+            fd.Title = "Выберите изображение ведомости";
+            if (fd.ShowDialog() == DialogResult.OK) {
+                Bitmap sourceImage = (Bitmap) Image.FromFile(fd.FileName);
+                Util.Timed("to std format", () => {
+                    sourceImage = ImageUtil.ToStdFormat(sourceImage);
+                });
 
-            Application.Run(new TableRecognitionDebugView(sourceImage));
+                Application.Run(new TableRecognitionDebugView(sourceImage));
+            }
         }
 
         public static Table RecognizeTable(Bitmap sourceImage) {

@@ -20,6 +20,7 @@ namespace RegisterProcessor {
 
         private string currentFileName;
         private Bitmap origImage;
+        private Bitmap bwImage;
         private Bitmap currentImage;
         private Table currentTable;
 
@@ -39,7 +40,7 @@ namespace RegisterProcessor {
 
             this.registerPV.AddDoubleClickListener(pt => {
                 currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                    Bitmap cellImage = currentTable.GetCellImage(origImage, cell.Item1, cell.Item2);
+                    Bitmap cellImage = currentTable.GetCellImage(bwImage, cell.Item1, cell.Item2);
 
                     cellImage.Save(GetNextUnsortGradeImageName());
 
@@ -51,14 +52,19 @@ namespace RegisterProcessor {
                     registerPV.SetImageKeepZoom(currentImage);
                 });
             });
+
+            this.debugOcrButton.Click += new EventHandler(delegate {
+                (new TableRecognitionDebugView(origImage)).ShowDialog();
+            });
         }
 
         private void ProcessNextImage() {
             currentFileName = NextImageName();
             this.Text = currentFileName;
 
-            currentImage = LoadImage(currentFileName);
-            origImage = new Bitmap(currentImage);
+            origImage = LoadImage(currentFileName);
+            bwImage = ImageUtil.ToBlackAndWhite(origImage);
+            currentImage = new Bitmap(bwImage);
 
             currentTable = GradeOCR.Program.RecognizeTable(currentImage);
             Graphics g = Graphics.FromImage(currentImage);
@@ -102,7 +108,7 @@ namespace RegisterProcessor {
             FileStream fs = File.OpenRead(fileName);
             Bitmap img = (Bitmap) Image.FromStream(fs);
             fs.Close();
-            return ImageUtil.ToBlackAndWhite(ImageUtil.ToStdFormat(img));
+            return ImageUtil.ToStdFormat(img);
         }
 
         private void MoveImageToDone(string fileName) {

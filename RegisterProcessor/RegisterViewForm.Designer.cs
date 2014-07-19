@@ -25,6 +25,7 @@
         private void InitializeComponent() {
             this.registerPanel = new System.Windows.Forms.Panel();
             this.nextRegisterButton = new System.Windows.Forms.Button();
+            this.debugOcrButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // registerPanel
@@ -44,11 +45,21 @@
             this.nextRegisterButton.Text = "Next register";
             this.nextRegisterButton.UseVisualStyleBackColor = true;
             // 
+            // debugOcrButton
+            // 
+            this.debugOcrButton.Location = new System.Drawing.Point(12, 909);
+            this.debugOcrButton.Name = "debugOcrButton";
+            this.debugOcrButton.Size = new System.Drawing.Size(75, 31);
+            this.debugOcrButton.TabIndex = 2;
+            this.debugOcrButton.Text = "Debug OCR";
+            this.debugOcrButton.UseVisualStyleBackColor = true;
+            // 
             // RegisterViewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(895, 952);
+            this.Controls.Add(this.debugOcrButton);
             this.Controls.Add(this.nextRegisterButton);
             this.Controls.Add(this.registerPanel);
             this.Name = "RegisterViewForm";
@@ -61,5 +72,6 @@
 
         private System.Windows.Forms.Panel registerPanel;
         private System.Windows.Forms.Button nextRegisterButton;
+        private System.Windows.Forms.Button debugOcrButton;
     }
 }
