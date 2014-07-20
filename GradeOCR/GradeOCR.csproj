@@ -54,6 +54,12 @@
     <Compile Include="GradeRecognitionDebugView.Designer.cs">
       <DependentUpon>GradeRecognitionDebugView.cs</DependentUpon>
     </Compile>
+    <Compile Include="MassGradeView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MassGradeView.Designer.cs">
+      <DependentUpon>MassGradeView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

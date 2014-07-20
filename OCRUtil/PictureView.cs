@@ -24,6 +24,8 @@ namespace OCRUtil {
             }
         }
 
+        public bool AllowZoom { get; set; }
+
         public void SetImageKeepZoom(Image img) {
             Bitmap copy = new Bitmap((Bitmap) img);
             this.Invoke(new EventHandler(delegate {
@@ -45,6 +47,8 @@ namespace OCRUtil {
         public PictureView() : base() {
             this.BorderStyle = BorderStyle.FixedSingle;
             this.DoubleBuffered = true;
+
+            this.AllowZoom = true;
 
             _Image = LoadPlaceholder();
             this.Controls.Add(plug);
@@ -89,54 +93,56 @@ namespace OCRUtil {
 
         private void AddMouseZoom() {
             this.MouseWheel += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
-                float origZoom = zoom;
-                
-                for (int i = 0; i < e.Delta; i += 120) {
-                    zoom *= 1.05f;
-                }
-                for (int i = 0; i > e.Delta; i -= 120) {
-                    zoom *= 0.95f;
-                }
+                if (AllowZoom) {
+                    float origZoom = zoom;
 
-                bool origFit = _Image.Width * origZoom <= this.Width && _Image.Height * origZoom <= this.Height;
-                bool fit = _Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height;
+                    for (int i = 0; i < e.Delta; i += 120) {
+                        zoom *= 1.05f;
+                    }
+                    for (int i = 0; i > e.Delta; i -= 120) {
+                        zoom *= 0.95f;
+                    }
 
-                if (fit) {
-                    // if image fits into view, no action is required
-                    offsetX = 0;
-                    offsetY = 0;
-                } else if (origFit && !fit) {
-                    // if image fit into frame before zoom, but stopped fitting after - need to center the image
-                    if (_Image.Width * zoom > this.Width - scrollBarWidth) {
-                        offsetX = (_Image.Width - (this.Width - scrollBarWidth) / zoom) / 2;
-                    } else {
+                    bool origFit = _Image.Width * origZoom <= this.Width && _Image.Height * origZoom <= this.Height;
+                    bool fit = _Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height;
+
+                    if (fit) {
+                        // if image fits into view, no action is required
                         offsetX = 0;
-                    }
-                    if (_Image.Height * zoom > this.Height - scrollBarWidth) {
-                        offsetY = (_Image.Height - (this.Height - scrollBarWidth) / zoom) / 2;
-                    } else {
                         offsetY = 0;
-                    }
-                    ClampOffsets();
-                } else {
-                    // image didn't fit before zoom or after
-                    if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
-                        offsetX = 0;
+                    } else if (origFit && !fit) {
+                        // if image fit into frame before zoom, but stopped fitting after - need to center the image
+                        if (_Image.Width * zoom > this.Width - scrollBarWidth) {
+                            offsetX = (_Image.Width - (this.Width - scrollBarWidth) / zoom) / 2;
+                        } else {
+                            offsetX = 0;
+                        }
+                        if (_Image.Height * zoom > this.Height - scrollBarWidth) {
+                            offsetY = (_Image.Height - (this.Height - scrollBarWidth) / zoom) / 2;
+                        } else {
+                            offsetY = 0;
+                        }
+                        ClampOffsets();
                     } else {
-                        offsetX += ((this.Width - scrollBarWidth) / origZoom - (this.Width - scrollBarWidth) / zoom) / 2;
+                        // image didn't fit before zoom or after
+                        if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
+                            offsetX = 0;
+                        } else {
+                            offsetX += ((this.Width - scrollBarWidth) / origZoom - (this.Width - scrollBarWidth) / zoom) / 2;
+                        }
+                        if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
+                            offsetY = 0;
+                        } else {
+                            offsetY += ((this.Height - scrollBarWidth) / origZoom - (this.Height - scrollBarWidth) / zoom) / 2;
+                        }
+                        ClampOffsets();
                     }
-                    if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
-                        offsetY = 0;
-                    } else {
-                        offsetY += ((this.Height - scrollBarWidth) / origZoom - (this.Height - scrollBarWidth) / zoom) / 2;
-                    }
-                    ClampOffsets();
-                }
 
-                UpdateScrollBars();
-                
-                this.PerformLayout();
-                this.Invalidate();
+                    UpdateScrollBars();
+
+                    this.PerformLayout();
+                    this.Invalidate();
+                }
             });
         }
 
