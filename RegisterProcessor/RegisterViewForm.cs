@@ -11,6 +11,7 @@ using System.IO;
 using LibUtil;
 using System.Drawing.Drawing2D;
 using System.Text.RegularExpressions;
+using OCRUtil;
 
 namespace RegisterProcessor {
     public partial class RegisterViewForm : Form {

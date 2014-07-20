@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using LibUtil;
 using System.Threading;
+using OCRUtil;
 
 namespace TableOCR {
     public class Program {

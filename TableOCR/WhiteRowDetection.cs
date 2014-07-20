@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
+using OCRUtil;
 
 namespace TableOCR {
     public static class WhiteRowDetection {

@@ -63,9 +63,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TableOCR\TableOCR.csproj">
-      <Project>{F1213444-68AD-4C9C-A0A9-22E571412CCD}</Project>
-      <Name>TableOCR</Name>
+    <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">
+      <Project>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</Project>
+      <Name>OCRUtil</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

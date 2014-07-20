@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using LibUtil;
-using TableOCR;
 using System.IO;
+using OCRUtil;
 
 namespace GradeSorter {
     public partial class GradeViewForm : Form {

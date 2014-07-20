@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using LibUtil;
+using OCRUtil;
+using GradeOCR;
 
 namespace TableOCR {
     public partial class TableRecognitionDebugView : Form {

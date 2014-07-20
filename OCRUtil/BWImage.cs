@@ -5,7 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace TableOCR {
+namespace OCRUtil {
     public class BWImage {
         public bool[] data;
         public int Width { get; set;}

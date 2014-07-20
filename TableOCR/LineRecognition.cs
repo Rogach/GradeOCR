@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
 using LibUtil;
+using OCRUtil;
 
 namespace TableOCR {
     public class LineRecognition {

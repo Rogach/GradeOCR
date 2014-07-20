@@ -9,8 +9,9 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Threading;
 using LibUtil;
+using OCRUtil;
 
-namespace TableOCR {
+namespace GradeOCR {
     public partial class GradeRecognitionDebugView : Form {
         public PictureView inputImagePV;
 

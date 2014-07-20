@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using LibUtil;
 using System.Drawing.Imaging;
+using OCRUtil;
 
 namespace TableOCR {
     

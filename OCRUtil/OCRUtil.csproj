@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{F1213444-68AD-4C9C-A0A9-22E571412CCD}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TableOCR</RootNamespace>
-    <AssemblyName>TableOCR</AssemblyName>
+    <RootNamespace>OCRUtil</RootNamespace>
+    <AssemblyName>OCRUtil</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="LibUtil">
       <HintPath>..\..\LibUtil\LibUtil\bin\Release\LibUtil.dll</HintPath>
@@ -49,33 +52,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LineRecognition.cs" />
-    <Compile Include="LineDetector.cs" />
-    <Compile Include="TableRecognitionDebugView.cs">
-      <SubType>Form</SubType>
+    <Compile Include="BWImage.cs" />
+    <Compile Include="ImageUtil.cs" />
+    <Compile Include="Line.cs" />
+    <Compile Include="PictureView.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TableRecognitionDebugView.Designer.cs">
-      <DependentUpon>TableRecognitionDebugView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="PointOps.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Table.cs" />
-    <Compile Include="WhiteRowDetection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TableRecognitionDebugView.resx">
-      <DependentUpon>TableRecognitionDebugView.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GradeOCR\GradeOCR.csproj">
-      <Project>{510CB01C-1284-4535-9312-798760B6C55E}</Project>
-      <Name>GradeOCR</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">
-      <Project>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</Project>
-      <Name>OCRUtil</Name>
-    </ProjectReference>
+    <EmbeddedResource Include="hourglass.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
