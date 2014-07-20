@@ -134,10 +134,11 @@ namespace TableOCR {
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
             g.RotateTransform(-ang);
+            g.TranslateTransform(0, -10);
             g.DrawImage(
                 img,
-                new RectangleF(0, 0, w + 10, h + 10),
-                new RectangleF((float) Math.Floor(pt.X + padding), (float) Math.Floor(pt.Y + padding), w + 10, h + 10),
+                new RectangleF(0, 0, w + 10, h + 20),
+                new RectangleF((float) Math.Floor(pt.X + padding), (float) Math.Floor(pt.Y - 10 + padding), w + 10, h + 20),
                 GraphicsUnit.Pixel);
             g.Dispose();
             return cell;
