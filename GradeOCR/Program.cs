@@ -13,7 +13,7 @@ namespace GradeOCR {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MassGradeView(new Size(100, 50), b => {
-                return b; 
+                return BorderRemoval.RemoveBorder(b); 
             }));
         }
     }

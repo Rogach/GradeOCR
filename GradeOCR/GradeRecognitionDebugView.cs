@@ -14,11 +14,13 @@ using OCRUtil;
 namespace GradeOCR {
     public partial class GradeRecognitionDebugView : Form {
         public PictureView inputImagePV;
+        public PictureView removeBorderPV;
 
         public GradeRecognitionDebugView(Bitmap inputImage) {
             InitializeComponent();
 
             inputImagePV = PictureView.InsertIntoPanel(inputImagePanel);
+            removeBorderPV = PictureView.InsertIntoPanel(removeBorderPanel);
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
@@ -33,6 +35,8 @@ namespace GradeOCR {
 
         public void RunOCR(Bitmap inputImage) {
             inputImagePV.Image = inputImage;
+            Bitmap removeBorderImage = BorderRemoval.RemoveBorder(inputImage);
+            removeBorderPV.Image = removeBorderImage;
         }
     }
 }
