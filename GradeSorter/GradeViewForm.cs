@@ -45,7 +45,8 @@ namespace GradeSorter {
                     { Keys.D2, 2 }, { Keys.NumPad2, 2 },
                     { Keys.D3, 3 }, { Keys.NumPad3, 3 },
                     { Keys.D4, 4 }, { Keys.NumPad4, 4 },
-                    { Keys.D5, 5 }, { Keys.NumPad5, 5 }
+                    { Keys.D5, 5 }, { Keys.NumPad5, 5 },
+                    { Keys.D0, 0 }, { Keys.NumPad0, 0 }
                 };
                 gradeKeys.GetOption(e.KeyCode).ForEach(grade => {
                     MoveImageToDone(currentFileName, grade);

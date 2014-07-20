@@ -111,6 +111,7 @@ namespace RegisterProcessor {
             images.AddRange(Directory.GetFiles(OcrData + "/grade-3"));
             images.AddRange(Directory.GetFiles(OcrData + "/grade-4"));
             images.AddRange(Directory.GetFiles(OcrData + "/grade-5"));
+            images.AddRange(Directory.GetFiles(OcrData + "/grade-0"));
             if (images.Count == 0) {
                 return OcrData + "/grade-unsort/g00001.png";
             } else {
