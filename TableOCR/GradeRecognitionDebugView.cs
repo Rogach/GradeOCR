@@ -10,7 +10,7 @@ using System.Drawing;
 using System.Threading;
 using LibUtil;
 
-namespace GradeOCR {
+namespace TableOCR {
     public partial class GradeRecognitionDebugView : Form {
         public PictureView inputImagePV;
 

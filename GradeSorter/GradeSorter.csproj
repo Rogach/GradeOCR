@@ -63,9 +63,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GradeOCR\GradeOCR.csproj">
+    <ProjectReference Include="..\TableOCR\TableOCR.csproj">
       <Project>{F1213444-68AD-4C9C-A0A9-22E571412CCD}</Project>
-      <Name>GradeOCR</Name>
+      <Name>TableOCR</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

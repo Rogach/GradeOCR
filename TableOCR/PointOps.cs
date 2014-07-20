@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace GradeOCR {
+namespace TableOCR {
     public static class PointOps {
         public static PointF Intersection(Line l1, Line l2) {
             PointF p = l1.p1;

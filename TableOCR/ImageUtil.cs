@@ -5,7 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace GradeOCR {
+namespace TableOCR {
     public static class ImageUtil {
         public static Bitmap ToStdFormat(Bitmap b) {
             Bitmap res = new Bitmap(b.Width, b.Height, PixelFormat.Format32bppArgb);

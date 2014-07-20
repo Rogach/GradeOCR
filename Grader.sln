@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grader", "Grader\Grader.csproj", "{A8001116-C3BE-4A35-9677-52C33C5C7922}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeOCR", "GradeOCR\GradeOCR.csproj", "{F1213444-68AD-4C9C-A0A9-22E571412CCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableOCR", "TableOCR\TableOCR.csproj", "{F1213444-68AD-4C9C-A0A9-22E571412CCD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterProcessor", "RegisterProcessor\RegisterProcessor.csproj", "{55037F42-399A-4261-BC29-33B84315F5F4}"
 EndProject

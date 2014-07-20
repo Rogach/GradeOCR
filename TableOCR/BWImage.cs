@@ -5,7 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace GradeOCR {
+namespace TableOCR {
     public class BWImage {
         public bool[] data;
         public int Width { get; set;}

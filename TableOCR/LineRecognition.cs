@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using LibUtil;
 
-namespace GradeOCR {
+namespace TableOCR {
     public class LineRecognition {
         public static readonly float maxAngleFactor = 0.03f;
         public static readonly float minHorizontalLineRatio = 0.5f;

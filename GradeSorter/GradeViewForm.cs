@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using LibUtil;
-using GradeOCR;
+using TableOCR;
 using System.IO;
 
 namespace GradeSorter {

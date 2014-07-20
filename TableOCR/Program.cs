@@ -7,7 +7,7 @@ using System.Drawing;
 using LibUtil;
 using System.Threading;
 
-namespace GradeOCR {
+namespace TableOCR {
     public class Program {
         [STAThread]
         static void Main(string[] args) {

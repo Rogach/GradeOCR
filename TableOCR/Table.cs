@@ -7,7 +7,7 @@ using System.Drawing.Drawing2D;
 using LibUtil;
 using System.Drawing.Imaging;
 
-namespace GradeOCR {
+namespace TableOCR {
     
     public class Table {
         private PointF origin;

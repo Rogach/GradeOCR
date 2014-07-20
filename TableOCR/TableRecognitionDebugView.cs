@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.Threading;
 using LibUtil;
 
-namespace GradeOCR {
+namespace TableOCR {
     public partial class TableRecognitionDebugView : Form {
         public PictureView sourcePV;
         public PictureView bwPV;

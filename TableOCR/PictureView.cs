@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Reflection;
 
-namespace GradeOCR {
+namespace TableOCR {
     public class PictureView : UserControl {
 
         private Image _Image;
@@ -190,7 +190,7 @@ namespace GradeOCR {
         public static Image placeholderImage = null;
         public static Image LoadPlaceholder() {
             if (placeholderImage == null) {
-                placeholderImage = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("GradeOCR.hourglass.png"));
+                placeholderImage = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("TableOCR.hourglass.png"));
             }
             return placeholderImage;
         }

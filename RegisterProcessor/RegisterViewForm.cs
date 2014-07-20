@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using GradeOCR;
+using TableOCR;
 using System.IO;
 using LibUtil;
 using System.Drawing.Drawing2D;
@@ -89,7 +89,7 @@ namespace RegisterProcessor {
             bwImage = ImageUtil.ToBlackAndWhite(origImage);
             currentImage = new Bitmap(bwImage);
 
-            currentTable = GradeOCR.Program.RecognizeTable(currentImage);
+            currentTable = TableOCR.Program.RecognizeTable(currentImage);
             Graphics g = Graphics.FromImage(currentImage);
             Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
             currentTable.DrawTable(g, p);

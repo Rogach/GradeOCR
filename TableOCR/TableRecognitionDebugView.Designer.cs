@@ -1,4 +1,4 @@
-﻿namespace GradeOCR {
+﻿namespace TableOCR {
     partial class TableRecognitionDebugView {
         /// <summary>
         /// Required designer variable.

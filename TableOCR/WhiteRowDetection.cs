@@ -5,7 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace GradeOCR {
+namespace TableOCR {
     public static class WhiteRowDetection {
         public static int[] TallyBlackPixels(BWImage img) {
             int spillOverFactor = (int) (img.Width * LineRecognition.maxAngleFactor / 4);

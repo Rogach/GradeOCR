@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace GradeOCR {
+namespace TableOCR {
     public class Line {
         public Point p1;
         public Point p2;
