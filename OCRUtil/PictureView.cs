@@ -238,7 +238,11 @@ namespace OCRUtil {
                 float zh = _Image.Height * zoom;
                 float x = (this.Width - zw) / 2;
                 float y = (this.Height - zh) / 2;
-                e.Graphics.DrawImage(_Image, new RectangleF(x, y, zw, zh));
+                e.Graphics.DrawImage(
+                    _Image, 
+                    new RectangleF(x, y, zw, zh), 
+                    new RectangleF(0 - 0.5f, 0 - 0.5f, _Image.Width, _Image.Height), 
+                    GraphicsUnit.Pixel);
             } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
                 float destW = this.Width - scrollBarWidth;
                 float destH = _Image.Height * zoom;
@@ -246,7 +250,7 @@ namespace OCRUtil {
                 e.Graphics.DrawImage(
                     _Image,
                     new RectangleF(0, y, destW, destH),
-                    new RectangleF(offsetX, 0, destW / zoom, _Image.Height),
+                    new RectangleF(offsetX - 0.5f, 0 - 0.5f, destW / zoom, _Image.Height),
                     GraphicsUnit.Pixel
                 );
             } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
@@ -256,16 +260,20 @@ namespace OCRUtil {
                 e.Graphics.DrawImage(
                     _Image,
                     new RectangleF(x, 0, destW, destH),
-                    new RectangleF(0, offsetY, _Image.Width, destH / zoom),
+                    new RectangleF(0 - 0.5f, offsetY - 0.5f, _Image.Width, destH / zoom),
                     GraphicsUnit.Pixel
                 );
             } else {
                 float destW = this.Width - scrollBarWidth;
                 float destH = this.Height - scrollBarWidth;
+                if (destW / zoom < 2 && destH / zoom < 2) {
+                    destW = zoom * 2;
+                    destH = zoom * 2;
+                }
                 e.Graphics.DrawImage(
-                    _Image, 
+                    _Image,
                     new RectangleF(0, 0, destW, destH),
-                    new RectangleF(offsetX, offsetY, destW / zoom, destH / zoom),
+                    new RectangleF(offsetX - 0.5f, offsetY - 0.5f, destW / zoom, destH / zoom),
                     GraphicsUnit.Pixel
                 );
             }
