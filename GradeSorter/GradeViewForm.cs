@@ -41,24 +41,36 @@ namespace GradeSorter {
             });
 
             gradePV.KeyUp += new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
-                Dictionary<Keys, int> gradeKeys = new Dictionary<Keys, int> {
-                    { Keys.D2, 2 }, { Keys.NumPad2, 2 },
-                    { Keys.D3, 3 }, { Keys.NumPad3, 3 },
-                    { Keys.D4, 4 }, { Keys.NumPad4, 4 },
-                    { Keys.D5, 5 }, { Keys.NumPad5, 5 },
-                    { Keys.D0, 0 }, { Keys.NumPad0, 0 }
-                };
-                gradeKeys.GetOption(e.KeyCode).ForEach(grade => {
-                    MoveImageToDone(currentFileName, grade);
-                    ProcessNextGrade();
-                });
-
+                if (e.Control && e.KeyCode == Keys.Z) {
+                    if (actionHistory.Count > 0) {
+                        Tuple<string, string> lastAction = actionHistory.Last();
+                        actionHistory.Remove(lastAction);
+                        File.Move(lastAction.Item2, lastAction.Item1);
+                        ProcessGrade(lastAction.Item1);
+                    }
+                } else {
+                    Dictionary<Keys, int> gradeKeys = new Dictionary<Keys, int> {
+                        { Keys.D2, 2 }, { Keys.NumPad2, 2 },
+                        { Keys.D3, 3 }, { Keys.NumPad3, 3 },
+                        { Keys.D4, 4 }, { Keys.NumPad4, 4 },
+                        { Keys.D5, 5 }, { Keys.NumPad5, 5 },
+                        { Keys.D0, 0 }, { Keys.NumPad0, 0 }
+                    };
+                    gradeKeys.GetOption(e.KeyCode).ForEach(grade => {
+                        MoveImageToDone(currentFileName, grade);
+                        ProcessNextGrade();
+                    });
+                }
             });
 
         }
 
         private void ProcessNextGrade() {
-            currentFileName = NextImageName();
+            ProcessGrade(NextImageName());
+        }
+
+        private void ProcessGrade(string fileName) {
+            currentFileName = fileName;
             this.Text = currentFileName;
 
             currentImage = LoadImage(currentFileName);
@@ -84,6 +96,8 @@ namespace GradeSorter {
             return img;
         }
 
+        private List<Tuple<string, string>> actionHistory = new List<Tuple<string, string>>();
+
         private void MoveImageToDone(string fileName, int grade) {
             string destDir = OcrData + "/grade-" + grade;
             string dest = destDir + "/" + Path.GetFileName(fileName);
@@ -93,13 +107,12 @@ namespace GradeSorter {
                 sfd.Title = "Выберите место для сохранения изображения оценки";
                 if (sfd.ShowDialog() == DialogResult.OK) {
                     dest = sfd.FileName;
-                    File.Move(fileName, dest);
                 } else {
                     throw new Exception("File name already exists!");
                 }
-            } else {
-                File.Move(fileName, dest);
             }
+            File.Move(fileName, dest);
+            actionHistory.Add(new Tuple<string, string>(fileName, dest));
         }
     }
 }
