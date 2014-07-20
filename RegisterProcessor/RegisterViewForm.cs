@@ -104,8 +104,13 @@ namespace RegisterProcessor {
         }
 
         private string GetNextUnsortGradeImageName() {
-            string[] images = Directory.GetFiles(OcrData + "/grade-unsort");
-            if (images.Length == 0) {
+            List<string> images = new List<string>();
+            images.AddRange(Directory.GetFiles(OcrData + "/grade-unsort"));
+            images.AddRange(Directory.GetFiles(OcrData + "/grade-2"));
+            images.AddRange(Directory.GetFiles(OcrData + "/grade-3"));
+            images.AddRange(Directory.GetFiles(OcrData + "/grade-4"));
+            images.AddRange(Directory.GetFiles(OcrData + "/grade-5"));
+            if (images.Count == 0) {
                 return OcrData + "/grade-unsort/g00001.png";
             } else {
                 Regex rgx = new Regex(@"g(\d{5}).png");
