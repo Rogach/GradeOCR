@@ -18,7 +18,7 @@ namespace GradeOCR {
             GradeDigest bestDigest = digestList[0];
             foreach (var gd in digestList) {
                 double match = MatchDigests(digest, gd);
-                if (maxConfidence < match && match < 0.9999) {
+                if (maxConfidence < match) {
                     maxConfidence = match;
                     bestDigest = gd;
                 }
