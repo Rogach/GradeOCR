@@ -29,6 +29,8 @@
             this.removeBorderPanel = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.noiseRemovalPanel = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.croppedPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // inputImagePanel
@@ -79,11 +81,29 @@
             this.noiseRemovalPanel.Size = new System.Drawing.Size(296, 100);
             this.noiseRemovalPanel.TabIndex = 2;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(9, 366);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(47, 13);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "Cropped";
+            // 
+            // croppedPanel
+            // 
+            this.croppedPanel.Location = new System.Drawing.Point(12, 382);
+            this.croppedPanel.Name = "croppedPanel";
+            this.croppedPanel.Size = new System.Drawing.Size(143, 100);
+            this.croppedPanel.TabIndex = 3;
+            // 
             // GradeRecognitionDebugView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(320, 379);
+            this.ClientSize = new System.Drawing.Size(320, 555);
+            this.Controls.Add(this.croppedPanel);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.noiseRemovalPanel);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.removeBorderPanel);
@@ -105,5 +125,7 @@
         private System.Windows.Forms.Panel removeBorderPanel;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel noiseRemovalPanel;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Panel croppedPanel;
     }
 }

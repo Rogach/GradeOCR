@@ -26,8 +26,9 @@ namespace GradeOCR {
 
         public static Bitmap RecognizeGrade(Bitmap img) {
             return
-                NoiseCleaner.RemoveNoise(
-                    BorderRemoval.RemoveBorder(img));
+                WhitespaceCropper.CropWhitespace(
+                    NoiseCleaner.RemoveNoise(
+                        BorderRemoval.RemoveBorder(img)));
         }
 
     }

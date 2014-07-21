@@ -58,7 +58,7 @@ namespace GradeOCR {
                         string imageFile = images[q];
                         Bitmap img = ImageUtil.LoadImage(imageFile);
                         pvs[q].Image = converter(img);
-                        pvs[q].AddDoubleClickListener((pt, e) => {
+                        pvs[q].DoubleClick += new EventHandler(delegate {
                             new GradeRecognitionDebugView(img, imageFile).ShowDialog();
                         });
                     }
