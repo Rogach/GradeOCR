@@ -8,7 +8,7 @@ using OCRUtil;
 
 namespace GradeOCR {
     public static class BorderRemoval {
-        public static readonly double blackThreshold = 0.3;
+        public static readonly double blackThreshold = 0.6;
 
         public static Bitmap RemoveBorder(Bitmap src) {
             bool[] hBlack = FindBlackHorizontalLines(src);

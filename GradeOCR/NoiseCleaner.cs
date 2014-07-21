@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 namespace GradeOCR {
     public static class NoiseCleaner {
         public static readonly double cutoffRatio = 0.33;
+        public static readonly int noiseCrop = 2;
 
         public static Bitmap RemoveNoise(Bitmap b) {
             List<List<Point>> islands = new List<List<Point>>();
@@ -15,20 +16,19 @@ namespace GradeOCR {
             unsafe {
                 BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
                 byte* ptr = (byte*) bd.Scan0.ToPointer();
-                byte* origPtr = ptr;
 
                 bool[] visited = new bool[b.Width * b.Height];
 
-                for (int y = 0; y < b.Height; y++) {
-                    for (int x = 0; x < b.Width; x++) {
-                        if (!visited[y * b.Width + x] && *ptr == 0) {
+                for (int y = noiseCrop; y < b.Height - noiseCrop; y++) {
+                    for (int x = noiseCrop; x < b.Width - noiseCrop; x++) {
+                        if (!visited[y * b.Width + x] && *(ptr + 4 * (y * b.Width + x)) == 0) {
                             List<Point> island = new List<Point>();
                             Queue<Point> queue = new Queue<Point>();
                             queue.Enqueue(new Point(x, y));
 
                             while (queue.Count > 0) {
                                 Point pt = queue.Dequeue();
-                                if (!visited[pt.Y * b.Width + pt.X] && *(origPtr + 4 * (pt.Y * b.Width + pt.X)) == 0) {
+                                if (!visited[pt.Y * b.Width + pt.X] && *(ptr + 4 * (pt.Y * b.Width + pt.X)) == 0) {
                                     visited[pt.Y * b.Width + pt.X] = true;
                                     island.Add(pt);
                                     if (pt.X > 0) 
@@ -52,7 +52,6 @@ namespace GradeOCR {
 
                             islands.Add(island);
                         }
-                        ptr += 4;
                     }
                 }
 
