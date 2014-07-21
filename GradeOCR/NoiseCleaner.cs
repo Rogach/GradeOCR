@@ -31,10 +31,22 @@ namespace GradeOCR {
                                 if (!visited[pt.Y * b.Width + pt.X] && *(origPtr + 4 * (pt.Y * b.Width + pt.X)) == 0) {
                                     visited[pt.Y * b.Width + pt.X] = true;
                                     island.Add(pt);
-                                    if (pt.X > 0) queue.Enqueue(new Point(pt.X - 1, pt.Y));
-                                    if (pt.X < b.Width - 1) queue.Enqueue(new Point(pt.X + 1, pt.Y));
-                                    if (pt.Y > 0) queue.Enqueue(new Point(pt.X, pt.Y - 1));
-                                    if (pt.Y < b.Height - 1) queue.Enqueue(new Point(pt.X, pt.Y + 1));
+                                    if (pt.X > 0) 
+                                        queue.Enqueue(new Point(pt.X - 1, pt.Y));
+                                    if (pt.X > 0 && pt.Y > 0) 
+                                        queue.Enqueue(new Point(pt.X - 1, pt.Y - 1));
+                                    if (pt.X < b.Width - 1) 
+                                        queue.Enqueue(new Point(pt.X + 1, pt.Y));
+                                    if (pt.X < b.Width - 1 && pt.Y > 0) 
+                                        queue.Enqueue(new Point(pt.X + 1, pt.Y - 1));
+                                    if (pt.Y > 0) 
+                                        queue.Enqueue(new Point(pt.X, pt.Y - 1));
+                                    if (pt.Y > 0 && pt.X < b.Width - 1)
+                                        queue.Enqueue(new Point(pt.X + 1, pt.Y - 1));
+                                    if (pt.Y < b.Height - 1) 
+                                        queue.Enqueue(new Point(pt.X, pt.Y + 1));
+                                    if (pt.X < b.Width - 1 && pt.Y < b.Height - 1)
+                                        queue.Enqueue(new Point(pt.X + 1, pt.Y + 1));
                                 }
                             }
 
