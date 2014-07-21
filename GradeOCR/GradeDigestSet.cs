@@ -29,13 +29,9 @@ namespace GradeOCR {
         public double MatchDigests(GradeDigest gd1, GradeDigest gd2) {
             int union = 0;
             int intersection = 0;
-            for (int q = 0; q < GradeDigest.digestSize * GradeDigest.digestSize; q++) {
-                if (gd1.data[q] && gd2.data[q]) {
-                    intersection++;
-                    union++;
-                } else if (gd1.data[q] || gd2.data[q]) {
-                    union++;
-                }
+            for (int q = 0; q < gd1.data.Length; q++) {
+                intersection += ByteUtils.CountBits(gd1.data[q] & gd2.data[q]);
+                union += ByteUtils.CountBits(gd1.data[q] | gd2.data[q]);
             }
             if (union == 0) {
                 return 0;
@@ -46,11 +42,11 @@ namespace GradeOCR {
 
         public void Save(string fileName) {
             Stream outStream = File.Open(fileName, FileMode.Create);
-            WriteUInt(outStream, (uint) digestList.Count);
+            ByteUtils.WriteUInt(outStream, (uint) digestList.Count);
             foreach (var digest in digestList) {
                 outStream.WriteByte(digest.grade);
                 for (int q = 0; q < digest.data.Length; q++) {
-                    outStream.WriteByte((byte) (digest.data[q] ? 1 : 0));
+                    ByteUtils.WriteULong(outStream, digest.data[q]);
                 }
             }
         }
@@ -59,13 +55,12 @@ namespace GradeOCR {
             List<GradeDigest> digests = new List<GradeDigest>();
 
             Stream inStream = File.OpenRead(fileName);
-            uint digestCount = ReadUInt(inStream);
+            uint digestCount = ByteUtils.ReadUInt(inStream);
             for (int q = 0; q < digestCount; q++) {
                 GradeDigest gd = new GradeDigest();
-                gd.grade = SafeReadByte(inStream);
+                gd.grade = ByteUtils.SafeReadByte(inStream);
                 for (int w = 0; w < gd.data.Length; w++) {
-                    byte b = SafeReadByte(inStream);
-                    gd.data[w] = b == 1;
+                    gd.data[w] = ByteUtils.ReadULong(inStream);
                 }
                 digests.Add(gd);
             }
@@ -76,29 +71,6 @@ namespace GradeOCR {
         public static GradeDigestSet ReadDefault() {
             return GradeDigestSet.Read("E:/Pronko/prj/Grader/ocr-data/grade-digests.db");
         }
-
-        public static void WriteUInt(Stream s, uint i) {
-            s.WriteByte((byte) i);
-            s.WriteByte((byte) (i >> 8));
-            s.WriteByte((byte) (i >> 16));
-            s.WriteByte((byte) (i >> 24));
-        }
-
-        public static byte SafeReadByte(Stream s) {
-            int b = s.ReadByte();
-            if (b == -1) {
-                throw new Exception("EOF");
-            } else {
-                return (byte) b;
-            }
-        }
-
-        public static uint ReadUInt(Stream s) {
-            int b1 = SafeReadByte(s);
-            int b2 = SafeReadByte(s);
-            int b3 = SafeReadByte(s);
-            int b4 = SafeReadByte(s);
-            return (uint) ((b4 << 24) + (b3 << 16) + (b2 << 8) + b1);
-        }
+        
     }
 }
