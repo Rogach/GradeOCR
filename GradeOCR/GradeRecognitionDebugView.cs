@@ -17,6 +17,7 @@ namespace GradeOCR {
         public PictureView removeBorderPV;
         public PictureView noiseRemovalPV;
         public PictureView croppedPV;
+        public PictureView digestPV;
 
         public GradeRecognitionDebugView(Bitmap inputImage, string imageName) {
             InitializeComponent();
@@ -27,6 +28,7 @@ namespace GradeOCR {
             removeBorderPV = PictureView.InsertIntoPanel(removeBorderPanel);
             noiseRemovalPV = PictureView.InsertIntoPanel(noiseRemovalPanel);
             croppedPV = PictureView.InsertIntoPanel(croppedPanel);
+            digestPV = PictureView.InsertIntoPanel(digestPanel);
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
@@ -47,6 +49,8 @@ namespace GradeOCR {
             noiseRemovalPV.Image = removeNoiseImage;
             Bitmap croppedImage = WhitespaceCropper.CropWhitespace(removeNoiseImage);
             croppedPV.Image = croppedImage;
+            Bitmap digestImage = DigestExtractor.ExtractDigestImage(croppedImage);
+            digestPV.Image = digestImage;
         }
     }
 }

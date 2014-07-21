@@ -31,6 +31,8 @@
             this.noiseRemovalPanel = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
             this.croppedPanel = new System.Windows.Forms.Panel();
+            this.digestPanel = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // inputImagePanel
@@ -97,11 +99,29 @@
             this.croppedPanel.Size = new System.Drawing.Size(143, 100);
             this.croppedPanel.TabIndex = 3;
             // 
+            // digestPanel
+            // 
+            this.digestPanel.Location = new System.Drawing.Point(165, 382);
+            this.digestPanel.Name = "digestPanel";
+            this.digestPanel.Size = new System.Drawing.Size(143, 100);
+            this.digestPanel.TabIndex = 4;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(162, 366);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(37, 13);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "Digest";
+            // 
             // GradeRecognitionDebugView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(320, 555);
+            this.ClientSize = new System.Drawing.Size(320, 493);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.digestPanel);
             this.Controls.Add(this.croppedPanel);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.noiseRemovalPanel);
@@ -127,5 +147,7 @@
         private System.Windows.Forms.Panel noiseRemovalPanel;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Panel croppedPanel;
+        private System.Windows.Forms.Panel digestPanel;
+        private System.Windows.Forms.Label label5;
     }
 }

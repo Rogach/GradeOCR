@@ -19,16 +19,17 @@ namespace GradeOCR {
             //Application.Run(new GradeRecognitionDebugView(
             //    ImageUtil.LoadImage("E:/Pronko/prj/Grader/ocr-data/grade-3/g13571.png"), ""));
 
-            Application.Run(new MassGradeView(new Size(100, 50), b => {
+            Application.Run(new MassGradeView(new Size(50, 50), b => {
                 return RecognizeGrade(b);
             }));
         }
 
         public static Bitmap RecognizeGrade(Bitmap img) {
             return
-                WhitespaceCropper.CropWhitespace(
-                    NoiseCleaner.RemoveNoise(
-                        BorderRemoval.RemoveBorder(img)));
+                DigestExtractor.ExtractDigestImage(
+                    WhitespaceCropper.CropWhitespace(
+                        NoiseCleaner.RemoveNoise(
+                            BorderRemoval.RemoveBorder(img))));
         }
 
     }

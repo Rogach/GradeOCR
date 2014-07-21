@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BorderRemoval.cs" />
+    <Compile Include="DigestExtractor.cs" />
     <Compile Include="WhitespaceCropper.cs" />
     <Compile Include="GradeRecognitionDebugView.cs">
       <SubType>Form</SubType>
