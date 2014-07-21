@@ -19,7 +19,7 @@ namespace GradeOCR {
             int leftBorderWidth = 0;
             int rightBorderWidth = 0;
 
-            for (int q = 0; q < 8; q++) {
+            for (int q = 0; q < 6; q++) {
                 if (hBlack[q]) topBorderWidth = q + 1;
                 if (hBlack[src.Height - 1 - q]) bottomBorderWidth = q + 1;
                 if (vBlack[q]) leftBorderWidth = q + 1;
