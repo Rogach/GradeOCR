@@ -7,6 +7,8 @@ using System.Drawing.Imaging;
 
 namespace GradeOCR {
     public static class NoiseCleaner {
+        public static readonly double cutoffRatio = 0.33;
+
         public static Bitmap RemoveNoise(Bitmap b) {
             List<List<Point>> islands = new List<List<Point>>();
 
@@ -47,7 +49,7 @@ namespace GradeOCR {
 
             int maxIslandSize = islands.Select(i => i.Count).Max();
 
-            List<List<Point>> bigIslands = islands.Where(i => i.Count > maxIslandSize / 4).ToList();
+            List<List<Point>> bigIslands = islands.Where(i => i.Count > maxIslandSize * cutoffRatio).ToList();
 
             Bitmap result = new Bitmap(b.Width, b.Height, PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(result);

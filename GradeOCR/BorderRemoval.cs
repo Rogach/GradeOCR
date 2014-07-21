@@ -8,29 +8,36 @@ using OCRUtil;
 
 namespace GradeOCR {
     public static class BorderRemoval {
-        public static Bitmap RemoveBorder(Bitmap b) {
-            for (int q = 0; q < 4; q++) {
-                b = RemoveTopBorder(b);
-                b = ImageUtil.Rotate(b);
-            }
-            return b;
-        }
+        public static readonly double blackThreshold = 0.3;
 
-        public static Bitmap RemoveTopBorder(Bitmap src) {
-            bool[] blackRows = FindBlackRows(src);
-            int borderWidth = 0;
+        public static Bitmap RemoveBorder(Bitmap src) {
+            bool[] hBlack = FindBlackHorizontalLines(src);
+            bool[] vBlack = FindBlackVerticalLines(src);
+
+            int topBorderWidth = 0;
+            int bottomBorderWidth = 0;
+            int leftBorderWidth = 0;
+            int rightBorderWidth = 0;
+
             for (int q = 0; q < 8; q++) {
-                if (blackRows[q]) borderWidth = q + 1;
+                if (hBlack[q]) topBorderWidth = q + 1;
+                if (hBlack[src.Height - 1 - q]) bottomBorderWidth = q + 1;
+                if (vBlack[q]) leftBorderWidth = q + 1;
+                if (vBlack[src.Width - 1 - q]) rightBorderWidth = q + 1;
             }
 
-            Bitmap res = new Bitmap(src.Width, src.Height - borderWidth, PixelFormat.Format32bppArgb);
+            Bitmap res = new Bitmap(
+                src.Width - leftBorderWidth - rightBorderWidth, 
+                src.Height - topBorderWidth - bottomBorderWidth,
+                PixelFormat.Format32bppArgb
+            );
             res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
 
             Graphics g = Graphics.FromImage(res);
             g.DrawImage(
                 src,
-                new Rectangle(0, 0, src.Width, src.Height - borderWidth),
-                new Rectangle(0, borderWidth, src.Width, src.Height - borderWidth),
+                new Rectangle(0, 0, res.Width, res.Height),
+                new Rectangle(leftBorderWidth, topBorderWidth, res.Width, res.Height),
                 GraphicsUnit.Pixel
             );
             g.Dispose();
@@ -38,10 +45,10 @@ namespace GradeOCR {
             return res;
         }
 
-        public static bool[] FindBlackRows(Bitmap b) {
-            bool[] blackRows = new bool[b.Height];
+        public static bool[] FindBlackHorizontalLines(Bitmap b) {
+            bool[] blackLines = new bool[b.Height];
 
-            int threshold = (int) (b.Width * 0.4);
+            int threshold = (int) (b.Width * blackThreshold);
             unsafe {
                 BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
@@ -52,13 +59,40 @@ namespace GradeOCR {
                         if (*(ptr) == 0) c++;
                         ptr += 4;
                     }
-                    blackRows[y] = c > threshold;
+                    blackLines[y] = c > threshold;
                 }
 
                 b.UnlockBits(bd);
             }
 
-            return blackRows;
+            return blackLines;
+        }
+
+        public static bool[] FindBlackVerticalLines(Bitmap b) {
+            bool[] blackLines = new bool[b.Width];
+
+            int threshold = (int) (b.Height * blackThreshold);
+
+            unsafe {
+                BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                byte* ptr = (byte*) bd.Scan0.ToPointer();
+
+                int[] tally = new int[b.Width];
+                for (int y = 0; y < b.Height; y++) {
+                    for (int x = 0; x < b.Width; x++) {
+                        if (*(ptr) == 0) tally[x]++;
+                        ptr += 4;
+                    }
+                }
+
+                for (int x = 0; x < b.Width; x++) {
+                    blackLines[x] = tally[x] > threshold;
+                }
+
+                b.UnlockBits(bd);
+            }
+
+            return blackLines;
         }
     }
 }

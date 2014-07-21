@@ -16,12 +16,9 @@ namespace GradeOCR {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.Run(new GradeRecognitionDebugView(ImageUtil.LoadImage(
-                "E:/Pronko/prj/Grader/ocr-data/grade-4/g16075.png"), ">>>"));
-
-            //Application.Run(new MassGradeView(new Size(100, 50), b => {
-            //    return RecognizeGrade(b);
-            //}));
+            Application.Run(new MassGradeView(new Size(100, 50), b => {
+                return RecognizeGrade(b);
+            }));
         }
 
         public static Bitmap RecognizeGrade(Bitmap img) {
