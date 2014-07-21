@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeOCR", "GradeOCR\GradeO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OCRUtil", "OCRUtil\OCRUtil.csproj", "{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigestDatabase", "DigestDatabase\DigestDatabase.csproj", "{3AD4FF6C-2D46-4077-8A3E-B367A2BB97DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -43,6 +45,10 @@ Global
 		{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}.Debug|x86.Build.0 = Debug|x86
 		{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}.Release|x86.ActiveCfg = Release|x86
 		{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}.Release|x86.Build.0 = Release|x86
+		{3AD4FF6C-2D46-4077-8A3E-B367A2BB97DF}.Debug|x86.ActiveCfg = Debug|x86
+		{3AD4FF6C-2D46-4077-8A3E-B367A2BB97DF}.Debug|x86.Build.0 = Debug|x86
+		{3AD4FF6C-2D46-4077-8A3E-B367A2BB97DF}.Release|x86.ActiveCfg = Release|x86
+		{3AD4FF6C-2D46-4077-8A3E-B367A2BB97DF}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

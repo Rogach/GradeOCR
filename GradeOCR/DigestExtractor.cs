@@ -7,10 +7,9 @@ using System.Drawing.Imaging;
 
 namespace GradeOCR {
     public static class DigestExtractor {
-        public static readonly int digestSize = 32;
 
         public static Bitmap ExtractDigestImage(Bitmap src) {
-            Bitmap res = new Bitmap(digestSize, digestSize, PixelFormat.Format32bppArgb);
+            Bitmap res = new Bitmap(GradeDigest.digestSize, GradeDigest.digestSize, PixelFormat.Format32bppArgb);
             res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
 
             Graphics g = Graphics.FromImage(res);

@@ -20,11 +20,11 @@ namespace GradeOCR {
             //    ImageUtil.LoadImage("E:/Pronko/prj/Grader/ocr-data/grade-3/g13571.png"), ""));
 
             Application.Run(new MassGradeView(new Size(50, 50), b => {
-                return RecognizeGrade(b);
+                return NormalizeImage(b);
             }));
         }
 
-        public static Bitmap RecognizeGrade(Bitmap img) {
+        public static Bitmap NormalizeImage(Bitmap img) {
             return
                 DigestExtractor.ExtractDigestImage(
                     WhitespaceCropper.CropWhitespace(
