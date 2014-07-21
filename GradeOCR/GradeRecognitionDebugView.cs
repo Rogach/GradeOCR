@@ -64,6 +64,9 @@ namespace GradeOCR {
             bestMatchPV.Image = bestMatchImage;
             recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
             recognitionConfidenceLabel.Text = String.Format("{0}%", (int) Math.Floor(recognitionResult.Confidence * 100));
+
+            Bitmap differenceImage = DigestDifference.GenerateDifferenceImage(digest, recognitionResult.Digest);
+            differencePV.Image = differenceImage;
         }
     }
 }

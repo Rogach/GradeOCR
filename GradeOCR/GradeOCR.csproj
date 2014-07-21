@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BorderRemoval.cs" />
+    <Compile Include="DigestDifference.cs" />
     <Compile Include="DigestExtractor.cs" />
     <Compile Include="GradeDigest.cs" />
     <Compile Include="GradeDigestSet.cs" />
