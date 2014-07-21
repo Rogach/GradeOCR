@@ -17,9 +17,6 @@ namespace GradeOCR {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            //Application.Run(new GradeRecognitionDebugView(
-            //    ImageUtil.LoadImage("E:/Pronko/prj/Grader/ocr-data/grade-3/g13571.png"), ""));
-
             Application.Run(new MassGradeView(new Size(50, 50), b => {
                 return NormalizeImage(b);
             }));
