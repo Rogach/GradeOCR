@@ -5,11 +5,43 @@ using System.Text;
 using System.IO;
 
 namespace GradeOCR {
+
     public class GradeDigestSet {
         private List<GradeDigest> digestList;
 
         public GradeDigestSet(List<GradeDigest> digests) {
             this.digestList = digests;
+        }
+
+        public RecognitionResult FindBestMatch(GradeDigest digest) {
+            double maxConfidence = 0;
+            GradeDigest bestDigest = digestList[0];
+            foreach (var gd in digestList) {
+                double match = MatchDigests(digest, gd);
+                if (maxConfidence < match) {
+                    maxConfidence = match;
+                    bestDigest = gd;
+                }
+            }
+            return new RecognitionResult(bestDigest, maxConfidence);
+        }
+
+        public double MatchDigests(GradeDigest gd1, GradeDigest gd2) {
+            int union = 0;
+            int intersection = 0;
+            for (int q = 0; q < GradeDigest.digestSize * GradeDigest.digestSize; q++) {
+                if (gd1.data[q] && gd2.data[q]) {
+                    intersection++;
+                    union++;
+                } else if (gd1.data[q] || gd2.data[q]) {
+                    union++;
+                }
+            }
+            if (union == 0) {
+                return 0;
+            } else {
+                return (double) intersection / (double) union;
+            }
         }
 
         public void Save(string fileName) {
@@ -39,6 +71,10 @@ namespace GradeOCR {
             }
 
             return new GradeDigestSet(digests);
+        }
+
+        public static GradeDigestSet ReadDefault() {
+            return GradeDigestSet.Read("E:/Pronko/prj/Grader/ocr-data/grade-digests.db");
         }
 
         public static void WriteUInt(Stream s, uint i) {

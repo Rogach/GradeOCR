@@ -107,9 +107,11 @@ namespace TableOCR {
             t.DrawTable(tableG, p);
             tableG.Dispose();
             this.resultPV.Image = tablePic;
+
+            GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
             this.resultPV.AddDoubleClickListener((pt, e) => {
                 t.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                    var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.X, cell.Y), "<gen>");
+                    var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.X, cell.Y), "<gen>", digestSet);
                     gradeRecognition.ShowDialog();
                 });
             });

@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Threading;
 using OCRUtil;
 using System.IO;
+using LibUtil;
 
 namespace GradeOCR {
     public class Program {

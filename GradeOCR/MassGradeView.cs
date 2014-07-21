@@ -6,7 +6,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Drawing;
 using OCRUtil;
 using System.Threading;
 using System.IO;
@@ -44,7 +43,10 @@ namespace GradeOCR {
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
+                    var digestSet = GradeDigestSet.ReadDefault();
+
                     List<string> images = new List<string>();
+                    images.AddRange(Directory.GetFiles(OcrData + "/grade-unsort"));
                     images.AddRange(Directory.GetFiles(OcrData + "/grade-2"));
                     images.AddRange(Directory.GetFiles(OcrData + "/grade-3"));
                     images.AddRange(Directory.GetFiles(OcrData + "/grade-4"));
@@ -59,7 +61,7 @@ namespace GradeOCR {
                         Bitmap img = ImageUtil.LoadImage(imageFile);
                         pvs[q].Image = converter(img);
                         pvs[q].DoubleClick += new EventHandler(delegate {
-                            new GradeRecognitionDebugView(img, imageFile).ShowDialog();
+                            new GradeRecognitionDebugView(img, imageFile, digestSet).ShowDialog();
                         });
                     }
                 }));

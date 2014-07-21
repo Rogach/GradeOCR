@@ -33,6 +33,12 @@
             this.croppedPanel = new System.Windows.Forms.Panel();
             this.digestPanel = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.bestMatchPanel = new System.Windows.Forms.Panel();
+            this.label7 = new System.Windows.Forms.Label();
+            this.differencePanel = new System.Windows.Forms.Panel();
+            this.recognizedGradeLabel = new System.Windows.Forms.Label();
+            this.recognitionConfidenceLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // inputImagePanel
@@ -115,11 +121,70 @@
             this.label5.TabIndex = 5;
             this.label5.Text = "Digest";
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(9, 485);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(60, 13);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "Best match";
+            // 
+            // bestMatchPanel
+            // 
+            this.bestMatchPanel.Location = new System.Drawing.Point(12, 501);
+            this.bestMatchPanel.Name = "bestMatchPanel";
+            this.bestMatchPanel.Size = new System.Drawing.Size(143, 100);
+            this.bestMatchPanel.TabIndex = 4;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(162, 485);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(56, 13);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "Difference";
+            // 
+            // differencePanel
+            // 
+            this.differencePanel.Location = new System.Drawing.Point(165, 501);
+            this.differencePanel.Name = "differencePanel";
+            this.differencePanel.Size = new System.Drawing.Size(143, 100);
+            this.differencePanel.TabIndex = 5;
+            // 
+            // recognizedGradeLabel
+            // 
+            this.recognizedGradeLabel.AutoSize = true;
+            this.recognizedGradeLabel.Font = new System.Drawing.Font("Arial Black", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            this.recognizedGradeLabel.Location = new System.Drawing.Point(12, 604);
+            this.recognizedGradeLabel.Name = "recognizedGradeLabel";
+            this.recognizedGradeLabel.Size = new System.Drawing.Size(81, 90);
+            this.recognizedGradeLabel.TabIndex = 8;
+            this.recognizedGradeLabel.Text = "0";
+            this.recognizedGradeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // recognitionConfidenceLabel
+            // 
+            this.recognitionConfidenceLabel.AutoSize = true;
+            this.recognitionConfidenceLabel.Font = new System.Drawing.Font("Arial", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            this.recognitionConfidenceLabel.Location = new System.Drawing.Point(82, 651);
+            this.recognitionConfidenceLabel.Name = "recognitionConfidenceLabel";
+            this.recognitionConfidenceLabel.Size = new System.Drawing.Size(44, 29);
+            this.recognitionConfidenceLabel.TabIndex = 9;
+            this.recognitionConfidenceLabel.Text = "0%";
+            // 
             // GradeRecognitionDebugView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(320, 493);
+            this.ClientSize = new System.Drawing.Size(320, 688);
+            this.Controls.Add(this.recognitionConfidenceLabel);
+            this.Controls.Add(this.recognizedGradeLabel);
+            this.Controls.Add(this.differencePanel);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.bestMatchPanel);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.digestPanel);
             this.Controls.Add(this.croppedPanel);
@@ -149,5 +214,11 @@
         private System.Windows.Forms.Panel croppedPanel;
         private System.Windows.Forms.Panel digestPanel;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Panel bestMatchPanel;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Panel differencePanel;
+        private System.Windows.Forms.Label recognizedGradeLabel;
+        private System.Windows.Forms.Label recognitionConfidenceLabel;
     }
 }

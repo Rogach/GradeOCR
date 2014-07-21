@@ -17,8 +17,13 @@ namespace GradeOCR {
         public PictureView noiseRemovalPV;
         public PictureView croppedPV;
         public PictureView digestPV;
+        public PictureView bestMatchPV;
+        public PictureView differencePV;
 
-        public GradeRecognitionDebugView(Bitmap inputImage, string imageName) {
+        private GradeDigestSet digestSet;
+
+        public GradeRecognitionDebugView(Bitmap inputImage, string imageName, GradeDigestSet digestSet) {
+            this.digestSet = digestSet;
             InitializeComponent();
 
             this.Text = imageName;
@@ -28,6 +33,8 @@ namespace GradeOCR {
             noiseRemovalPV = PictureView.InsertIntoPanel(noiseRemovalPanel);
             croppedPV = PictureView.InsertIntoPanel(croppedPanel);
             digestPV = PictureView.InsertIntoPanel(digestPanel);
+            bestMatchPV = PictureView.InsertIntoPanel(bestMatchPanel);
+            differencePV = PictureView.InsertIntoPanel(differencePanel);
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
@@ -50,6 +57,13 @@ namespace GradeOCR {
             croppedPV.Image = croppedImage;
             Bitmap digestImage = DigestExtractor.ExtractDigestImage(croppedImage);
             digestPV.Image = digestImage;
+
+            GradeDigest digest = GradeDigest.FromImage(digestImage);
+            RecognitionResult recognitionResult = Util.Timed("digest matching", () => digestSet.FindBestMatch(digest));
+            Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
+            bestMatchPV.Image = bestMatchImage;
+            recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
+            recognitionConfidenceLabel.Text = String.Format("{0}%", (int) Math.Floor(recognitionResult.Confidence * 100));
         }
     }
 }
