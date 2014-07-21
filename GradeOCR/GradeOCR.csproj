@@ -62,6 +62,7 @@
     <Compile Include="MassGradeView.Designer.cs">
       <DependentUpon>MassGradeView.cs</DependentUpon>
     </Compile>
+    <Compile Include="NoiseCleaner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

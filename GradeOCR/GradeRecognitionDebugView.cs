@@ -15,12 +15,16 @@ namespace GradeOCR {
     public partial class GradeRecognitionDebugView : Form {
         public PictureView inputImagePV;
         public PictureView removeBorderPV;
+        public PictureView noiseRemovalPV;
 
-        public GradeRecognitionDebugView(Bitmap inputImage) {
+        public GradeRecognitionDebugView(Bitmap inputImage, string imageName) {
             InitializeComponent();
+
+            this.Text = imageName;
 
             inputImagePV = PictureView.InsertIntoPanel(inputImagePanel);
             removeBorderPV = PictureView.InsertIntoPanel(removeBorderPanel);
+            noiseRemovalPV = PictureView.InsertIntoPanel(noiseRemovalPanel);
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
@@ -37,6 +41,8 @@ namespace GradeOCR {
             inputImagePV.Image = inputImage;
             Bitmap removeBorderImage = BorderRemoval.RemoveBorder(inputImage);
             removeBorderPV.Image = removeBorderImage;
+            Bitmap removeNoiseImage = NoiseCleaner.RemoveNoise(removeBorderImage);
+            noiseRemovalPV.Image = removeNoiseImage;
         }
     }
 }

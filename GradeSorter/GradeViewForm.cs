@@ -73,7 +73,7 @@ namespace GradeSorter {
             currentFileName = fileName;
             this.Text = currentFileName;
 
-            currentImage = LoadImage(currentFileName);
+            currentImage = ImageUtil.LoadImage(currentFileName);
 
             gradePV.Image = currentImage;
         }
@@ -87,13 +87,6 @@ namespace GradeSorter {
                 Environment.Exit(0);
                 return null;
             }
-        }
-
-        private Bitmap LoadImage(string fileName) {
-            FileStream fs = File.OpenRead(fileName);
-            Bitmap img = (Bitmap) Image.FromStream(fs);
-            fs.Close();
-            return img;
         }
 
         private List<Tuple<string, string>> actionHistory = new List<Tuple<string, string>>();

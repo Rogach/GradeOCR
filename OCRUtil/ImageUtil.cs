@@ -4,9 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 
 namespace OCRUtil {
     public static class ImageUtil {
+        public static Bitmap LoadImage(string fileName) {
+            FileStream fs = File.OpenRead(fileName);
+            Bitmap img = (Bitmap) Image.FromStream(fs);
+            fs.Close();
+            return ImageUtil.ToStdFormat(img);
+        }
+
         public static Bitmap ToStdFormat(Bitmap b) {
             Bitmap res = new Bitmap(b.Width, b.Height, PixelFormat.Format32bppArgb);
             res.SetResolution(b.HorizontalResolution, b.VerticalResolution);
@@ -42,14 +50,19 @@ namespace OCRUtil {
         public static Bitmap Rotate(Bitmap src) {
             Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format32bppArgb);
             rotated.SetResolution(src.HorizontalResolution, src.VerticalResolution);
-
+            
             Graphics g = Graphics.FromImage(rotated);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+            
             g.TranslateTransform(0, rotated.Height);
             g.RotateTransform(-90);
+
             g.DrawImageUnscaled(src, 0, 0);
             g.Dispose();
 
             return rotated;
         }
+        
     }
 }

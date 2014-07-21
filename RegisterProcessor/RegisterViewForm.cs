@@ -86,7 +86,7 @@ namespace RegisterProcessor {
             currentFileName = NextImageName();
             this.Text = currentFileName;
 
-            origImage = LoadImage(currentFileName);
+            origImage = ImageUtil.LoadImage(currentFileName);
             bwImage = ImageUtil.ToBlackAndWhite(origImage);
             currentImage = new Bitmap(bwImage);
 
@@ -137,13 +137,6 @@ namespace RegisterProcessor {
                 Environment.Exit(0);
                 return null;
             }
-        }
-
-        private Bitmap LoadImage(string fileName) {
-            FileStream fs = File.OpenRead(fileName);
-            Bitmap img = (Bitmap) Image.FromStream(fs);
-            fs.Close();
-            return ImageUtil.ToStdFormat(img);
         }
 
         private void MoveImageToDone(string fileName) {

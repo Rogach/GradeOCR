@@ -59,15 +59,15 @@ namespace TableOCR {
                     int f = blackCount[y] * 200 / maxCount;
                     if (!blackRows[y]) {
                         for (int x = 0; x < f; x++) {
-                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 4288059030; // 150 gray
+                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 0xff969696;
                         }
                     } else {
                         for (int x = 0; x < f; x++) {
-                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 4278190080; // black
+                            *(resPtr + y * (src.Width + 200) + src.Width + x) = 0xff000000;
                         }
                     }
                     for (int x = f; x < 200; x++) {
-                        *(resPtr + y * (src.Width + 200) + src.Width + x) = 4294967295; // white
+                        *(resPtr + y * (src.Width + 200) + src.Width + x) = 0xffffffff;
                     }
                 }
 

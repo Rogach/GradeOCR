@@ -16,30 +16,32 @@ namespace GradeOCR {
             return b;
         }
 
-        public static Bitmap RemoveTopBorder(Bitmap b) {
-            bool[] blackRows = FindBlackRows(b);
+        public static Bitmap RemoveTopBorder(Bitmap src) {
+            bool[] blackRows = FindBlackRows(src);
             int borderWidth = 0;
             for (int q = 0; q < 8; q++) {
                 if (blackRows[q]) borderWidth = q + 1;
             }
 
-            Bitmap withoutBorder = new Bitmap(b.Width, b.Height - borderWidth, PixelFormat.Format32bppArgb);
-            withoutBorder.SetResolution(b.HorizontalResolution, b.VerticalResolution);
-            Graphics g = Graphics.FromImage(withoutBorder);
+            Bitmap res = new Bitmap(src.Width, src.Height - borderWidth, PixelFormat.Format32bppArgb);
+            res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
+
+            Graphics g = Graphics.FromImage(res);
             g.DrawImage(
-                b,
-                new Rectangle(0, 0, b.Width, b.Height - borderWidth),
-                new Rectangle(0, borderWidth, b.Width, b.Height - borderWidth),
+                src,
+                new Rectangle(0, 0, src.Width, src.Height - borderWidth),
+                new Rectangle(0, borderWidth, src.Width, src.Height - borderWidth),
                 GraphicsUnit.Pixel
             );
             g.Dispose();
-            return withoutBorder;
+
+            return res;
         }
 
         public static bool[] FindBlackRows(Bitmap b) {
             bool[] blackRows = new bool[b.Height];
 
-            int threshold = (int) (b.Width * 0.3);
+            int threshold = (int) (b.Width * 0.4);
             unsafe {
                 BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 

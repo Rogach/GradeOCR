@@ -109,7 +109,7 @@ namespace TableOCR {
             this.resultPV.Image = tablePic;
             this.resultPV.AddDoubleClickListener((pt, e) => {
                 t.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                    var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.X, cell.Y));
+                    var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.X, cell.Y), "<gen>");
                     gradeRecognition.ShowDialog();
                 });
             });

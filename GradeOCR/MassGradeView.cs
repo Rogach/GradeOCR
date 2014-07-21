@@ -55,10 +55,11 @@ namespace GradeOCR {
                     images = images.OrderBy(s => r.NextDouble()).ToList();
 
                     for (int q = 0; q < pvs.Count; q++) {
-                        Bitmap img = LoadImage(images[q]);
+                        string imageFile = images[q];
+                        Bitmap img = ImageUtil.LoadImage(imageFile);
                         pvs[q].Image = converter(img);
                         pvs[q].AddDoubleClickListener((pt, e) => {
-                            new GradeRecognitionDebugView(img).ShowDialog();
+                            new GradeRecognitionDebugView(img, imageFile).ShowDialog();
                         });
                     }
                 }));
@@ -67,11 +68,6 @@ namespace GradeOCR {
             });
         }
 
-        private Bitmap LoadImage(string fileName) {
-            FileStream fs = File.OpenRead(fileName);
-            Bitmap img = (Bitmap) Image.FromStream(fs);
-            fs.Close();
-            return ImageUtil.ToStdFormat(img);
-        }
+        
     }
 }
