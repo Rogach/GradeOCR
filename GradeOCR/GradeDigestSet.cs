@@ -58,11 +58,11 @@ namespace GradeOCR {
         }
 
         public static uint ReadUInt(Stream s) {
-            byte b1 = SafeReadByte(s);
-            byte b2 = SafeReadByte(s);
-            byte b3 = SafeReadByte(s);
-            byte b4 = SafeReadByte(s);
-            return (UInt32) (b4 << 24 + b3 << 16 + b2 << 8 + b1);
+            int b1 = SafeReadByte(s);
+            int b2 = SafeReadByte(s);
+            int b3 = SafeReadByte(s);
+            int b4 = SafeReadByte(s);
+            return (uint) ((b4 << 24) + (b3 << 16) + (b2 << 8) + b1);
         }
     }
 }
