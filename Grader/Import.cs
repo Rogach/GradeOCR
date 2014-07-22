@@ -25,14 +25,14 @@ namespace Grader {
                 }
                 
                 var r = sh.GetRange("A2");
-                Func<string, string> field = colName => r.GetOffset(0, headerOffset[colName]).Value.ToString();
+                Func<ExcelRange, string, string> field = (rng, colName) => rng.GetOffset(0, headerOffset[colName]).Value.ToString();
                 while (r.Value != null) {
                     et.Военнослужащий.AddObject(new Военнослужащий {
-                        Фамилия = field("фамилия"),
-                        Имя = field("имя"),
-                        Отчество = field("отчество"),
-                        КодЗвания = et.rankNameToId[field("звание")],
-                        КодПодразделения = et.subunitShortNameToId[field("подразделение")],
+                        Фамилия = field(r, "фамилия"),
+                        Имя = field(r, "имя"),
+                        Отчество = field(r, "отчество"),
+                        КодЗвания = et.rankNameToId[field(r, "звание")],
+                        КодПодразделения = et.subunitShortNameToId[field(r, "подразделение")],
                         ТипВоеннослужащего = "курсант"
                     });
                     r = r.GetOffset(1, 0);
