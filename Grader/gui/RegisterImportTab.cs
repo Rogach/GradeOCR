@@ -163,7 +163,7 @@ namespace Grader.gui {
                 DialogResult result = MessageBox.Show("Сохранить изменения в текущей ведомости?", "Несохраненные изменения", MessageBoxButtons.YesNoCancel);
                 if (result == DialogResult.Cancel) {
                     return false;
-                } else if (result == DialogResult.OK) {
+                } else if (result == DialogResult.Yes) {
                     RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et);
                     changesPending = false;
                     return true;
