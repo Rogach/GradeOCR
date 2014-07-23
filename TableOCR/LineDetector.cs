@@ -7,7 +7,7 @@ using OCRUtil;
 
 namespace TableOCR {
     public class LineDetector {
-        private static readonly int momentumFactor = 7;
+        private static readonly int momentumFactor = 5;
 
         private int minLineLength;
         private int length;
