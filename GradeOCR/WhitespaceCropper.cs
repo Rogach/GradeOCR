@@ -33,23 +33,27 @@ namespace GradeOCR {
                 bottomCropWidth++;
             }
 
-            Bitmap res = new Bitmap(
-                src.Width - leftCropWidth - rightCropWidth,
-                src.Height - topCropWidth - bottomCropWidth,
-                PixelFormat.Format32bppArgb
-            );
-            res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
+            if (topCropWidth + bottomCropWidth < src.Height || leftCropWidth + rightCropWidth < src.Width) {
+                Bitmap res = new Bitmap(
+                    src.Width - leftCropWidth - rightCropWidth,
+                    src.Height - topCropWidth - bottomCropWidth,
+                    PixelFormat.Format32bppArgb
+                );
+                res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
 
-            Graphics g = Graphics.FromImage(res);
-            g.DrawImage(
-                src,
-                new Rectangle(0, 0, res.Width, res.Height),
-                new Rectangle(leftCropWidth, topCropWidth, res.Width, res.Height),
-                GraphicsUnit.Pixel
-            );
-            g.Dispose();
+                Graphics g = Graphics.FromImage(res);
+                g.DrawImage(
+                    src,
+                    new Rectangle(0, 0, res.Width, res.Height),
+                    new Rectangle(leftCropWidth, topCropWidth, res.Width, res.Height),
+                    GraphicsUnit.Pixel
+                );
+                g.Dispose();
 
-            return res;
+                return res;
+            } else {
+                return src;
+            }
         }
 
         private static bool[] FindHorizontalWhiteLines(Bitmap b) {

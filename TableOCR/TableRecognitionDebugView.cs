@@ -101,20 +101,25 @@ namespace TableOCR {
             gVert.Dispose();
             this.outputPV_vert.Image = drwVert;
 
-            Table t = new Table(lines, linesVert);
-            Bitmap tablePic = new Bitmap(bwImage);
-            Graphics tableG = Graphics.FromImage(tablePic);
-            t.DrawTable(tableG, p);
-            tableG.Dispose();
-            this.resultPV.Image = tablePic;
+            Option<Table> tOpt = Table.CreateTable(lines, linesVert);
+            tOpt.ForEach(t => {
+                Bitmap tablePic = new Bitmap(bwImage);
+                Graphics tableG = Graphics.FromImage(tablePic);
+                t.DrawTable(tableG, p);
+                tableG.Dispose();
+                this.resultPV.Image = tablePic;
 
-            GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
-            this.resultPV.AddDoubleClickListener((pt, e) => {
-                t.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                    var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.X, cell.Y), "<gen>", digestSet);
-                    gradeRecognition.ShowDialog();
+                GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
+                this.resultPV.AddDoubleClickListener((pt, e) => {
+                    t.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                        var gradeRecognition = new GradeRecognitionDebugView(t.GetCellImage(bwImage, cell.X, cell.Y), "<gen>", digestSet);
+                        gradeRecognition.ShowDialog();
+                    });
                 });
             });
+            if (tOpt.IsEmpty()) {
+                this.resultPV.Image = bwImage;
+            }
         }
     }
 }

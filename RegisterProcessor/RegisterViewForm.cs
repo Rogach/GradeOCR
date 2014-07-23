@@ -23,7 +23,7 @@ namespace RegisterProcessor {
         private Bitmap origImage;
         private Bitmap bwImage;
         private Bitmap currentImage;
-        private Table currentTable;
+        private Option<Table> currentTable;
 
         public RegisterViewForm() {
             InitializeComponent();
@@ -41,40 +41,42 @@ namespace RegisterProcessor {
 
             Point? selectionStart = null;
             this.registerPV.AddDoubleClickListener((pt, e) => {
-                if (e.Button == MouseButtons.Left) {
-                    currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                        ProcessTableCell(cell.X, cell.Y);
+                currentTable.ForEach(table => {
+                    if (e.Button == MouseButtons.Left) {
+                        table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                            ProcessTableCell(cell.X, cell.Y);
 
-                        // color processed cell with green
-                        GraphicsPath cellPath = currentTable.GetCellContour(cell.X, cell.Y);
-                        Graphics g = Graphics.FromImage(currentImage);
-                        g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
-                        g.Dispose();
-                        registerPV.SetImageKeepZoom(currentImage);
-                    });
-                } else if (e.Button == MouseButtons.Right) {
-                    currentTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                        if (selectionStart.HasValue) {
+                            // color processed cell with green
+                            GraphicsPath cellPath = table.GetCellContour(cell.X, cell.Y);
                             Graphics g = Graphics.FromImage(currentImage);
-
-                            for (int y = selectionStart.Value.Y; y <= cell.Y; y++) {
-                                for (int x = selectionStart.Value.X; x <= cell.X; x++) {
-                                    ProcessTableCell(x, y);
-                                    GraphicsPath cellPath = currentTable.GetCellContour(x, y);
-                                    g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
-                                }
-                            }
-
-                            // color processed cells with green
+                            g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
                             g.Dispose();
                             registerPV.SetImageKeepZoom(currentImage);
+                        });
+                    } else if (e.Button == MouseButtons.Right) {
+                        table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                            if (selectionStart.HasValue) {
+                                Graphics g = Graphics.FromImage(currentImage);
 
-                            selectionStart = null;
-                        } else {
-                            selectionStart = new Point(cell.X, cell.Y);
-                        }
-                    });
-                }
+                                for (int y = selectionStart.Value.Y; y <= cell.Y; y++) {
+                                    for (int x = selectionStart.Value.X; x <= cell.X; x++) {
+                                        ProcessTableCell(x, y);
+                                        GraphicsPath cellPath = table.GetCellContour(x, y);
+                                        g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+                                    }
+                                }
+
+                                // color processed cells with green
+                                g.Dispose();
+                                registerPV.SetImageKeepZoom(currentImage);
+
+                                selectionStart = null;
+                            } else {
+                                selectionStart = new Point(cell.X, cell.Y);
+                            }
+                        });
+                    }
+                });
             });
 
             this.debugOcrButton.Click += new EventHandler(delegate {
@@ -93,15 +95,17 @@ namespace RegisterProcessor {
             currentTable = TableOCR.Program.RecognizeTable(currentImage);
             Graphics g = Graphics.FromImage(currentImage);
             Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
-            currentTable.DrawTable(g, p);
+            currentTable.ForEach(table => table.DrawTable(g, p));
             g.Dispose();
 
             registerPV.Image = currentImage;
         }
 
         private void ProcessTableCell(int x, int y) {
-            Bitmap cellImage = currentTable.GetCellImage(bwImage, x, y);
-            cellImage.Save(GetNextUnsortGradeImageName());
+            currentTable.ForEach(table => {
+                Bitmap cellImage = table.GetCellImage(bwImage, x, y);
+                cellImage.Save(GetNextUnsortGradeImageName());
+            });
         }
 
         private string GetNextUnsortGradeImageName() {

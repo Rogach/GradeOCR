@@ -27,7 +27,7 @@ namespace TableOCR {
             }
         }
 
-        public static Table RecognizeTable(Bitmap sourceImage) {
+        public static Option<Table> RecognizeTable(Bitmap sourceImage) {
             Bitmap sourceImageVert = ImageUtil.Rotate(sourceImage);
             BWImage bw = new BWImage(sourceImage);
             BWImage bwVert = new BWImage(sourceImageVert);
@@ -40,7 +40,7 @@ namespace TableOCR {
                         new Point(sourceImage.Width - 1 - ln.p1.Y, ln.p1.X), 
                         new Point(sourceImage.Width - 1 - ln.p2.Y, ln.p2.X));
                 });
-            return new Table(hLines, vLines);
+            return Table.CreateTable(hLines, vLines);
         }
     }
 }

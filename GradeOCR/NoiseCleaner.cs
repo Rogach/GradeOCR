@@ -58,29 +58,32 @@ namespace GradeOCR {
                 b.UnlockBits(bd);
             }
 
-            int maxIslandSize = islands.Select(i => i.Count).Max();
-
-            List<List<Point>> bigIslands = islands.Where(i => i.Count > maxIslandSize * cutoffRatio).ToList();
-
+            
             Bitmap result = new Bitmap(b.Width, b.Height, PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(result);
             g.FillRectangle(Brushes.White, new Rectangle(0, 0, result.Width, result.Height));
             g.Dispose();
 
-            unsafe {
-                BitmapData rbd = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                byte* rptr = (byte*) rbd.Scan0.ToPointer();
+            if (islands.Count > 0) {
+                int maxIslandSize = islands.Select(i => i.Count).Max();
 
-                foreach (var island in bigIslands) {
-                    foreach (Point pt in island) {
-                        byte* iptr = rptr + 4 * (pt.Y * result.Width + pt.X);
-                        *iptr = 0;
-                        *(iptr + 1) = 0;
-                        *(iptr + 2) = 0;
+                List<List<Point>> bigIslands = islands.Where(i => i.Count > maxIslandSize * cutoffRatio).ToList();
+
+                unsafe {
+                    BitmapData rbd = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                    byte* rptr = (byte*) rbd.Scan0.ToPointer();
+
+                    foreach (var island in bigIslands) {
+                        foreach (Point pt in island) {
+                            byte* iptr = rptr + 4 * (pt.Y * result.Width + pt.X);
+                            *iptr = 0;
+                            *(iptr + 1) = 0;
+                            *(iptr + 2) = 0;
+                        }
                     }
-                }
 
-                result.UnlockBits(rbd);
+                    result.UnlockBits(rbd);
+                }
             }
 
             return result;
