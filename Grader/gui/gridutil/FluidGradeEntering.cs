@@ -7,7 +7,7 @@ using System.Data;
 
 namespace Grader.gui.gridutil {
     public static class FluidGradeEntering {
-        public static void EnableFluidGradeEntering(DataGridView dataGridView, DataTable dataTable, Func<int, bool> isEditingAllowed) {
+        public static void EnableFluidGradeEntering(DataGridView dataGridView, Func<int, bool> isEditingAllowed) {
             bool afterGradeType = false;
             dataGridView.PreviewKeyDown += new PreviewKeyDownEventHandler(delegate(object sender, PreviewKeyDownEventArgs args) {
                 Dictionary<Keys, string> quickKeys = new Dictionary<Keys, string> {
@@ -24,27 +24,11 @@ namespace Grader.gui.gridutil {
                         minY = Math.Min(minY, sc.RowIndex);
                     }
                     if (isEditingAllowed(minX)) {
-                        if (dataGridView.AllowUserToAddRows) {
-                            if (minY + 1 < dataGridView.Rows.Count) {
-                                dataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
-                                dataGridView.ClearSelection();
-                                dataGridView.Rows[minY + 1].Cells[minX].Selected = true;
-                                dataGridView.CurrentCell = dataGridView.Rows[minY + 1].Cells[minX];
-                            } else {
-                                DataRow row = dataTable.Rows.Add(new object[] { });
-                                row.SetField(dataTable.Columns[minX], quickKeys[args.KeyCode]);
-                                dataGridView.Rows.RemoveAt(dataGridView.Rows.Count - 2);
-                                dataGridView.ClearSelection();
-                                dataGridView.CurrentCell = dataGridView.Rows[dataGridView.Rows.Count - 1].Cells[minX];
-                                dataGridView.CurrentCell.Selected = true;
-                            }
-                        } else {
-                            dataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
-                            if (minY + 1 < dataGridView.Rows.Count) {
-                                dataGridView.ClearSelection();
-                                dataGridView.Rows[minY + 1].Cells[minX].Selected = true;
-                                dataGridView.CurrentCell = dataGridView.Rows[minY + 1].Cells[minX];
-                            }
+                        dataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
+                        if (minY + 2 < dataGridView.Rows.Count) {
+                            dataGridView.ClearSelection();
+                            dataGridView.Rows[minY + 1].Cells[minX].Selected = true;
+                            dataGridView.CurrentCell = dataGridView.Rows[minY + 1].Cells[minX];
                         }
                         afterGradeType = true;
                     }

@@ -173,8 +173,8 @@ namespace Grader.gui {
                 }
             });
 
-            FluidGradeEntering.EnableFluidGradeEntering(gradeView, gradeViewDataTable, col => col >= 4 && col != gradeView.ColumnCount - 1);
-            GridPasteSupport.AddPasteSupport(gradeView, gradeViewDataTable);
+            FluidGradeEntering.EnableFluidGradeEntering(gradeView, col => col >= 4 && col != gradeView.ColumnCount - 1);
+            GridPasteSupport.AddPasteSupport(gradeView);
             GridDeleteKeySupport.AddDeleteKeySupport(gradeView, isEditingAllowed: col => col >= 4 && col != gradeView.ColumnCount - 1);
 
             this.ResumeLayout(false);
