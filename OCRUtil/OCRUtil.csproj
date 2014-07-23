@@ -55,6 +55,7 @@
     <Compile Include="BWImage.cs" />
     <Compile Include="ImageUtil.cs" />
     <Compile Include="Line.cs" />
+    <Compile Include="MonkeyPatches.cs" />
     <Compile Include="PictureView.cs">
       <SubType>UserControl</SubType>
     </Compile>

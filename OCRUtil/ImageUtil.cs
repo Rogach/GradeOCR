@@ -24,27 +24,66 @@ namespace OCRUtil {
             return res;
         }
 
-        public static Bitmap ToBlackAndWhite(Bitmap b) {
-            BitmapData bd = b.LockBits(new Rectangle(0, 0, b.Width, b.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            unsafe {
-                byte* ptr = (byte*) bd.Scan0.ToPointer();
-                for (int q = 0; q < bd.Width * bd.Height; q++) {
-                    int gray = (*ptr * 30 + *(ptr + 1) * 59 + *(ptr + 2) * 11) / 100;
-                    if (gray < 220) {
-                        *ptr = 0;
-                        *(ptr + 1) = 0;
-                        *(ptr + 2) = 0;
-                    } else {
-                        *ptr = 255;
-                        *(ptr + 1) = 255;
-                        *(ptr + 2) = 255;
-                    }
-                    ptr += 4;
-                }
-            }
-            b.UnlockBits(bd);
+        public static Bitmap ToBlackAndWhite(Bitmap src) {
+            Bitmap res = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
 
-            return b;
+            unsafe {
+                BitmapData srcBD = src.LockBits(ImageLockMode.ReadOnly);
+                BitmapData resBD = res.LockBits(ImageLockMode.WriteOnly);
+
+                byte* srcPtr = (byte*) srcBD.Scan0.ToPointer();
+                byte* resPtr = (byte*) resBD.Scan0.ToPointer();
+
+                for (int q = 0; q < srcBD.Width * srcBD.Height; q++) {
+                    int gray = (*srcPtr * 30 + *(srcPtr + 1) * 59 + *(srcPtr + 2) * 11) / 100;
+                    if (gray < 220) {
+                        *resPtr = 0;
+                        *(resPtr + 1) = 0;
+                        *(resPtr + 2) = 0;
+                    } else {
+                        *resPtr = 255;
+                        *(resPtr + 1) = 255;
+                        *(resPtr + 2) = 255;
+                    }
+                    *(resPtr + 3) = 255;
+                    srcPtr += 4;
+                    resPtr += 4;
+                }
+
+                src.UnlockBits(srcBD);
+                res.UnlockBits(resBD);
+            }
+
+            return res;
+        }
+
+        public static Bitmap ToGrayscale(Bitmap src) {
+            Bitmap res = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+
+            unsafe {
+                BitmapData srcBD = src.LockBits(ImageLockMode.ReadOnly);
+                BitmapData resBD = res.LockBits(ImageLockMode.WriteOnly);
+
+                byte* srcPtr = (byte*) srcBD.Scan0.ToPointer();
+                byte* resPtr = (byte*) resBD.Scan0.ToPointer();
+
+                for (int q = 0; q < srcBD.Width * srcBD.Height; q++) {
+                    byte gray = (byte) ((*srcPtr * 30 + *(srcPtr + 1) * 59 + *(srcPtr + 2) * 11) / 100);
+
+                    *resPtr = gray;
+                    *(resPtr + 1) = gray;
+                    *(resPtr + 2) = gray;
+                    *(resPtr + 3) = 255;
+
+                    srcPtr += 4;
+                    resPtr += 4;
+                }
+
+                src.UnlockBits(srcBD);
+                res.UnlockBits(resBD);
+            }
+
+            return res;
         }
 
         public static Bitmap Rotate(Bitmap src) {
