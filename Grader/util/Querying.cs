@@ -15,7 +15,7 @@ namespace Grader.util {
                 join soldier in et.Военнослужащий on subunit.КодКомандира equals soldier.Код
                 where subunit.Код == subunitId
                 select soldier;
-            return Options.Create(query.First());
+            return query.ToList().HeadOption();
         }
 
         public static Option<Военнослужащий> GetCompanyCommander(Entities et, int subunitId) {
@@ -27,7 +27,7 @@ namespace Grader.util {
                 where subunit.Тип == "рота"
                 where subunitRel.КодПодразделения == subunitId
                 select soldier;
-            return Options.Create(query.First());
+            return query.ToList().HeadOption();
         }
 
         public static Option<Подразделение> GetCompany(Entities et, int subunitId) {
@@ -38,7 +38,7 @@ namespace Grader.util {
                 where subunit.Тип == "рота"
                 where subunitRel.КодПодразделения == subunitId
                 select subunit;
-            return Options.Create(query.First());
+            return query.ToList().HeadOption();
         }
 
         public static Option<Военнослужащий> GetSubunitCommander(Entities et, int subunitId) {
@@ -47,7 +47,7 @@ namespace Grader.util {
                 join soldier in et.Военнослужащий on subunit.КодКомандира equals soldier.Код
                 where subunit.Код == subunitId
                 select soldier;
-            return Options.Create(query.First());
+            return query.ToList().HeadOption();
         }
 
         public static string GetSubunitName(Entities et, int subunitId) {
@@ -86,7 +86,7 @@ namespace Grader.util {
         }
 
         public static Option<Военнослужащий> GetPostForSubunit(Entities et, int subunitId, string postName) {
-            return Options.Create(GetPostsForSubunit(et, subunitId, postName).First());
+            return GetPostsForSubunit(et, subunitId, postName).ToList().HeadOption();
         }
 
         public static IQueryable<Военнослужащий> GetSubunitSoldiers(Entities et, int subunitId, IQueryable<Военнослужащий> soldierQuery) {

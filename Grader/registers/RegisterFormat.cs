@@ -253,7 +253,7 @@ namespace Grader.registers {
             base.Format(et, sh, settings);
             ExcelTemplates.AppendRange(sh, "ЗКВ", Querying.GetPostForSubunit(et, settings.subunit.Код, "ЗКВ").Map(c => c.GetFullName(et)).GetOrElse(""));
             ExcelTemplates.AppendRange(sh, "КО", Querying.GetPostForSubunit(et, settings.subunit.Код, "КО").Map(c => c.GetFullName(et)).GetOrElse(""));
-            ExcelTemplates.AppendRange(sh, "Преподаватели", Querying.GetPostsForSubunit(et, settings.subunit.Код, "преподаватель").Select(c => c.GetFullName(et)).MkString());
+            ExcelTemplates.AppendRange(sh, "Преподаватели", Querying.GetPostsForSubunit(et, settings.subunit.Код, "преподаватель").ToList().Select(c => c.GetFullName(et)).MkString());
         }
         public override void InsertSoldiers(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             RegisterFormat.InsertSoldierList(et, sh, settings.soldiers,
