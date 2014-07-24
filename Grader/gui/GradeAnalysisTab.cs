@@ -375,6 +375,11 @@ namespace Grader.gui {
             gradesByBatallionButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
+                if (subjectSelector.SelectedItem == null && !displayAllSubjects.Checked) {
+                    errorProvider.SetError(subjectSelector, "Выберите предмет!");
+                    return;
+                }
+
                 TimeAnalysis("оценки по батальонам", () => {
                     CallBySubunitTable("батальон", false);
                 });
@@ -384,6 +389,11 @@ namespace Grader.gui {
             gradesByCompanyButton.Text = "Оценки по ротам";
             gradesByCompanyButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
+
+                if (subjectSelector.SelectedItem == null && !displayAllSubjects.Checked) {
+                    errorProvider.SetError(subjectSelector, "Выберите предмет!");
+                    return;
+                }
 
                 TimeAnalysis("оценки по ротам", () => {
                     CallBySubunitTable("рота", false);
@@ -395,6 +405,11 @@ namespace Grader.gui {
             gradesByPlatoonButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
+                if (subjectSelector.SelectedItem == null && !displayAllSubjects.Checked) {
+                    errorProvider.SetError(subjectSelector, "Выберите предмет!");
+                    return;
+                }
+
                 TimeAnalysis("оценки по взводам", () => {
                     CallBySubunitTable("взвод", false);
                 });
@@ -404,6 +419,11 @@ namespace Grader.gui {
             gradesByCycleButton.Text = "Оценки по циклам";
             gradesByCycleButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
+
+                if (subjectSelector.SelectedItem == null && !displayAllSubjects.Checked) {
+                    errorProvider.SetError(subjectSelector, "Выберите предмет!");
+                    return;
+                }
 
                 TimeAnalysis("оценки по циклам", () => {
                     if (personFilter.selectCadets.Checked) {
