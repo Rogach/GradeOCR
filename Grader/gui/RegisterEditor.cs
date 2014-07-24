@@ -104,7 +104,17 @@ namespace Grader.gui {
 
                     MenuItem deleteColumnAction = new MenuItem("Удалить предмет");
                     deleteColumnAction.Click += new EventHandler(delegate {
-                        registerDataGridView.Columns.Remove(registerDataGridView.Columns[e.ColumnIndex]);
+                        DialogResult prompt = MessageBox.Show(
+                            "Действительно удалить предмет?",
+                            "Удаление предмета",
+                            MessageBoxButtons.OKCancel,
+                            MessageBoxIcon.Warning,
+                            MessageBoxDefaultButton.Button1
+                        );
+                        if (prompt == DialogResult.OK) {
+                            registerDataGridView.Columns.Remove(registerDataGridView.Columns[e.ColumnIndex]);
+                            RegisterEdited.Invoke();
+                        }
                     });
 
                     MenuItem addSubjectSubmenu = new MenuItem("Добавить предмет");
