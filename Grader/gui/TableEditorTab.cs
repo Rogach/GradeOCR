@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Data;
+using LibUtil;
 
 namespace Grader.gui {
     public class TableEditorTab : TabPage {
@@ -13,6 +14,8 @@ namespace Grader.gui {
         private bool tableConstructed = false;
         private TableDefinition currentTable;
         private List<object> objects;
+        private Option<int> sortColumnIndex = new None<int>();
+        private bool ascendingSort = true;
 
         public TableEditorTab(Entities et) {
             this.et = et;
@@ -331,6 +334,22 @@ namespace Grader.gui {
                 args.Column.SortMode = DataGridViewColumnSortMode.NotSortable;
                 args.Column.Width = currentTable.Columns[args.Column.Index].ColumnWidth();
             });
+            tableView.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(delegate(object sender, DataGridViewCellMouseEventArgs e) {
+                if (e.Button == MouseButtons.Left) {
+                    if (sortColumnIndex.IsEmpty()) {
+                        sortColumnIndex = new Some<int>(e.ColumnIndex);
+                        ascendingSort = true;
+                    } else {
+                        if (sortColumnIndex.Get() == e.ColumnIndex) {
+                            ascendingSort = !ascendingSort;
+                        } else {
+                            sortColumnIndex = new Some<int>(e.ColumnIndex);
+                            ascendingSort = true;
+                        }
+                    }
+                    SetEditedTable(currentTable, filterString.Text);
+                }
+            });
         }
 
         private void SetEditedTable(TableDefinition tdef, string filter) {
@@ -346,19 +365,35 @@ namespace Grader.gui {
             foreach (var col in tdef.Columns) {
                 dataTable.Columns.Add(col.Name(), col.GetColType());
             }
-            objects = new List<object>();
-            foreach (var obj in tdef.getObjects()) {
+            objects =
+                tdef.getObjects()
+                .Where(obj => {
+                    foreach (var col in tdef.Columns) {
+                        object value = col.GetValue(obj);
+                        if (value.ToString().ToLower().Contains(filter.ToLower())) return true;
+                    }
+                    return false;
+                })
+                .ToList();
+
+            sortColumnIndex.ForEach(sortCol => {
+                if (ascendingSort) {
+                    objects = objects.OrderBy(obj => {
+                        return tdef.Columns[sortCol].GetValue(obj).ToString();
+                    }).ToList();
+                } else {
+                    objects = objects.OrderByDescending(obj => {
+                        return tdef.Columns[sortCol].GetValue(obj).ToString();
+                    }).ToList();
+                }
+            });
+
+            foreach (var obj in objects) {
                 List<object> cells = new List<object>();
-                bool matches = false;
                 foreach (var col in tdef.Columns) {
-                    object value = col.GetValue(obj);
-                    matches = matches || value.ToString().ToLower().Contains(filter.ToLower());
                     cells.Add(col.GetValue(obj));
                 }
-                if (matches) {
-                    dataTable.Rows.Add(cells.ToArray());
-                    objects.Add(obj);
-                }
+                dataTable.Rows.Add(cells.ToArray());
             }
 
             tableView.Columns.Clear();
