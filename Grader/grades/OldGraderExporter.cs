@@ -104,7 +104,7 @@ namespace Grader.grades {
                     gradeQuery,
                     soldierQuery,
                     "старая_учетка_курсанты.xlsm",
-                    new List<string> { "СП", "СЭС", "ТП", "СТР", "ФП", "ОВУ", "ОГН", "РХБЗ", "ВМП", "ОГП", "ТАКТ" },
+                    new List<string> { "СП", "СЭС", "ТП", "СТР", "ФП", "ОВУ", "ОГН", "РХБЗ", "ВМП", "ОГП", "ТАК" },
                     cadetExports
                 );
             } else if (selectContract) {
@@ -146,7 +146,8 @@ namespace Grader.grades {
                             Grades.GetGradesForSubunit(et, gradeQuery, subunitId))
                         .ToDictionary(g => g.soldier.Код);
 
-                    List<Военнослужащий> realSoldiers = soldiers.Where(s => et.rankCache.Find(r => r.Код == s.КодЗвания).Название != "ГП").ToList();
+                    int gpId = et.rankNameToId["ГП"];
+                    List<Военнослужащий> realSoldiers = soldiers.Where(s => s.КодЗвания != gpId).ToList();
                     ProgressDialogs.ForEach(realSoldiers, s => {
                         var r = c;
                         r.Value = et.rankCache.Find(rk => rk.Код == s.КодЗвания).Название;
