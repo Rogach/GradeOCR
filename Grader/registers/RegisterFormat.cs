@@ -260,8 +260,9 @@ namespace Grader.registers {
                 isExam: settings.registerType == RegisterType.экзамен, useShortNames: false, strikeKMN: settings.strikeKMN, strikeLen: columnCount,
                 additionalFormatting: (rng, soldier) => {
                     if (soldier.ВУС != 0) {
-
                         rng.GetOffset(0, 3).Value = "'" + soldier.ВУС.ToString().PadLeft(3, '0');
+                    } else {
+                        rng.GetOffset(0, 3).Value = "";
                     }
                 });
         }
