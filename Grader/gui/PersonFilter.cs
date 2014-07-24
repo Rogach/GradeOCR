@@ -43,10 +43,6 @@ namespace Grader.gui {
                     selectCadets.Checked = true;
                     selectPermanent.Checked = false;
                     selectContract.Checked = false;
-                } else if (subunit.ТипОбучения == "" || subunit.ТипОбучения == null) {
-                    selectCadets.Checked = false;
-                    selectPermanent.Checked = false;
-                    selectContract.Checked = true;
                 }
             });
 
