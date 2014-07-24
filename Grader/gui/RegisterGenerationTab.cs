@@ -149,6 +149,14 @@ namespace Grader.gui {
             }
         }
 
+        private ExcelApplication excelAppInstance = null;
+        private ExcelApplication GetExcel() {
+            if (excelAppInstance == null) {
+                excelAppInstance = new ExcelApplication();
+            }
+            return excelAppInstance;
+        }
+
         private void GenerateRegister() {
             RegisterSpec spec = (RegisterSpec) registerSubjectSelect.SelectedItem;
             RegisterSettings settings = new RegisterSettings {
@@ -167,7 +175,7 @@ namespace Grader.gui {
             }
             SoldierGrouping grouping = GetGrouping(et);
 
-            var rwb = ExcelTemplates.LoadExcelTemplate(this.settings.GetTemplateLocation(spec.templateName));
+            var rwb = ExcelTemplates.LoadExcelTemplate(GetExcel(), this.settings.GetTemplateLocation(spec.templateName));
             ExcelWorksheet templateSheet = rwb.Worksheets.First();
             ProgressDialogs.ForEach(soldiers.GroupBy(grouping.keySelector).OrderBy(group => group.Key), group => {
                 templateSheet.Copy(After: rwb.Worksheets.Last());
