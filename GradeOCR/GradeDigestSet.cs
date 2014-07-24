@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Windows.Forms;
 
 namespace GradeOCR {
 
@@ -69,7 +70,18 @@ namespace GradeOCR {
         }
 
         public static GradeDigestSet ReadDefault() {
-            return GradeDigestSet.Read("E:/Pronko/prj/Grader/ocr-data/grade-digests.db");
+            string defaultPath = "E:/Pronko/prj/Grader/ocr-data/grade-digests.db";
+            if (File.Exists(defaultPath)) {
+                return GradeDigestSet.Read(defaultPath);
+            } else {
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.Title = "Выберите базу с оценками";
+                if (ofd.ShowDialog() == DialogResult.OK) {
+                    return GradeDigestSet.Read(ofd.FileName);
+                } else {
+                    throw new Exception("Can't load grade digests database");
+                }
+            }
         }
         
     }
