@@ -127,7 +127,10 @@ namespace Grader.gui {
                 return new SoldierGrouping {
                     keySelector = v => v.КодПодразделения,
                     registerName = subunitId => Querying.GetSubunitName(et, subunitId),
-                    subunit = soldiers => et.Подразделение.Where(s => s.Код == soldiers.First().КодПодразделения).First()
+                    subunit = soldiers => {
+                        int subunitId = soldiers.First().КодПодразделения;
+                        return et.Подразделение.Where(s => s.Код == subunitId).First();
+                    }
                 };
             } else if (groupingByVus.Checked) {
                 return new SoldierGrouping {
