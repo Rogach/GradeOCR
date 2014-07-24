@@ -102,9 +102,9 @@
             // 
             // ok_button
             // 
-            this.ok_button.Location = new System.Drawing.Point(109, 116);
+            this.ok_button.Location = new System.Drawing.Point(12, 116);
             this.ok_button.Name = "ok_button";
-            this.ok_button.Size = new System.Drawing.Size(100, 23);
+            this.ok_button.Size = new System.Drawing.Size(91, 23);
             this.ok_button.TabIndex = 5;
             this.ok_button.Text = "ОК";
             this.ok_button.UseVisualStyleBackColor = true;
@@ -112,9 +112,9 @@
             // 
             // cancel_button
             // 
-            this.cancel_button.Location = new System.Drawing.Point(12, 116);
+            this.cancel_button.Location = new System.Drawing.Point(109, 116);
             this.cancel_button.Name = "cancel_button";
-            this.cancel_button.Size = new System.Drawing.Size(91, 23);
+            this.cancel_button.Size = new System.Drawing.Size(100, 23);
             this.cancel_button.TabIndex = 6;
             this.cancel_button.Text = "Отмена";
             this.cancel_button.UseVisualStyleBackColor = true;
@@ -124,7 +124,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(224, 151);
+            this.ClientSize = new System.Drawing.Size(224, 148);
             this.Controls.Add(this.cancel_button);
             this.Controls.Add(this.ok_button);
             this.Controls.Add(this.password_text);
