@@ -14,6 +14,8 @@ namespace Grader {
 
         public Dictionary<int, string> rankIdToName;
         public Dictionary<string, int> rankNameToId;
+        public Dictionary<int, int> rankIdToOrder;
+        public Dictionary<string, int> rankNameToOrder;
 
         public Dictionary<int, string> subunitIdToName;
         public Dictionary<string, int> subunitNameToId;
@@ -32,6 +34,8 @@ namespace Grader {
             subjectIdToName = Предмет.Select(s => new { id = s.Код, name = s.Название }).ToList().ToDictionary(s => s.id, s => s.name);
             rankIdToName = Звание.Select(r => new { id = r.Код, rank = r.Название }).ToList().ToDictionary(r => r.id, r => r.rank);
             rankNameToId = Звание.Select(r => new { id = r.Код, rank = r.Название }).ToList().ToDictionary(r => r.rank, r => r.id);
+            rankIdToOrder = Звание.Select(r => new { id = r.Код, order = r.order }).ToList().ToDictionary(r => r.id, r => r.order);
+            rankNameToOrder = Звание.Select(r => new { name = r.Название, order = r.order }).ToList().ToDictionary(r => r.name, r => r.order);
 
             subunitIdToName = Подразделение.Select(s => new { id = s.Код, name = s.Имя }).ToList().ToDictionary(s => s.id, s => s.name);
             subunitNameToId = Подразделение.Select(s => new { id = s.Код, name = s.Имя }).ToList().ToDictionary(s => s.name, s => s.id);

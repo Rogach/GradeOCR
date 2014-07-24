@@ -187,18 +187,15 @@ namespace Grader.gui {
             DateTime dtTo = dateTo.Value.Date.AddDays(1);
             bool subjectIsComplex = ComplexSubjects.IsComplexSubject((string) subjectSelector.SelectedItem);
 
+            int minRankOrder = et.rankNameToOrder[(string) minRankSelector.SelectedItem];
+            int maxRankOrder = et.rankNameToOrder[(string) maxRankSelector.SelectedItem];
+
             return
                 from grade in personFilter.GetGradeQuery()
 
                 join rank in et.Звание on grade.КодЗвания equals rank.Код
-
-                from minRank in et.Звание
-                where minRank.Название == ((string) minRankSelector.SelectedItem)
-                where rank.order >= minRank.order
-
-                from maxRank in et.Звание
-                where maxRank.Название == ((string) maxRankSelector.SelectedItem)
-                where rank.order <= maxRank.order
+                where rank.order >= minRankOrder
+                where rank.order <= maxRankOrder
 
                 from r in et.Ведомость
                 where grade.КодВедомости == r.Код
