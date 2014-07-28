@@ -179,20 +179,20 @@ namespace Grader.gui {
 
         public void UpdateRegisterList() {
             registerList.Items.Clear();
-            et.Ведомость
-                .OrderByDescending(r => r.ДатаЗаполнения)
-                .Select(r => new RegisterDesc { 
-                    id = r.Код, 
-                    name = r.Название,
-                    fillDate = r.ДатаЗаполнения, 
-                    virt = r.Виртуальная, 
-                    enabled = r.Включена
-                })
-                .ToList().ForEach(rd => {
-                    ListViewItem item = new ListViewItem(rd.ToString());
-                    item.Tag = rd;
-                    registerList.Items.Add(item);
-                });
+            var unsortedRegisters = et.Ведомость
+                 .Select(r => new RegisterDesc {
+                     id = r.Код,
+                     name = r.Название,
+                     fillDate = r.ДатаЗаполнения,
+                     virt = r.Виртуальная,
+                     enabled = r.Включена
+                 }).ToList();
+            unsortedRegisters.OrderBy(r => r.name).OrderByDescending(r => r.fillDate.Date).ToList()
+                 .ForEach(rd => {
+                     ListViewItem item = new ListViewItem(rd.ToString());
+                     item.Tag = rd;
+                     registerList.Items.Add(item);
+                 });
             UpdateRegisterListColors();
         }
 
