@@ -58,13 +58,21 @@ namespace RegisterProcessor {
                             if (selectionStart.HasValue) {
                                 Graphics g = Graphics.FromImage(currentImage);
 
-                                for (int y = selectionStart.Value.Y; y <= cell.Y; y++) {
-                                    for (int x = selectionStart.Value.X; x <= cell.X; x++) {
-                                        ProcessTableCell(x, y);
-                                        GraphicsPath cellPath = table.GetCellContour(x, y);
-                                        g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+                                int minX = Math.Min(selectionStart.Value.X, cell.X);
+                                int maxX = Math.Max(selectionStart.Value.X, cell.X);
+                                int minY = Math.Min(selectionStart.Value.Y, cell.Y);
+                                int maxY = Math.Max(selectionStart.Value.Y, cell.Y);
+
+                                ProgressDialogs.WithProgress((maxX - minX + 1) * (maxY - minY + 1), pd => {
+                                    for (int y = minY; y <= maxY; y++) {
+                                        for (int x = minX; x <= maxX; x++) {
+                                            ProcessTableCell(x, y);
+                                            GraphicsPath cellPath = table.GetCellContour(x, y);
+                                            g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+                                            pd.Increment();
+                                        }
                                     }
-                                }
+                                });
 
                                 // color processed cells with green
                                 g.Dispose();
