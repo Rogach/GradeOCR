@@ -7,3 +7,4 @@ ocr-data/
 *.pfx
 *.user
 publish/
+var/
