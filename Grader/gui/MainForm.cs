@@ -101,6 +101,12 @@ namespace Grader.gui {
             });
             menu_import.DropDownItems.Add(menu_import_cadets);
 
+            ToolStripMenuItem menu_import_permanents = new ToolStripMenuItem("Импортировать пост. срочников");
+            menu_import_permanents.Click += new EventHandler(delegate {
+                Import.ImportPermanents(et);
+            });
+            menu_import.DropDownItems.Add(menu_import_permanents);
+
             menuStrip.Items.Add(menu_import);
 
             this.Controls.Add(menuStrip);
