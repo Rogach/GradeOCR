@@ -7,6 +7,7 @@ using System.Xml;
 using LibUtil;
 using System.Windows.Forms;
 using Grader.gui;
+using MySql.Data.MySqlClient;
 
 namespace Grader {
     
@@ -140,16 +141,7 @@ namespace Grader {
                 dcd.Port = portSettingOpt.Get();
                 dcd.User = userSettingOpt.Get();
                 dcd.FocusOnPassword = true;
-                if (dcd.ShowDialog() == DialogResult.OK && dcd.User != "root") {
-                    settingValue = dcd.ConnectionString;
-                    serverSetting = dcd.Server;
-                    portSetting = dcd.Port;
-                    userSetting = dcd.User;
-                    passwordSetting = dcd.Password;
-                    return true;
-                } else {
-                    return false;
-                }
+                return ShowDbConnectionDialog(dcd);
             } else {
                 return init();
             }
@@ -157,14 +149,35 @@ namespace Grader {
         public bool init() {
             DbConnectionDialog dcd = new DbConnectionDialog();
             dcd.Port = "3306";
+            return ShowDbConnectionDialog(dcd);
+        }
+
+        public bool ShowDbConnectionDialog(DbConnectionDialog dcd) {
             if (dcd.ShowDialog() == DialogResult.OK && dcd.User != "root") {
-                settingValue = dcd.ConnectionString;
-                serverSetting = dcd.Server;
-                portSetting = dcd.Port;
-                userSetting = dcd.User;
-                passwordSetting = dcd.Password;
-                return true;
+                if (!TestConnection(dcd)) {
+                    dcd.Password = "";
+                    return ShowDbConnectionDialog(dcd);
+                } else {
+                    settingValue = dcd.ConnectionString;
+                    serverSetting = dcd.Server;
+                    portSetting = dcd.Port;
+                    userSetting = dcd.User;
+                    passwordSetting = dcd.Password;
+                    return true;
+                }
             } else {
+                return false;
+            }
+        }
+
+        public bool TestConnection(DbConnectionDialog dcd) {
+            var conn = new MySqlConnection(dcd.ConnectionString);
+            try {
+                conn.Open();
+                conn.Close();
+                return true;
+            } catch (Exception e) {
+                MessageBox.Show("Не удалось подключиться к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
