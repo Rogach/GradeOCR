@@ -176,7 +176,7 @@ namespace Grader {
                 conn.Open();
                 conn.Close();
                 return true;
-            } catch (Exception e) {
+            } catch (Exception) {
                 MessageBox.Show("Не удалось подключиться к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
