@@ -182,6 +182,12 @@ namespace OCRUtil {
                     float dx = (this.Width - _Image.Width * zoom) / 2;
                     float dy = (this.Height - _Image.Height * zoom) / 2;
                     pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor((e.Y - dy) / zoom));
+                } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
+                    float dx = (this.Width - _Image.Width * zoom - scrollBarWidth) / 2;
+                    pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
+                } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
+                    float dy = (this.Height - _Image.Height * zoom - scrollBarWidth) / 2;
+                    pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor((e.Y - dy) / zoom));
                 } else {
                     pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
                 }
