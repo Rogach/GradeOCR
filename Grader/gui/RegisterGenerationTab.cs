@@ -189,10 +189,12 @@ namespace Grader.gui {
                 spec.Format(et, rsh, settings);
             });
 
-            templateSheet.Delete();
-            rwb.Saved = true;
-            rwb.Application.Visible = true;
-            rwb.Activate();
+            if (soldiers.Count > 0) {
+                templateSheet.Delete();
+                rwb.Saved = true;
+                rwb.Application.Visible = true;
+                rwb.Activate();
+            }
         }
 
     }
