@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterOCR", "RegisterOCR\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QualityTest", "QualityTest\QualityTest.csproj", "{E16B9FA7-CBCF-4433-A550-73213D1117E1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableRecognitionTest", "TableRecognitionTest\TableRecognitionTest.csproj", "{14771C87-E519-4E47-A1B7-B66ED41EC40E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -61,6 +63,10 @@ Global
 		{E16B9FA7-CBCF-4433-A550-73213D1117E1}.Debug|x86.Build.0 = Debug|x86
 		{E16B9FA7-CBCF-4433-A550-73213D1117E1}.Release|x86.ActiveCfg = Release|x86
 		{E16B9FA7-CBCF-4433-A550-73213D1117E1}.Release|x86.Build.0 = Release|x86
+		{14771C87-E519-4E47-A1B7-B66ED41EC40E}.Debug|x86.ActiveCfg = Debug|x86
+		{14771C87-E519-4E47-A1B7-B66ED41EC40E}.Debug|x86.Build.0 = Debug|x86
+		{14771C87-E519-4E47-A1B7-B66ED41EC40E}.Release|x86.ActiveCfg = Release|x86
+		{14771C87-E519-4E47-A1B7-B66ED41EC40E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
