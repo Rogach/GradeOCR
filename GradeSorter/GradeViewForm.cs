@@ -12,7 +12,7 @@ using OCRUtil;
 
 namespace GradeSorter {
     public partial class GradeViewForm : Form {
-        public string OcrData;
+        public string OcrData = "E:/Pronko/prj/Grader/ocr-data";
 
         private PictureView gradePV;
 
@@ -20,9 +20,7 @@ namespace GradeSorter {
         private Bitmap currentImage;
 
         public GradeViewForm() {
-            if (Directory.Exists("E:/Pronko/prj/Grader/ocr-data")) {
-                OcrData = "E:/Pronko/prj/Grader/ocr-data";
-            } else {
+            if (!Directory.Exists(OcrData)) {
                 var fbd = new FolderBrowserDialog();
                 fbd.Description = "Выберите директорию с оценками";
                 if (fbd.ShowDialog() == DialogResult.OK) {
