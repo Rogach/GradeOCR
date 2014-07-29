@@ -45,6 +45,7 @@ namespace RegisterProcessor {
                     currentTable.ForEach(table => {
                         if (e.Button == MouseButtons.Left) {
                             table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                                nextImageIndex = null;
                                 ProcessTableCell(cell.X, cell.Y);
 
                                 // color processed cell with green
@@ -64,6 +65,7 @@ namespace RegisterProcessor {
                                     int minY = Math.Min(selectionStart.Value.Y, cell.Y);
                                     int maxY = Math.Max(selectionStart.Value.Y, cell.Y);
 
+                                    nextImageIndex = null;
                                     ProgressDialogs.WithProgress((maxX - minX + 1) * (maxY - minY + 1), pd => {
                                         for (int y = minY; y <= maxY; y++) {
                                             for (int x = minX; x <= maxX; x++) {
@@ -122,7 +124,7 @@ namespace RegisterProcessor {
             });
         }
 
-        private string GetNextUnsortGradeImageName() {
+        private int GetNextUnsortGradeIndex() {
             List<string> images = new List<string>();
             images.AddRange(Directory.GetFiles(OcrData + "/grade-unsort"));
             images.AddRange(Directory.GetFiles(OcrData + "/grade-2"));
@@ -131,7 +133,7 @@ namespace RegisterProcessor {
             images.AddRange(Directory.GetFiles(OcrData + "/grade-5"));
             images.AddRange(Directory.GetFiles(OcrData + "/grade-0"));
             if (images.Count == 0) {
-                return OcrData + "/grade-unsort/g00001.png";
+                return 1;
             } else {
                 Regex rgx = new Regex(@"g(\d{5}).png");
                 int nextN = images.Select(img => {
@@ -142,8 +144,19 @@ namespace RegisterProcessor {
                         return 0;
                     }
                 }).Max();
-                return OcrData + "/grade-unsort/g" + (nextN + 1).ToString().PadLeft(5, '0') + ".png";
+                return nextN + 1;
             }
+        }
+
+        private int? nextImageIndex = null;
+
+        private string GetNextUnsortGradeImageName() {
+            if (!nextImageIndex.HasValue) {
+                nextImageIndex = GetNextUnsortGradeIndex();
+            }
+            string name = OcrData + "/grade-unsort/g" + nextImageIndex.Value.ToString().PadLeft(5, '0') + ".png";
+            nextImageIndex++;
+            return name;
         }
 
         private string NextImageName() {
