@@ -18,11 +18,10 @@ namespace TableRecognitionTest {
                 var images = Directory.GetFiles(TableInputDir);
                 int c = 0;
                 foreach (var img in images) {
-                    Console.WriteLine("Processed {0}/{1} tables...", c, images.Length);
-
                     DrawTable(ImageUtil.LoadImage(img)).Save(TableOutputDir + "/" + Path.GetFileName(img));
 
                     c++;
+                    Console.WriteLine("Processed {0}/{1} tables...", c, images.Length);
                 }
             });
         }
