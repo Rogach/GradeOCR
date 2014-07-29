@@ -12,6 +12,7 @@ namespace TableOCR {
         public static readonly float maxAngleFactor = 0.03f;
         public static readonly float minHorizontalLineRatio = 0.5f;
         public static readonly float minVerticalLineRatio = 0.1f;
+        public static readonly float noLinePadding = 0.02f;
 
         public static List<Line> RunRecognition(BWImage bw, int minLineLength) {
             List<Line> lines = new List<Line>();
@@ -22,9 +23,11 @@ namespace TableOCR {
 
             short[,] inclination = PrecomputeInclination(maxDy, bw.Width);
 
-            int optDy = DetectOptimalDy(bw, inclination, maxDy, blackRows, minLineLength);
+            int padding = (int) Math.Ceiling(bw.Width * noLinePadding);
 
-            for (int Y = 1; Y < bw.Height - 1; Y++) {
+            int optDy = DetectOptimalDy(bw, inclination, maxDy, blackRows, minLineLength, padding);
+
+            for (int Y = padding; Y < bw.Height - padding; Y++) {
                 if (Y + optDy >= 0 && Y + optDy < bw.Height) {
 
                     LineDetector mavg = new LineDetector(bw.Width, minLineLength);
@@ -59,8 +62,8 @@ namespace TableOCR {
             return inclination;
         }
 
-        public static int DetectOptimalDy(BWImage bw, short[,] inclination, int maxDy, bool[] blackRows, int minLineLength) {
-            for (int Y = 0; Y < bw.Height; Y++) {
+        public static int DetectOptimalDy(BWImage bw, short[,] inclination, int maxDy, bool[] blackRows, int minLineLength, int padding) {
+            for (int Y = padding; Y < bw.Height - padding; Y++) {
                 if (blackRows[Y]) {
                     int minY = Math.Max(0, Y - maxDy);
                     int maxY = Math.Min(bw.Height - 1, Y + maxDy);
