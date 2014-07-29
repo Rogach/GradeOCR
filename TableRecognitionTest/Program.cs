@@ -31,7 +31,7 @@ namespace TableRecognitionTest {
             var tableOpt = TableOCR.Program.RecognizeTable(src);
             var g = Graphics.FromImage(res);
             tableOpt.ForEach(table => {
-                table.DrawTable(g, new Pen(Brushes.Red, 2));
+                table.DrawTable(g, new Pen(Brushes.Red, 4));
             });
             g.Dispose();
             return res;
