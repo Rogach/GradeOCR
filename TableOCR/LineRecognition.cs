@@ -39,7 +39,7 @@ namespace TableOCR {
                     lines.AddRange(mavg.GetLines(getY: x => Y + inclination[maxDy + optDy, x]));
                 }
             }
-            lines = RemoveAdjacentLines(lines);
+            lines = RemoveAdjacentLines(lines, bw.Width / 2);
 
             return lines;
         }
@@ -111,10 +111,10 @@ namespace TableOCR {
             throw new Exception("no optimal dy detected");
         }
 
-        public static List<Line> RemoveAdjacentLines(List<Line> lines) {
+        public static List<Line> RemoveAdjacentLines(List<Line> lines, int midX) {
             List<Line> filteredLines = new List<Line>();
 
-            lines = lines.OrderBy(ln => ln.Y_atZero()).ToList();
+            lines = lines.OrderBy(ln => ln.Y_atX(midX)).ToList();
 
             bool[] used = new bool[lines.Count];
             for (int q = 0; q < lines.Count; q++) {
@@ -123,9 +123,9 @@ namespace TableOCR {
                     adjacentLines.Add(lines[q]);
                     used[q] = true;
 
-                    int y = lines[q].Y_atZero();
+                    int y = lines[q].Y_atX(midX);
                     int w = q + 1;
-                    while (w < lines.Count && lines[w].Y_atZero() - 20 < y) {
+                    while (w < lines.Count && lines[w].Y_atX(midX) - 20 < y) {
                         used[w] = true;
                         adjacentLines.Add(lines[w]);
                         w++;

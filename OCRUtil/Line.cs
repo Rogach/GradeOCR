@@ -26,12 +26,12 @@ namespace OCRUtil {
             return (double) dy / (double) dx;
         }
 
-        public int Y_atZero() {
+        public int Y_atX(int x) {
             double dx = p2.X - p1.X;
             double dy = p2.Y - p1.Y;
             double k = dy / dx;
             double a = p1.Y - k * p1.X;
-            return (int) Math.Round(a);
+            return (int) Math.Round(a + k * x);
         }
 
         public override string ToString() {
