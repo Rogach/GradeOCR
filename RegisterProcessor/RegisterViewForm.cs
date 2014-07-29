@@ -41,49 +41,51 @@ namespace RegisterProcessor {
 
             Point? selectionStart = null;
             this.registerPV.AddDoubleClickListener((pt, e) => {
-                currentTable.ForEach(table => {
-                    if (e.Button == MouseButtons.Left) {
-                        table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                            ProcessTableCell(cell.X, cell.Y);
+                Util.NewThread(() => {
+                    currentTable.ForEach(table => {
+                        if (e.Button == MouseButtons.Left) {
+                            table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                                ProcessTableCell(cell.X, cell.Y);
 
-                            // color processed cell with green
-                            GraphicsPath cellPath = table.GetCellContour(cell.X, cell.Y);
-                            Graphics g = Graphics.FromImage(currentImage);
-                            g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
-                            g.Dispose();
-                            registerPV.SetImageKeepZoom(currentImage);
-                        });
-                    } else if (e.Button == MouseButtons.Right) {
-                        table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                            if (selectionStart.HasValue) {
+                                // color processed cell with green
+                                GraphicsPath cellPath = table.GetCellContour(cell.X, cell.Y);
                                 Graphics g = Graphics.FromImage(currentImage);
-
-                                int minX = Math.Min(selectionStart.Value.X, cell.X);
-                                int maxX = Math.Max(selectionStart.Value.X, cell.X);
-                                int minY = Math.Min(selectionStart.Value.Y, cell.Y);
-                                int maxY = Math.Max(selectionStart.Value.Y, cell.Y);
-
-                                ProgressDialogs.WithProgress((maxX - minX + 1) * (maxY - minY + 1), pd => {
-                                    for (int y = minY; y <= maxY; y++) {
-                                        for (int x = minX; x <= maxX; x++) {
-                                            ProcessTableCell(x, y);
-                                            GraphicsPath cellPath = table.GetCellContour(x, y);
-                                            g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
-                                            pd.Increment();
-                                        }
-                                    }
-                                });
-
-                                // color processed cells with green
+                                g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
                                 g.Dispose();
                                 registerPV.SetImageKeepZoom(currentImage);
+                            });
+                        } else if (e.Button == MouseButtons.Right) {
+                            table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                                if (selectionStart.HasValue) {
+                                    Graphics g = Graphics.FromImage(currentImage);
 
-                                selectionStart = null;
-                            } else {
-                                selectionStart = new Point(cell.X, cell.Y);
-                            }
-                        });
-                    }
+                                    int minX = Math.Min(selectionStart.Value.X, cell.X);
+                                    int maxX = Math.Max(selectionStart.Value.X, cell.X);
+                                    int minY = Math.Min(selectionStart.Value.Y, cell.Y);
+                                    int maxY = Math.Max(selectionStart.Value.Y, cell.Y);
+
+                                    ProgressDialogs.WithProgress((maxX - minX + 1) * (maxY - minY + 1), pd => {
+                                        for (int y = minY; y <= maxY; y++) {
+                                            for (int x = minX; x <= maxX; x++) {
+                                                ProcessTableCell(x, y);
+                                                GraphicsPath cellPath = table.GetCellContour(x, y);
+                                                g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+                                                pd.Increment();
+                                            }
+                                        }
+                                    });
+
+                                    // color processed cells with green
+                                    g.Dispose();
+                                    registerPV.SetImageKeepZoom(currentImage);
+
+                                    selectionStart = null;
+                                } else {
+                                    selectionStart = new Point(cell.X, cell.Y);
+                                }
+                            });
+                        }
+                    });
                 });
             });
 
@@ -93,20 +95,24 @@ namespace RegisterProcessor {
         }
 
         private void ProcessNextImage() {
-            currentFileName = NextImageName();
-            this.Text = currentFileName;
+            Util.NewThread(() => {
+                registerPV.Image = PictureView.LoadPlaceholder();
 
-            origImage = ImageUtil.LoadImage(currentFileName);
-            bwImage = ImageUtil.ToBlackAndWhite(origImage);
-            currentImage = new Bitmap(bwImage);
+                currentFileName = NextImageName();
+                this.Text = currentFileName;
 
-            currentTable = TableOCR.Program.RecognizeTable(currentImage);
-            Graphics g = Graphics.FromImage(currentImage);
-            Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
-            currentTable.ForEach(table => table.DrawTable(g, p));
-            g.Dispose();
+                origImage = ImageUtil.LoadImage(currentFileName);
+                bwImage = ImageUtil.ToBlackAndWhite(origImage);
+                currentImage = new Bitmap(bwImage);
 
-            registerPV.Image = currentImage;
+                currentTable = TableOCR.Program.RecognizeTable(currentImage);
+                Graphics g = Graphics.FromImage(currentImage);
+                Pen p = new Pen(Color.FromArgb(255, 255, 0, 0), 2);
+                currentTable.ForEach(table => table.DrawTable(g, p));
+                g.Dispose();
+
+                registerPV.Image = currentImage;
+            });
         }
 
         private void ProcessTableCell(int x, int y) {
