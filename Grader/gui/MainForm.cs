@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Data.EntityClient;
+using Grader.model;
 
 namespace Grader.gui {
     public class MainForm : Form {
@@ -100,6 +101,12 @@ namespace Grader.gui {
                 Import.ImportCadets(et);
             });
             menu_import.DropDownItems.Add(menu_import_cadets);
+
+            ToolStripMenuItem menu_import_compare_cadets = new ToolStripMenuItem("Сравнить курсантов");
+            menu_import_compare_cadets.Click += new EventHandler(delegate {
+                Difference.CalculateCadetDifference(et);
+            });
+            menu_import.DropDownItems.Add(menu_import_compare_cadets);
 
             ToolStripMenuItem menu_import_permanents = new ToolStripMenuItem("Импортировать пост. срочников");
             menu_import_permanents.Click += new EventHandler(delegate {

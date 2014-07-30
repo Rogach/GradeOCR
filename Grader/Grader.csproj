@@ -168,7 +168,8 @@
     <Compile Include="gui\TableEditorTab.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Import.cs" />
+    <Compile Include="model\Import.cs" />
+    <Compile Include="model\Difference.cs" />
     <Compile Include="model\Register.cs" />
     <Compile Include="model\RegisterMarshaller.cs" />
     <Compile Include="Program.cs" />
