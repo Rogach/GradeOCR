@@ -20,7 +20,7 @@ namespace Grader.model {
                         et.subunitShortNameToId[field(r, "подразделение")]);
                     r = r.GetOffset(1, 0);
                 }
-
+                
                 var outputSheet = ExcelTemplates.CreateEmptyExcelTable();
                 var output = outputSheet.GetRange("A1");
 
@@ -33,7 +33,9 @@ namespace Grader.model {
                     where cadet.ТипВоеннослужащего == "курсант"
                     where subunit.ТипОбучения == "срочники"
                     select cadet;
-                foreach (var cadet in cadetQuery) {
+                var cadetList = cadetQuery.ToList();
+
+                ProgressDialogs.ForEach(cadetList, cadet => {
                     var fio = new Tuple<string, string, string>(cadet.Фамилия, cadet.Имя, cadet.Отчество);
                     try {
                         dataMap.Add(fio, cadet.КодПодразделения);
@@ -61,10 +63,10 @@ namespace Grader.model {
                         output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.Red;
                         output = output.GetOffset(1, 0);
                     }
-                    
-                }
 
-                foreach (var fio in inputMap.Keys) {
+                });
+
+                ProgressDialogs.ForEach(inputMap.Keys, fio => {
                     if (dataMap.GetOption(fio).IsEmpty()) {
                         // new cadet was added
                         output.Value = fio.Item1;
@@ -74,7 +76,7 @@ namespace Grader.model {
                         output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.Green;
                         output = output.GetOffset(1, 0);
                     }
-                }
+                });
 
                 ExcelTemplates.ActivateExcel(outputSheet);
             });
