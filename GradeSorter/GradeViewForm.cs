@@ -40,7 +40,7 @@ namespace GradeSorter {
                 ProcessNextGrade();
             });
 
-            gradePV.KeyUp += new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
+            KeyEventHandler keyHandler = new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
                 if (e.Control && e.KeyCode == Keys.Z) {
                     if (actionHistory.Count > 0) {
                         Tuple<string, string> lastAction = actionHistory.Last();
@@ -63,6 +63,8 @@ namespace GradeSorter {
                 }
             });
 
+            gradePV.KeyUp += keyHandler;
+            digestPV.KeyUp += keyHandler;
         }
 
         private void ProcessNextGrade() {
