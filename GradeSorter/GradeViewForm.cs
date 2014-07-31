@@ -15,6 +15,7 @@ namespace GradeSorter {
         public string OcrData = "E:/Pronko/prj/Grader/ocr-data";
 
         private PictureView gradePV;
+        private PictureView digestPV;
 
         private string currentFileName;
         private Bitmap currentImage;
@@ -33,6 +34,7 @@ namespace GradeSorter {
             InitializeComponent();
 
             gradePV = PictureView.InsertIntoPanel(gradePanel);
+            digestPV = PictureView.InsertIntoPanel(digestPanel);
 
             this.Shown += new EventHandler(delegate {
                 ProcessNextGrade();
@@ -74,6 +76,7 @@ namespace GradeSorter {
             currentImage = ImageUtil.LoadImage(currentFileName);
 
             gradePV.Image = currentImage;
+            digestPV.Image = GradeOCR.Program.NormalizeImage(currentImage);
         }
 
         private string NextImageName() {

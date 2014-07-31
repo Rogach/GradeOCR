@@ -24,6 +24,7 @@
         /// </summary>
         private void InitializeComponent() {
             this.gradePanel = new System.Windows.Forms.Panel();
+            this.digestPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // gradePanel
@@ -33,11 +34,19 @@
             this.gradePanel.Size = new System.Drawing.Size(260, 138);
             this.gradePanel.TabIndex = 0;
             // 
+            // digestPanel
+            // 
+            this.digestPanel.Location = new System.Drawing.Point(12, 156);
+            this.digestPanel.Name = "digestPanel";
+            this.digestPanel.Size = new System.Drawing.Size(260, 138);
+            this.digestPanel.TabIndex = 1;
+            // 
             // GradeViewForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 162);
+            this.ClientSize = new System.Drawing.Size(288, 306);
+            this.Controls.Add(this.digestPanel);
             this.Controls.Add(this.gradePanel);
             this.Name = "GradeViewForm";
             this.Text = "GradeViewForm";
@@ -48,5 +57,6 @@
         #endregion
 
         private System.Windows.Forms.Panel gradePanel;
+        private System.Windows.Forms.Panel digestPanel;
     }
 }
