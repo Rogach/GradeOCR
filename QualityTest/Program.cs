@@ -101,7 +101,7 @@ namespace QualityTest {
             }
 
             Console.WriteLine("Recognition failures:");
-            gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Digest.grade).Where(gp => gp.Item1.grade != 2).ToList().ForEach(gp => {
+            gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Digest.grade).ToList().ForEach(gp => {
                 Console.WriteLine(testDigests.Find(gd => gd.Item2 == gp.Item1).Item1);
             });
         }
