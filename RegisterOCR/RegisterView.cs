@@ -51,8 +51,8 @@ namespace RegisterOCR {
                             } else {
                                 cell1 = cell;
                                 cell2 = null;
+                                MarkCell();
                             }
-                            RepaintImage();
                         });
                     });
                 }
@@ -131,28 +131,14 @@ namespace RegisterOCR {
             worker.Start();
         }
 
-        private void RepaintImage() {
+        private void MarkCell() {
             Bitmap currentImage = new Bitmap(originalImage);
             Graphics g = Graphics.FromImage(currentImage);
             currentTable.ForEach(table => {
                 table.DrawTable(g, new Pen(Color.Red, 2));
-                Brush fillBrush = new SolidBrush(Color.FromArgb(50, Color.Green));
-                if (!cell2.HasValue && cell1.HasValue) {
+                Brush fillBrush = new SolidBrush(Color.FromArgb(50, Color.Blue));
+                if (cell1.HasValue) {
                     g.FillPath(fillBrush, table.GetCellContour(cell1.Value.X, cell1.Value.Y));
-                } else if (cell1.HasValue && cell2.HasValue) {
-                    Point c1 = cell1.Value;
-                    Point c2 = cell2.Value;
-
-                    int minY = Math.Min(c1.Y, c2.Y);
-                    int maxY = Math.Max(c1.Y, c2.Y);
-                    int minX = Math.Min(c1.X, c2.X);
-                    int maxX = Math.Max(c1.X, c2.X);
-
-                    for (int y = minY; y <= maxY; y++) {
-                        for (int x = minX; x <= maxX; x++) {
-                            g.FillPath(fillBrush, table.GetCellContour(x, y));
-                        }
-                    }
                 }
             });
             g.Dispose();
@@ -171,17 +157,34 @@ namespace RegisterOCR {
 
                 string str = "";
 
-                for (int y = minY; y <= maxY; y++) {
-                    for (int x = minX; x <= maxX; x++) {
-                        GradeDigest gd = GradeDigest.FromImage(GradeOCR.Program.NormalizeImage(currentTable.Get().GetCellImage(originalImage, x, y)));
-                        RecognitionResult res = digestSet.FindBestMatch(gd);
-                        if (res.ConfidenceScore > 0.5) {
-                            str += res.Digest.grade;
+                Bitmap currentImage = new Bitmap(originalImage);
+                Graphics g = Graphics.FromImage(currentImage);
+                currentTable.ForEach(table => {
+                    table.DrawTable(g, new Pen(Color.Red, 2));
+                    Brush recognitionBrush = new SolidBrush(Color.FromArgb(50, Color.Green));
+                    Brush unsureBrush = new SolidBrush(Color.FromArgb(50, Color.Yellow));
+
+                    int cellCount = (maxY - minY + 1) * (maxX - minX + 1);
+                    ProgressDialogs.WithProgress(cellCount, ph => {
+                        for (int y = minY; y <= maxY; y++) {
+                            for (int x = minX; x <= maxX; x++) {
+                                GradeDigest gd = GradeDigest.FromImage(GradeOCR.Program.NormalizeImage(table.GetCellImage(originalImage, x, y)));
+                                RecognitionResult res = digestSet.FindBestMatch(gd);
+                                if (MatchConfidence.Sure(res.ConfidenceScore)) {
+                                    str += res.Digest.grade;
+                                    g.FillPath(recognitionBrush, table.GetCellContour(x, y));
+                                } else {
+                                    g.FillPath(unsureBrush, table.GetCellContour(x, y));
+                                }
+                                str += "\t";
+                                ph.Increment();
+                            }
+                            str += "\n";
                         }
-                        str += "\t";
-                    }
-                    str += "\n";
-                }
+                    });
+                });
+                g.Dispose();
+                registerPV.SetImageKeepZoom(currentImage);
 
                 str = str.Substring(0, str.Length - 1); // trim last newline
 
