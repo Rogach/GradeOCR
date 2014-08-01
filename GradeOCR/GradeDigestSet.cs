@@ -15,16 +15,16 @@ namespace GradeOCR {
         }
 
         public RecognitionResult FindBestMatch(GradeDigest digest) {
-            double maxConfidence = 0;
+            double maxMatch = 0;
             GradeDigest bestDigest = digestList[0];
             foreach (var gd in digestList) {
                 double match = MatchDigests(digest, gd);
-                if (maxConfidence < match && match < 0.9999) {
-                    maxConfidence = match;
+                if (maxMatch < match && match < 0.9999) {
+                    maxMatch = match;
                     bestDigest = gd;
                 }
             }
-            return new RecognitionResult(bestDigest, maxConfidence);
+            return new RecognitionResult(bestDigest, MatchConfidence.GetConfidence(digest, bestDigest));
         }
 
         public double MatchDigests(GradeDigest gd1, GradeDigest gd2) {

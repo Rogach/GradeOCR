@@ -6,9 +6,9 @@ using System.Text;
 namespace GradeOCR {
     public class RecognitionResult {
         public GradeDigest Digest { get; set; }
-        public double Confidence { get; set; }
+        public int Confidence { get; set; }
 
-        public RecognitionResult(GradeDigest gd, double confidence) {
+        public RecognitionResult(GradeDigest gd, int confidence) {
             this.Digest = gd;
             this.Confidence = confidence;
         }

@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 namespace GradeOCR {
     public class GradeDigest {
         public static readonly int digestSize = 32;
+        public static readonly int dataSize = digestSize * digestSize;
 
         public ulong[] data = new ulong[digestSize * digestSize / 64];
         public byte grade = 0;
@@ -53,6 +54,14 @@ namespace GradeOCR {
             }
 
             return res;
+        }
+
+        public static bool[] UnpackBits(ulong[] data) {
+            bool[] bits = new bool[data.Length * 64];
+            for (int q = 0; q < data.Length * 64; q++) {
+                bits[q] = ((data[q / 64] & ((ulong) 1 << (q % 64))) != 0);
+            }
+            return bits;
         }
 
         public static ulong[] PackBits(bool[] bits) {

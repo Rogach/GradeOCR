@@ -84,6 +84,7 @@
     <Compile Include="DigestExtractor.cs" />
     <Compile Include="GradeDigest.cs" />
     <Compile Include="GradeDigestSet.cs" />
+    <Compile Include="MatchConfidence.cs" />
     <Compile Include="RecognitionResult.cs" />
     <Compile Include="WhitespaceCropper.cs" />
     <Compile Include="GradeRecognitionDebugView.cs">
