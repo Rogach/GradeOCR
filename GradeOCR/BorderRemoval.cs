@@ -94,5 +94,27 @@ namespace GradeOCR {
 
             return blackLines;
         }
+
+        public static Bitmap RemoveRemainingBorder(Bitmap src) {
+            Bitmap res = new Bitmap(src);
+
+            unsafe {
+                BitmapData srcBD = src.LockBits(ImageLockMode.ReadOnly);
+                BitmapData resBD = res.LockBits(ImageLockMode.WriteOnly);
+                byte* srcPtr = (byte*) srcBD.Scan0.ToPointer();
+                uint* resPtr = (uint*) resBD.Scan0.ToPointer();
+                
+                for (int x = 0; x < src.Width; x++) {
+                    if (*(srcPtr + 4 * x) == 0 && *(srcPtr + 4 * (src.Width + x)) == 255) {
+                        *(resPtr + x) = 0xffffffff;
+                    }
+                }
+
+                src.UnlockBits(srcBD);
+                res.UnlockBits(resBD);
+            }
+
+            return res;
+        }
     }
 }

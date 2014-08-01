@@ -26,8 +26,9 @@ namespace GradeOCR {
             return
                 DigestExtractor.ExtractDigestImage(
                     WhitespaceCropper.CropWhitespace(
-                        NoiseCleaner.RemoveNoise(
-                            BorderRemoval.RemoveBorder(img))));
+                        BorderRemoval.RemoveRemainingBorder(
+                            NoiseCleaner.RemoveNoise(
+                                BorderRemoval.RemoveBorder(img)))));
         }
 
     }
