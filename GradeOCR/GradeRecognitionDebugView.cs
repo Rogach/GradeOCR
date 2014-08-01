@@ -48,25 +48,25 @@ namespace GradeOCR {
         }
 
         public void RunOCR(Bitmap inputImage) {
-            inputImagePV.Image = inputImage;
+            inputImagePV.Picture = inputImage;
             Bitmap removeBorderImage = BorderRemoval.RemoveBorder(inputImage);
-            removeBorderPV.Image = removeBorderImage;
+            removeBorderPV.Picture = removeBorderImage;
             Bitmap removeNoiseImage = NoiseCleaner.RemoveNoise(removeBorderImage);
-            noiseRemovalPV.Image = removeNoiseImage;
+            noiseRemovalPV.Picture = removeNoiseImage;
             Bitmap croppedImage = WhitespaceCropper.CropWhitespace(removeNoiseImage);
-            croppedPV.Image = croppedImage;
+            croppedPV.Picture = croppedImage;
             Bitmap digestImage = DigestExtractor.ExtractDigestImage(croppedImage);
-            digestPV.Image = digestImage;
+            digestPV.Picture = digestImage;
 
             GradeDigest digest = GradeDigest.FromImage(digestImage);
             RecognitionResult recognitionResult = Util.Timed("digest matching", () => digestSet.FindBestMatch(digest));
             Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
-            bestMatchPV.Image = bestMatchImage;
+            bestMatchPV.Picture = bestMatchImage;
             recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
             recognitionConfidenceLabel.Text = String.Format("{0}%", (int) Math.Floor(recognitionResult.Confidence * 100));
 
             Bitmap differenceImage = DigestDifference.GenerateDifferenceImage(digest, recognitionResult.Digest);
-            differencePV.Image = differenceImage;
+            differencePV.Picture = differenceImage;
         }
     }
 }

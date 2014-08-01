@@ -98,7 +98,7 @@ namespace RegisterProcessor {
 
         private void ProcessNextImage() {
             Util.NewThread(() => {
-                registerPV.Image = PictureView.LoadPlaceholder();
+                registerPV.Picture = PictureView.LoadPlaceholder();
 
                 currentFileName = NextImageName();
                 this.Text = currentFileName;
@@ -113,7 +113,7 @@ namespace RegisterProcessor {
                 currentTable.ForEach(table => table.DrawTable(g, p));
                 g.Dispose();
 
-                registerPV.Image = currentImage;
+                registerPV.Picture = currentImage;
             });
         }
 

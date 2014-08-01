@@ -9,15 +9,15 @@ using System.Reflection;
 namespace OCRUtil {
     public class PictureView : UserControl {
 
-        private Image _Image;
-        public Image Image {
+        private Bitmap _Picture;
+        public Bitmap Picture {
             get {
-                return _Image;
+                return _Picture;
             }
             set {
-                Bitmap copy = new Bitmap((Bitmap) value);
+                Bitmap copy = new Bitmap(value);
                 this.Invoke(new EventHandler(delegate {
-                    _Image = copy;
+                    _Picture = copy;
                     this.Invalidate();
                     this.ZoomToFit();
                 }));
@@ -26,10 +26,10 @@ namespace OCRUtil {
 
         public bool AllowZoom { get; set; }
 
-        public void SetImageKeepZoom(Image img) {
-            Bitmap copy = new Bitmap((Bitmap) img);
+        public void SetImageKeepZoom(Bitmap img) {
+            Bitmap copy = new Bitmap(img);
             this.Invoke(new EventHandler(delegate {
-                _Image = copy;
+                _Picture = copy;
                 this.Invalidate();
             }));
         }
@@ -50,7 +50,7 @@ namespace OCRUtil {
 
             this.AllowZoom = true;
 
-            _Image = LoadPlaceholder();
+            _Picture = LoadPlaceholder();
             this.Controls.Add(plug);
             hScrollBar.Minimum = 0;
             hScrollBar.Maximum = 1000;
@@ -82,11 +82,11 @@ namespace OCRUtil {
 
         private void AddMouseScroll() {
             hScrollBar.Scroll += new ScrollEventHandler(delegate {
-                offsetX = (_Image.Width - (this.Width - scrollBarWidth) / zoom) * ((float) hScrollBar.Value / 1000);
+                offsetX = (_Picture.Width - (this.Width - scrollBarWidth) / zoom) * ((float) hScrollBar.Value / 1000);
                 this.Invalidate();
             });
             vScrollBar.Scroll += new ScrollEventHandler(delegate {
-                offsetY = (_Image.Height - (this.Height - scrollBarWidth) / zoom) * ((float) vScrollBar.Value / 1000);
+                offsetY = (_Picture.Height - (this.Height - scrollBarWidth) / zoom) * ((float) vScrollBar.Value / 1000);
                 this.Invalidate();
             });
         }
@@ -103,8 +103,8 @@ namespace OCRUtil {
                         zoom *= 0.95f;
                     }
 
-                    bool origFit = _Image.Width * origZoom <= this.Width && _Image.Height * origZoom <= this.Height;
-                    bool fit = _Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height;
+                    bool origFit = _Picture.Width * origZoom <= this.Width && _Picture.Height * origZoom <= this.Height;
+                    bool fit = _Picture.Width * zoom <= this.Width && _Picture.Height * zoom <= this.Height;
 
                     if (fit) {
                         // if image fits into view, no action is required
@@ -112,25 +112,25 @@ namespace OCRUtil {
                         offsetY = 0;
                     } else if (origFit && !fit) {
                         // if image fit into frame before zoom, but stopped fitting after - need to center the image
-                        if (_Image.Width * zoom > this.Width - scrollBarWidth) {
-                            offsetX = (_Image.Width - (this.Width - scrollBarWidth) / zoom) / 2;
+                        if (_Picture.Width * zoom > this.Width - scrollBarWidth) {
+                            offsetX = (_Picture.Width - (this.Width - scrollBarWidth) / zoom) / 2;
                         } else {
                             offsetX = 0;
                         }
-                        if (_Image.Height * zoom > this.Height - scrollBarWidth) {
-                            offsetY = (_Image.Height - (this.Height - scrollBarWidth) / zoom) / 2;
+                        if (_Picture.Height * zoom > this.Height - scrollBarWidth) {
+                            offsetY = (_Picture.Height - (this.Height - scrollBarWidth) / zoom) / 2;
                         } else {
                             offsetY = 0;
                         }
                         ClampOffsets();
                     } else {
                         // image didn't fit before zoom or after
-                        if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
+                        if (_Picture.Width * zoom <= this.Width - scrollBarWidth) {
                             offsetX = 0;
                         } else {
                             offsetX += ((this.Width - scrollBarWidth) / origZoom - (this.Width - scrollBarWidth) / zoom) / 2;
                         }
-                        if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
+                        if (_Picture.Height * zoom <= this.Height - scrollBarWidth) {
                             offsetY = 0;
                         } else {
                             offsetY += ((this.Height - scrollBarWidth) / origZoom - (this.Height - scrollBarWidth) / zoom) / 2;
@@ -178,20 +178,20 @@ namespace OCRUtil {
         private void AddDoubleClickListener() {
             this.MouseDoubleClick += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
                 Point pt;
-                if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
-                    float dx = (this.Width - _Image.Width * zoom) / 2;
-                    float dy = (this.Height - _Image.Height * zoom) / 2;
+                if (_Picture.Width * zoom <= this.Width && _Picture.Height * zoom <= this.Height) {
+                    float dx = (this.Width - _Picture.Width * zoom) / 2;
+                    float dy = (this.Height - _Picture.Height * zoom) / 2;
                     pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor((e.Y - dy) / zoom));
-                } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
-                    float dx = (this.Width - _Image.Width * zoom - scrollBarWidth) / 2;
+                } else if (_Picture.Width * zoom <= this.Width - scrollBarWidth) {
+                    float dx = (this.Width - _Picture.Width * zoom - scrollBarWidth) / 2;
                     pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
-                } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
-                    float dy = (this.Height - _Image.Height * zoom - scrollBarWidth) / 2;
+                } else if (_Picture.Height * zoom <= this.Height - scrollBarWidth) {
+                    float dy = (this.Height - _Picture.Height * zoom - scrollBarWidth) / 2;
                     pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor((e.Y - dy) / zoom));
                 } else {
                     pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
                 }
-                if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Height) {
+                if (pt.X >= 0 && pt.X < _Picture.Width && pt.Y >= 0 && pt.Y < _Picture.Height) {
                     foreach (var listener in DoubleClickListeners) {
                         listener.Invoke(pt, e);
                     }
@@ -199,17 +199,17 @@ namespace OCRUtil {
             });
         }
 
-        public static Image placeholderImage = null;
-        public static Image LoadPlaceholder() {
+        public static Bitmap placeholderImage = null;
+        public static Bitmap LoadPlaceholder() {
             if (placeholderImage == null) {
-                placeholderImage = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("OCRUtil.hourglass.png"));
+                placeholderImage = (Bitmap) Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("OCRUtil.hourglass.png"));
             }
             return placeholderImage;
         }
 
         protected override void OnLayout(LayoutEventArgs e) {
             base.OnLayout(e);
-            if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
+            if (_Picture.Width * zoom <= this.Width && _Picture.Height * zoom <= this.Height) {
                 // the whole image fits into component, no scroll bars required
                 vScrollBar.Visible = false;
                 hScrollBar.Visible = false;
@@ -239,34 +239,34 @@ namespace OCRUtil {
                 e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Default;
             }
 
-            if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
-                float zw = _Image.Width * zoom;
-                float zh = _Image.Height * zoom;
+            if (_Picture.Width * zoom <= this.Width && _Picture.Height * zoom <= this.Height) {
+                float zw = _Picture.Width * zoom;
+                float zh = _Picture.Height * zoom;
                 float x = (this.Width - zw) / 2;
                 float y = (this.Height - zh) / 2;
                 e.Graphics.DrawImage(
-                    _Image, 
+                    _Picture, 
                     new RectangleF(x, y, zw, zh), 
-                    new RectangleF(0 - 0.5f, 0 - 0.5f, _Image.Width, _Image.Height), 
+                    new RectangleF(0 - 0.5f, 0 - 0.5f, _Picture.Width, _Picture.Height), 
                     GraphicsUnit.Pixel);
-            } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
+            } else if (_Picture.Height * zoom <= this.Height - scrollBarWidth) {
                 float destW = this.Width - scrollBarWidth;
-                float destH = _Image.Height * zoom;
+                float destH = _Picture.Height * zoom;
                 float y = (this.Height - scrollBarWidth - destH) / 2;
                 e.Graphics.DrawImage(
-                    _Image,
+                    _Picture,
                     new RectangleF(0, y, destW, destH),
-                    new RectangleF(offsetX - 0.5f, 0 - 0.5f, destW / zoom, _Image.Height),
+                    new RectangleF(offsetX - 0.5f, 0 - 0.5f, destW / zoom, _Picture.Height),
                     GraphicsUnit.Pixel
                 );
-            } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
-                float destW = _Image.Width * zoom;
+            } else if (_Picture.Width * zoom <= this.Width - scrollBarWidth) {
+                float destW = _Picture.Width * zoom;
                 float x = (this.Width - scrollBarWidth - destW) / 2;
                 float destH = this.Height - scrollBarWidth;
                 e.Graphics.DrawImage(
-                    _Image,
+                    _Picture,
                     new RectangleF(x, 0, destW, destH),
-                    new RectangleF(0 - 0.5f, offsetY - 0.5f, _Image.Width, destH / zoom),
+                    new RectangleF(0 - 0.5f, offsetY - 0.5f, _Picture.Width, destH / zoom),
                     GraphicsUnit.Pixel
                 );
             } else {
@@ -277,7 +277,7 @@ namespace OCRUtil {
                     destH = zoom * 2;
                 }
                 e.Graphics.DrawImage(
-                    _Image,
+                    _Picture,
                     new RectangleF(0, 0, destW, destH),
                     new RectangleF(offsetX - 0.5f, offsetY - 0.5f, destW / zoom, destH / zoom),
                     GraphicsUnit.Pixel
@@ -286,18 +286,18 @@ namespace OCRUtil {
         }
 
         private void UpdateScrollBars() {
-            hScrollBar.Value = (int) Math.Min(1000, Math.Max(0, hScrollBar.Maximum * (offsetX / (_Image.Width - (this.Width - scrollBarWidth) / zoom))));
-            vScrollBar.Value = (int) Math.Min(1000, Math.Max(0, vScrollBar.Maximum * (offsetY / (_Image.Height - (this.Height - scrollBarWidth) / zoom))));
+            hScrollBar.Value = (int) Math.Min(1000, Math.Max(0, hScrollBar.Maximum * (offsetX / (_Picture.Width - (this.Width - scrollBarWidth) / zoom))));
+            vScrollBar.Value = (int) Math.Min(1000, Math.Max(0, vScrollBar.Maximum * (offsetY / (_Picture.Height - (this.Height - scrollBarWidth) / zoom))));
         }
 
         private void ClampOffsets() {
-            offsetX = Math.Min(_Image.Width - (this.Width - scrollBarWidth) / zoom, Math.Max(0, offsetX));
-            offsetY = Math.Min(_Image.Height - (this.Height - scrollBarWidth) / zoom, Math.Max(0, offsetY));
+            offsetX = Math.Min(_Picture.Width - (this.Width - scrollBarWidth) / zoom, Math.Max(0, offsetX));
+            offsetY = Math.Min(_Picture.Height - (this.Height - scrollBarWidth) / zoom, Math.Max(0, offsetY));
         }
 
         public void ZoomToFit() {
-            float zoomX = (float) this.Width / (float) _Image.Width;
-            float zoomY = (float) this.Height / (float) _Image.Height;
+            float zoomX = (float) this.Width / (float) _Picture.Width;
+            float zoomY = (float) this.Height / (float) _Picture.Height;
             zoom = Math.Min(zoomX, zoomY) * 0.99f;
             this.PerformLayout();
             this.Invalidate();

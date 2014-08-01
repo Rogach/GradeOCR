@@ -59,7 +59,7 @@ namespace GradeOCR {
                     for (int q = 0; q < pvs.Count; q++) {
                         string imageFile = images[q];
                         Bitmap img = ImageUtil.LoadImage(imageFile);
-                        pvs[q].Image = converter(img);
+                        pvs[q].Picture = converter(img);
                         pvs[q].DoubleClick += new EventHandler(delegate {
                             new GradeRecognitionDebugView(img, imageFile, digestSet).ShowDialog();
                         });

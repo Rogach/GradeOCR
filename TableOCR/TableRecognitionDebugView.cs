@@ -51,25 +51,25 @@ namespace TableOCR {
         }
 
         public void RunOCR(Bitmap sourceImage) {
-            this.sourcePV.Image = sourceImage;
+            this.sourcePV.Picture = sourceImage;
 
             Bitmap sourceImageVert = Util.Timed("rotate", () => ImageUtil.Rotate(sourceImage));
-            this.sourcePV_vert.Image = sourceImageVert;
+            this.sourcePV_vert.Picture = sourceImageVert;
 
             Bitmap bwImage = Util.Timed("to black and white (horiz)", () => ImageUtil.ToBlackAndWhite(sourceImage));
-            this.bwPV.Image = bwImage;
+            this.bwPV.Picture = bwImage;
 
             Bitmap bwImageVert = Util.Timed("to black and white (vert)", () => ImageUtil.ToBlackAndWhite(sourceImageVert));
-            this.bwPV_vert.Image = bwImageVert;
+            this.bwPV_vert.Picture = bwImageVert;
 
             BWImage bw = Util.Timed("bw (horiz)", () => new BWImage(sourceImage));
             BWImage bwVert = Util.Timed("bw (vert)", () => new BWImage(sourceImageVert));
 
             Bitmap freqImage = Util.Timed("freq", () => WhiteRowDetection.DisplayWhiteRows(bwImage, bw));
-            this.freqPV.Image = freqImage;
+            this.freqPV.Picture = freqImage;
 
             Bitmap freqImageVert = Util.Timed("freqVert", () => WhiteRowDetection.DisplayWhiteRows(bwImageVert, bwVert));
-            this.freqPV_vert.Image = freqImageVert;
+            this.freqPV_vert.Picture = freqImageVert;
 
             List<Line> lines = Util.Timed("sweepline segment detection", () => {
                 return LineRecognition.RunRecognition(bw, (int) (bw.Width * LineRecognition.minHorizontalLineRatio));
@@ -85,7 +85,7 @@ namespace TableOCR {
             }
             g.Dispose();
 
-            this.outputPV.Image = drw;
+            this.outputPV.Picture = drw;
 
             List<Line> linesVert = Util.Timed("sweepline segment detection (vert)", () => {
                 return LineRecognition.RunRecognition(bwVert, (int) (bw.Height * LineRecognition.minVerticalLineRatio));
@@ -99,7 +99,7 @@ namespace TableOCR {
                 gVert.DrawLine(p, ln.p1.X, ln.p1.Y, ln.p2.X, ln.p2.Y);
             }
             gVert.Dispose();
-            this.outputPV_vert.Image = drwVert;
+            this.outputPV_vert.Picture = drwVert;
 
             Option<Table> tOpt = Table.CreateTable(lines, linesVert);
             tOpt.ForEach(t => {
@@ -107,7 +107,7 @@ namespace TableOCR {
                 Graphics tableG = Graphics.FromImage(tablePic);
                 t.DrawTable(tableG, p);
                 tableG.Dispose();
-                this.resultPV.Image = tablePic;
+                this.resultPV.Picture = tablePic;
 
                 GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
                 this.resultPV.AddDoubleClickListener((pt, e) => {
@@ -118,7 +118,7 @@ namespace TableOCR {
                 });
             });
             if (tOpt.IsEmpty()) {
-                this.resultPV.Image = bwImage;
+                this.resultPV.Picture = bwImage;
             }
         }
     }
