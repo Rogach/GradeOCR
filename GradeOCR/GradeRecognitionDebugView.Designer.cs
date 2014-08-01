@@ -170,9 +170,9 @@
             this.recognitionConfidenceLabel.Font = new System.Drawing.Font("Arial", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
             this.recognitionConfidenceLabel.Location = new System.Drawing.Point(82, 651);
             this.recognitionConfidenceLabel.Name = "recognitionConfidenceLabel";
-            this.recognitionConfidenceLabel.Size = new System.Drawing.Size(44, 29);
+            this.recognitionConfidenceLabel.Size = new System.Drawing.Size(93, 29);
             this.recognitionConfidenceLabel.TabIndex = 9;
-            this.recognitionConfidenceLabel.Text = "0%";
+            this.recognitionConfidenceLabel.Text = "unsure";
             // 
             // GradeRecognitionDebugView
             // 

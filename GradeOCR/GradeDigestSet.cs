@@ -10,6 +10,10 @@ namespace GradeOCR {
     public class GradeDigestSet {
         private List<GradeDigest> digestList;
 
+        public List<GradeDigest> GetDigestList() {
+            return digestList;
+        }
+
         public GradeDigestSet(List<GradeDigest> digests) {
             this.digestList = digests;
         }
@@ -24,7 +28,7 @@ namespace GradeOCR {
                     bestDigest = gd;
                 }
             }
-            return new RecognitionResult(bestDigest, MatchConfidence.GetConfidence(digest, bestDigest));
+            return new RecognitionResult(bestDigest, MatchConfidence.GetConfidenceScore(digest, bestDigest));
         }
 
         public double MatchDigests(GradeDigest gd1, GradeDigest gd2) {

@@ -63,7 +63,11 @@ namespace GradeOCR {
             Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
             bestMatchPV.Image = bestMatchImage;
             recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
-            recognitionConfidenceLabel.Text = String.Format("{0}%", MatchConfidence.GetConfidencePercent(recognitionResult.Confidence));
+            if (MatchConfidence.Sure(recognitionResult.ConfidenceScore)) {
+                recognitionConfidenceLabel.Text = String.Format("sure, {0} pt", recognitionResult.ConfidenceScore);
+            } else {
+                recognitionConfidenceLabel.Text = String.Format("unsure, {0} pt", recognitionResult.ConfidenceScore);
+            }
 
             Bitmap differenceImage = DigestDifference.GenerateDifferenceImage(digest, recognitionResult.Digest);
             differencePV.Image = differenceImage;

@@ -6,7 +6,9 @@ using System.Drawing;
 
 namespace GradeOCR {
     public static class MatchConfidence {
-        public static int GetConfidence(GradeDigest gd1, GradeDigest gd2) {
+        public static readonly int cutoffConfidenceScore = 250;
+
+        public static int GetConfidenceScore(GradeDigest gd1, GradeDigest gd2) {
             int?[] distance = new int?[GradeDigest.dataSize];
             Queue<Tuple<Point, int>> floodQueue = new Queue<Tuple<Point, int>>();
             bool[] bits2 = GradeDigest.UnpackBits(gd2.data);
@@ -41,14 +43,14 @@ namespace GradeOCR {
             int distanceSum = 0;
             bool[] bits1 = GradeDigest.UnpackBits(gd1.data);
             for (int q = 0; q < bits1.Length; q++) {
-                if (bits1[q]) distanceSum += distance[q].Value;
+                if (bits1[q]) distanceSum += distance[q].Value * distance[q].Value;
             }
 
             return distanceSum;
         }
 
-        public static int GetConfidencePercent(int confidence) {
-            return confidence;
+        public static bool Sure(int confidenceScore) {
+            return confidenceScore < cutoffConfidenceScore;
         }
 
     }

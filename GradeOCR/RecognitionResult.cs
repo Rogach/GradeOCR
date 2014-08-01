@@ -6,11 +6,11 @@ using System.Text;
 namespace GradeOCR {
     public class RecognitionResult {
         public GradeDigest Digest { get; set; }
-        public int Confidence { get; set; }
+        public int ConfidenceScore { get; set; }
 
-        public RecognitionResult(GradeDigest gd, int confidence) {
+        public RecognitionResult(GradeDigest gd, int confidenceScore) {
             this.Digest = gd;
-            this.Confidence = confidence;
+            this.ConfidenceScore = confidenceScore;
         }
     }
 }

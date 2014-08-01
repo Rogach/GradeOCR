@@ -175,7 +175,7 @@ namespace RegisterOCR {
                     for (int x = minX; x <= maxX; x++) {
                         GradeDigest gd = GradeDigest.FromImage(GradeOCR.Program.NormalizeImage(currentTable.Get().GetCellImage(originalImage, x, y)));
                         RecognitionResult res = digestSet.FindBestMatch(gd);
-                        if (res.Confidence > 0.5) {
+                        if (res.ConfidenceScore > 0.5) {
                             str += res.Digest.grade;
                         }
                         str += "\t";
