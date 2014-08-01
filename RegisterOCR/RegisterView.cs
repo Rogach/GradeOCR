@@ -97,7 +97,7 @@ namespace RegisterOCR {
         }
 
         private void LoadRegister(string fileName) {
-            registerPV.Picture = PictureView.LoadPlaceholder();
+            registerPV.Image = PictureView.LoadPlaceholder();
             debugButton.Enabled = false;
             nextRegisterButton.Enabled = false;
             selectRegisterButton.Enabled = false;
@@ -121,7 +121,7 @@ namespace RegisterOCR {
                 });
                 g.Dispose();
 
-                registerPV.Picture = processedImage;
+                registerPV.Image = processedImage;
                 this.Text = fileName;
                 debugButton.Enabled = true;
                 selectRegisterButton.Enabled = true;

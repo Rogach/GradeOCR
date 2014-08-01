@@ -77,8 +77,8 @@ namespace GradeSorter {
 
             currentImage = ImageUtil.LoadImage(currentFileName);
 
-            gradePV.Picture = currentImage;
-            digestPV.Picture = GradeOCR.Program.NormalizeImage(currentImage);
+            gradePV.Image = currentImage;
+            digestPV.Image = GradeOCR.Program.NormalizeImage(currentImage);
         }
 
         private string NextImageName() {
