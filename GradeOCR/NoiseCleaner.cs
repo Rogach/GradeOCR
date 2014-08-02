@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 namespace GradeOCR {
     public static class NoiseCleaner {
         public static readonly double cutoffRatio = 0.2;
+        public static readonly double secondaryCutoffRatio = 0.33;
         public static readonly int noiseCrop = 2;
 
         public static Bitmap RemoveNoise(Bitmap b) {
@@ -67,7 +68,21 @@ namespace GradeOCR {
             if (islands.Count > 0) {
                 int maxIslandSize = islands.Select(i => i.Count).Max();
 
-                List<List<Point>> bigIslands = islands.Where(i => i.Count > maxIslandSize * cutoffRatio).ToList();
+                List<List<Point>> bigIslands = 
+                    islands
+                    .Where(i => i.Count > maxIslandSize * cutoffRatio)
+                    .Where(i => {
+                        // remove circular islands less than secondary cutoff
+                        if (i.Count > maxIslandSize * secondaryCutoffRatio) { 
+                            return true;
+                        } else {
+                            int dx = i.Select(p => p.X).Max() - i.Select(p => p.X).Min();
+                            int dy = i.Select(p => p.Y).Max() - i.Select(p => p.Y).Min();
+                            int circleDiameter = (int) Math.Ceiling(Math.Sqrt(i.Count) / Math.PI * 2);
+                            return (dy > 3 * circleDiameter) || (dx > 3 * circleDiameter);
+                        }
+                    })
+                    .ToList();
 
                 unsafe {
                     BitmapData rbd = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
