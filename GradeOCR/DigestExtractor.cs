@@ -15,7 +15,7 @@ namespace GradeOCR {
             Graphics g = Graphics.FromImage(res);
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
-
+            g.FillRectangle(Brushes.White, new Rectangle(0, 0, res.Width, res.Height));
             g.DrawImage(src,
                 new Rectangle(0, 0, res.Width, res.Height),
                 new Rectangle(0, 0, src.Width, src.Height),
