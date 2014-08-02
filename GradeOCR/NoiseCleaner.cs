@@ -103,5 +103,9 @@ namespace GradeOCR {
 
             return result;
         }
+
+        public static Bitmap RemoveNoiseWithBorder(Bitmap src) {
+            return RemoveNoise(BorderRemoval.RemoveRemainingBorder(RemoveNoise(src)));
+        }
     }
 }

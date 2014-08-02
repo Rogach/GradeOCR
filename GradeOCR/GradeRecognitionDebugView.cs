@@ -51,7 +51,7 @@ namespace GradeOCR {
             inputImagePV.Image = inputImage;
             Bitmap removeBorderImage = BorderRemoval.RemoveBorder(inputImage);
             removeBorderPV.Image = removeBorderImage;
-            Bitmap removeNoiseImage = BorderRemoval.RemoveRemainingBorder(NoiseCleaner.RemoveNoise(removeBorderImage));
+            Bitmap removeNoiseImage = NoiseCleaner.RemoveNoiseWithBorder(removeBorderImage);
             noiseRemovalPV.Image = removeNoiseImage;
             Bitmap croppedImage = WhitespaceCropper.CropWhitespace(removeNoiseImage);
             croppedPV.Image = croppedImage;
