@@ -139,6 +139,7 @@ namespace TableOCR {
             Bitmap cell = new Bitmap(w - padding * 2, h - padding * 2, PixelFormat.Format32bppArgb);
             PointF pt = GetTopLeftCellCorner(x, y);
             Graphics g = Graphics.FromImage(cell);
+            g.FillRectangle(Brushes.White, new Rectangle(0, 0, cell.Width, cell.Height));
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
             g.RotateTransform(-ang);
