@@ -99,7 +99,7 @@ namespace QualityTest {
             int minFailureConfidenceScore =
                 gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Digest.grade).Select(t => t.Item2.ConfidenceScore).Min();
             Console.WriteLine("min confidence score in recognition failures: {0}", minFailureConfidenceScore);
-            Console.WriteLine("successes with score above min failure scroe: {0}",
+            Console.WriteLine("successes with score above min failure score: {0}",
                 gradePairs.Where(gp => gp.Item1.grade == gp.Item2.Digest.grade).Where(t => t.Item2.ConfidenceScore > minFailureConfidenceScore).Count());
 
             Console.WriteLine("Recognition failures:");
