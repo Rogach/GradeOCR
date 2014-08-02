@@ -170,8 +170,8 @@ namespace RegisterOCR {
                             for (int x = minX; x <= maxX; x++) {
                                 GradeDigest gd = GradeDigest.FromImage(GradeOCR.Program.NormalizeImage(table.GetCellImage(originalImage, x, y)));
                                 RecognitionResult res = digestSet.FindBestMatch(gd);
+                                str += res.Digest.grade;
                                 if (MatchConfidence.Sure(res.ConfidenceScore)) {
-                                    str += res.Digest.grade;
                                     g.FillPath(recognitionBrush, table.GetCellContour(x, y));
                                 } else {
                                     g.FillPath(unsureBrush, table.GetCellContour(x, y));
