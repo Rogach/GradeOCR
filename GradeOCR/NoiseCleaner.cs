@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 
 namespace GradeOCR {
     public static class NoiseCleaner {
-        public static readonly double cutoffRatio = 0.33;
+        public static readonly double cutoffRatio = 0.2;
         public static readonly int noiseCrop = 2;
 
         public static Bitmap RemoveNoise(Bitmap b) {
