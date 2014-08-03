@@ -122,10 +122,18 @@ namespace RegisterOCR {
                 g.Dispose();
 
                 registerPV.Image = processedImage;
-                this.Text = fileName;
-                debugButton.Enabled = true;
-                selectRegisterButton.Enabled = true;
-                nextRegisterButton.Enabled = true;
+                this.Invoke(new EventHandler(delegate {
+                    this.Text = fileName;
+                }));
+                debugButton.Invoke(new EventHandler(delegate {
+                    debugButton.Enabled = true;
+                }));
+                selectRegisterButton.Invoke(new EventHandler(delegate {
+                    selectRegisterButton.Enabled = true;
+                }));
+                nextRegisterButton.Invoke(new EventHandler(delegate {
+                    nextRegisterButton.Enabled = true;
+                }));
             }));
             worker.IsBackground = true;
             worker.Start();
