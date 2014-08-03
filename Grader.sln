@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QualityTest", "QualityTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableRecognitionTest", "TableRecognitionTest\TableRecognitionTest.csproj", "{14771C87-E519-4E47-A1B7-B66ED41EC40E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LineOCR", "LineOCR\LineOCR.csproj", "{AA27086D-C2E9-4C24-94A8-17E5B0F6C37E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeImageMove", "GradeImageMove\GradeImageMove.csproj", "{283F540E-CE68-41D3-9B68-43CD9D0B8F4B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -67,6 +71,14 @@ Global
 		{14771C87-E519-4E47-A1B7-B66ED41EC40E}.Debug|x86.Build.0 = Debug|x86
 		{14771C87-E519-4E47-A1B7-B66ED41EC40E}.Release|x86.ActiveCfg = Release|x86
 		{14771C87-E519-4E47-A1B7-B66ED41EC40E}.Release|x86.Build.0 = Release|x86
+		{AA27086D-C2E9-4C24-94A8-17E5B0F6C37E}.Debug|x86.ActiveCfg = Debug|x86
+		{AA27086D-C2E9-4C24-94A8-17E5B0F6C37E}.Debug|x86.Build.0 = Debug|x86
+		{AA27086D-C2E9-4C24-94A8-17E5B0F6C37E}.Release|x86.ActiveCfg = Release|x86
+		{AA27086D-C2E9-4C24-94A8-17E5B0F6C37E}.Release|x86.Build.0 = Release|x86
+		{283F540E-CE68-41D3-9B68-43CD9D0B8F4B}.Debug|x86.ActiveCfg = Debug|x86
+		{283F540E-CE68-41D3-9B68-43CD9D0B8F4B}.Debug|x86.Build.0 = Debug|x86
+		{283F540E-CE68-41D3-9B68-43CD9D0B8F4B}.Release|x86.ActiveCfg = Release|x86
+		{283F540E-CE68-41D3-9B68-43CD9D0B8F4B}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
