@@ -78,8 +78,7 @@ namespace GradeOCR {
                         } else {
                             int dx = i.Select(p => p.X).Max() - i.Select(p => p.X).Min();
                             int dy = i.Select(p => p.Y).Max() - i.Select(p => p.Y).Min();
-                            int circleDiameter = (int) Math.Ceiling(Math.Sqrt(i.Count) / Math.PI * 2);
-                            return (dy > 3 * circleDiameter) || (dx > 3 * circleDiameter);
+                            return dx * dy > i.Count * 3;
                         }
                     })
                     .ToList();
