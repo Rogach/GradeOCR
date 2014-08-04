@@ -26,6 +26,8 @@ namespace OCRUtil {
 
         public bool AllowZoom { get; set; }
 
+        public bool AllowMaximization { get; set; }
+
         public void SetImageKeepZoom(Image img) {
             Bitmap copy = new Bitmap((Bitmap) img);
             this.Invoke(new EventHandler(delegate {
@@ -49,6 +51,7 @@ namespace OCRUtil {
             this.DoubleBuffered = true;
 
             this.AllowZoom = true;
+            this.AllowMaximization = true;
 
             _Image = LoadPlaceholder();
             this.Controls.Add(plug);
@@ -69,6 +72,7 @@ namespace OCRUtil {
             AddMouseDrag();
             AddMouseZoom();
             AddDoubleClickListener();
+            AddFullFrameListener();
         }
 
         public static PictureView InsertIntoPanel(Panel panel) {
@@ -177,24 +181,50 @@ namespace OCRUtil {
 
         private void AddDoubleClickListener() {
             this.MouseDoubleClick += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
-                Point pt;
-                if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
-                    float dx = (this.Width - _Image.Width * zoom) / 2;
-                    float dy = (this.Height - _Image.Height * zoom) / 2;
-                    pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor((e.Y - dy) / zoom));
-                } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
-                    float dx = (this.Width - _Image.Width * zoom - scrollBarWidth) / 2;
-                    pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
-                } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
-                    float dy = (this.Height - _Image.Height * zoom - scrollBarWidth) / 2;
-                    pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor((e.Y - dy) / zoom));
-                } else {
-                    pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
-                }
-                if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Height) {
-                    foreach (var listener in DoubleClickListeners) {
-                        listener.Invoke(pt, e);
+                if (e.Button == MouseButtons.Left) {
+                    Point pt;
+                    if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
+                        float dx = (this.Width - _Image.Width * zoom) / 2;
+                        float dy = (this.Height - _Image.Height * zoom) / 2;
+                        pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor((e.Y - dy) / zoom));
+                    } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
+                        float dx = (this.Width - _Image.Width * zoom - scrollBarWidth) / 2;
+                        pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
+                    } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
+                        float dy = (this.Height - _Image.Height * zoom - scrollBarWidth) / 2;
+                        pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor((e.Y - dy) / zoom));
+                    } else {
+                        pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
                     }
+                    if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Height) {
+                        foreach (var listener in DoubleClickListeners) {
+                            listener.Invoke(pt, e);
+                        }
+                    }
+                }
+            });
+        }
+
+        private void AddFullFrameListener() {
+            this.MouseDoubleClick += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
+                if (e.Button == MouseButtons.Middle && AllowMaximization) {
+                    Form f = new Form();
+                    f.Size = new Size(1000, 1000);
+
+                    PictureView pv = new PictureView();
+                    pv.Location = new Point(0, 0);
+                    pv.Size = new Size(984, 962);
+                    pv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+                    foreach (var mouseListener in DoubleClickListeners) {
+                        pv.AddDoubleClickListener(mouseListener);
+                    }
+                    pv._Image = _Image;
+                    pv.ZoomToFit();
+                    f.Controls.Add(pv);
+
+                    
+
+                    f.ShowDialog();
                 }
             });
         }
