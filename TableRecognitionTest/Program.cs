@@ -7,6 +7,7 @@ using System.IO;
 using TableOCR;
 using System.Drawing;
 using LibUtil;
+using LineOCR;
 
 namespace TableRecognitionTest {
     class Program {
