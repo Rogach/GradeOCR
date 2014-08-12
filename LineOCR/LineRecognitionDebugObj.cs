@@ -48,8 +48,7 @@ namespace LineOCR {
                 width = bw.Width,
                 height = bw.Height,
                 minLineLength = bw.Width / 2,
-                cyclicPatternsMinWidth = 10,
-                cyclicPatternsMaxWidth = 100
+                detectCyclicPatterns = false
             };
 
             vertOptions = new RecognitionParams {
@@ -60,6 +59,7 @@ namespace LineOCR {
                 width = rotBw.Width,
                 height = rotBw.Height,
                 minLineLength = rotBw.Width / 10,
+                detectCyclicPatterns = true,
                 cyclicPatternsMinWidth = 10,
                 cyclicPatternsMaxWidth = 100
             };

@@ -16,6 +16,7 @@ namespace LineOCR {
         public int width;
         public int height;
         public int minLineLength;
+        public bool detectCyclicPatterns;
         public int cyclicPatternsMinWidth;
         public int cyclicPatternsMaxWidth;
     }
