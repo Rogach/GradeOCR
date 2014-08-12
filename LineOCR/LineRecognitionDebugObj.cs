@@ -31,8 +31,12 @@ namespace LineOCR {
         Bitmap vertHoughImage;
         List<RawLine> vertRawLines;
         List<Line> vertLines;
+        List<Line> filteredVertLines;
 
         Bitmap rawLinesImage;
+        Bitmap filteredLinesImage;
+
+        Bitmap verticalLengthImage;
 
         public LineRecognitionDebugObj(Bitmap src) {
             this.src = src;
@@ -61,7 +65,9 @@ namespace LineOCR {
                 minLineLength = rotBw.Width / 10,
                 detectCyclicPatterns = true,
                 cyclicPatternsMinWidth = 10,
-                cyclicPatternsMaxWidth = 100
+                cyclicPatternsMaxWidth = 100,
+                detectDisparityLines = true,
+                verticalDisparityThreshold = 300
             };
 
             horizEdgePoints = EdgeExtraction.ExtractEdgePoints(bw);
@@ -78,11 +84,23 @@ namespace LineOCR {
             vertHoughPlainImage = PseudoHoughTransform.HoughTransformImage(vertHough);
             vertHoughImage = PseudoHoughTransform.HoughTransformImageWithPeaks(vertHough, vertHoughPeaks);
             vertRawLines = PseudoHoughTransform.ExtractRawLines(vertHoughPeaks, vertOptions);
-            vertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertOptions);
 
-            rawLinesImage = new Bitmap(bw);
+            RecognitionParams vertNoFilterOptions = vertOptions;
+            vertNoFilterOptions.detectCyclicPatterns = false;
+            vertNoFilterOptions.detectDisparityLines = false;
+            vertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertNoFilterOptions);
+            filteredVertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertOptions);
 
-            Graphics g = Graphics.FromImage(rawLinesImage);
+            rawLinesImage = DrawLines(bw, horizLines, vertLines);
+            filteredLinesImage = DrawLines(bw, horizLines, filteredVertLines);
+
+            verticalLengthImage = VerticalArtifactRemoval.LengthMap(vertLines, vertOptions);
+        }
+
+        private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines) {
+            Bitmap res = new Bitmap(src);
+
+            Graphics g = Graphics.FromImage(res);
             Pen p = new Pen(Brushes.Red, 2);
             foreach (var ln in horizLines) {
                 g.DrawLine(p, ln.p1, ln.p2);
@@ -93,12 +111,25 @@ namespace LineOCR {
                     new Point(bw.Width - 1 - ln.p2.Y, ln.p2.X));
             }
             g.Dispose();
+
+            return res;
         }
 
         public Bitmap GetAggregateImage() {
             return ImageUtil.HorizontalConcat(new List<Bitmap> { 
-                GetHoughDebugImage(), GetCyclicPatternsImage()
+                GetHoughDebugImage(),
+                GetCyclicPatternsImage(),
+                GetVerticalLineLengthMap(),
+                GetFilteredLinesImage()
             });
+        }
+
+        public Bitmap GetRawLinesImage() {
+            return rawLinesImage;
+        }
+
+        public Bitmap GetFilteredLinesImage() {
+            return filteredLinesImage;
         }
 
         public Bitmap GetHoughDebugImage() {
@@ -111,6 +142,10 @@ namespace LineOCR {
 
         public Bitmap GetCyclicPatternsImage() {
             return LineFilter.CyclicPatternsInLines(vertEdgePoints, vertRawLines, vertOptions);
+        }
+
+        public Bitmap GetVerticalLineLengthMap() {
+            return verticalLengthImage;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace LineOCR {
                 var ld = new SimpleLineDetector(linePoints);
                 var segments = ld.GetLines(x => (int) Math.Round(rawLine.yInt + x * rawLine.k));
                 if (segments.Count > 0) {
-                    if (!HasCyclicPatterns(linePoints, segments.First().p1.X, segments.Last().p2.X, options))
+                    if (!options.detectCyclicPatterns || !HasCyclicPatterns(linePoints, segments.First().p1.X, segments.Last().p2.X, options))
                         lines.Add(new Line(segments.First().p1, segments.Last().p2));
                 }
             }
