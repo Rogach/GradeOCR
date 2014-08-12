@@ -21,7 +21,7 @@ namespace LineOCR {
         private static readonly int imageWidth = 200;
 
         public static Bitmap LengthMap(List<Line> lines, RecognitionParams options) {
-            Bitmap res = new Bitmap(imageWidth, options.height, PixelFormat.Format32bppArgb);
+            Bitmap res = new Bitmap(imageWidth, options.width, PixelFormat.Format32bppArgb);
 
             Graphics g = Graphics.FromImage(res);
             g.FillRectangle(Brushes.White, new Rectangle(0, 0, res.Width, res.Height));
@@ -57,7 +57,7 @@ namespace LineOCR {
                 for (int x = 0; x < imageWidth; x++)
                     *(ptr + (median - options.verticalDisparityThreshold) * imageWidth + x) = 0xffff0000;
 
-            if (median + options.verticalDisparityThreshold < options.height)
+            if (median + options.verticalDisparityThreshold < options.width)
                 for (int x = 0; x < imageWidth; x++)
                     *(ptr + (median + options.verticalDisparityThreshold) * imageWidth + x) = 0xffff0000;
         }
