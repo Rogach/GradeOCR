@@ -28,6 +28,9 @@ namespace LineOCR {
                 }
             }
 
+            if (options.detectDisparityLines)
+                lines = VerticalArtifactRemoval.RemoveArtifactLines(lines, options);
+
             return lines;
         }
 
