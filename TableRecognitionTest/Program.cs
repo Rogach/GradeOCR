@@ -19,7 +19,10 @@ namespace TableRecognitionTest {
                 var images = Directory.GetFiles(TableInputDir);
                 int c = 0;
                 foreach (var img in images) {
-                    DrawTable(ImageUtil.LoadImage(img)).Save(TableOutputDir + "/" + Path.GetFileName(img));
+                    Bitmap result = DrawTable(ImageUtil.LoadImage(img));
+                    result.Save(TableOutputDir + "/" + Path.GetFileName(img));
+                    result.Dispose();
+                    System.GC.Collect();
 
                     c++;
                     Console.WriteLine("Processed {0}/{1} tables...", c, images.Length);

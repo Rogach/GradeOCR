@@ -91,17 +91,17 @@ namespace LineOCR {
             vertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertNoFilterOptions);
             filteredVertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertOptions);
 
-            rawLinesImage = DrawLines(bw, horizLines, vertLines);
-            filteredLinesImage = DrawLines(bw, horizLines, filteredVertLines);
+            rawLinesImage = DrawLines(bw, horizLines, vertLines, 2);
+            filteredLinesImage = DrawLines(bw, horizLines, filteredVertLines, 4);
 
             verticalLengthImage = VerticalArtifactRemoval.LengthMap(vertLines, vertOptions);
         }
 
-        private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines) {
+        private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines, int lineWidth) {
             Bitmap res = new Bitmap(src);
 
             Graphics g = Graphics.FromImage(res);
-            Pen p = new Pen(Brushes.Red, 2);
+            Pen p = new Pen(Brushes.Red, lineWidth);
             foreach (var ln in horizLines) {
                 g.DrawLine(p, ln.p1, ln.p2);
             }
