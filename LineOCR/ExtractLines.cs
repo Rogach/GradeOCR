@@ -9,9 +9,6 @@ using LibUtil;
 
 namespace LineOCR {
     public static class ExtractLines {
-        public static readonly float maxAngleFactor = 0.03f;
-        public static readonly float minHorizontalLineRatio = 0.5f;
-        public static readonly float minVerticalLineRatio = 0.1f;
 
         public static List<Point> ExtractEdgePoints(Bitmap src) {
             List<Point> edgePoints = new List<Point>();
@@ -44,6 +41,7 @@ namespace LineOCR {
 
         public static Bitmap DrawPoints(Bitmap src, List<Point> points) {
             Bitmap res = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+            res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
 
             Graphics g = Graphics.FromImage(res);
             g.FillRectangle(Brushes.White, new Rectangle(0, 0, res.Width, res.Height));

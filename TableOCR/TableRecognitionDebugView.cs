@@ -53,7 +53,7 @@ namespace TableOCR {
         public void RunOCR(Bitmap sourceImage) {
             this.sourcePV.Image = sourceImage;
 
-            Bitmap sourceImageVert = Util.Timed("rotate", () => ImageUtil.Rotate(sourceImage));
+            Bitmap sourceImageVert = Util.Timed("rotate", () => ImageUtil.RotateCounterClockwise(sourceImage));
             this.sourcePV_vert.Image = sourceImageVert;
 
             Bitmap bwImage = Util.Timed("to black and white (horiz)", () => ImageUtil.ToBlackAndWhite(sourceImage));

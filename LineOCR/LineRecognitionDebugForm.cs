@@ -15,7 +15,7 @@ namespace LineOCR {
         private PictureView sourceImagePV;
         private PictureView bwImagePV;
         private PictureView edgePointsPV;
-        private PictureView linesPV;
+        private PictureView houghPV;
 
         public LineRecognitionDebugForm(Bitmap sourceImage) {
             InitializeComponent();
@@ -23,7 +23,7 @@ namespace LineOCR {
             sourceImagePV = PictureView.InsertIntoPanel(sourceImagePanel);
             bwImagePV = PictureView.InsertIntoPanel(bwImagePanel);
             edgePointsPV = PictureView.InsertIntoPanel(edgePointsPanel);
-            linesPV = PictureView.InsertIntoPanel(linesPanel);
+            houghPV = PictureView.InsertIntoPanel(houghPanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
@@ -33,6 +33,11 @@ namespace LineOCR {
         }
 
         private void RunOCR(Bitmap sourceImage) {
+            RecognitionParams horizOptions = new RecognitionParams {
+                maxAngleFactor = 0.03f,
+                houghThreshold = 50
+            };
+
             this.sourceImagePV.Image = sourceImage;
 
             Bitmap bwImage = Util.Timed("to bw image", () => ImageUtil.ToBlackAndWhite(sourceImage));
@@ -47,6 +52,7 @@ namespace LineOCR {
                 Console.WriteLine(p);
             });
 
+            this.houghPV.Image = Util.Timed("hough image", () => Program.CreateHoughImage(sourceImage));
         }
     }
 }

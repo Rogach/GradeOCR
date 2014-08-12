@@ -58,11 +58,17 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PseudoHoughTransform.cs" />
+    <Compile Include="SimpleLineDetector.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">
       <Project>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</Project>
       <Name>OCRUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TableOCR\TableOCR.csproj">
+      <Project>{F1213444-68AD-4C9C-A0A9-22E571412CCD}</Project>
+      <Name>TableOCR</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

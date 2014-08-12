@@ -28,7 +28,7 @@ namespace TableOCR {
         }
 
         public static Option<Table> RecognizeTable(Bitmap sourceImage) {
-            Bitmap sourceImageVert = ImageUtil.Rotate(sourceImage);
+            Bitmap sourceImageVert = ImageUtil.RotateCounterClockwise(sourceImage);
             BWImage bw = new BWImage(sourceImage);
             BWImage bwVert = new BWImage(sourceImageVert);
             List<Line> hLines = 

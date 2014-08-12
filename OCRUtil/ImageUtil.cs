@@ -26,6 +26,7 @@ namespace OCRUtil {
 
         public static Bitmap ToBlackAndWhite(Bitmap src) {
             Bitmap res = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+            res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
 
             unsafe {
                 BitmapData srcBD = src.LockBits(ImageLockMode.ReadOnly);
@@ -86,7 +87,7 @@ namespace OCRUtil {
             return res;
         }
 
-        public static Bitmap Rotate(Bitmap src) {
+        public static Bitmap RotateCounterClockwise(Bitmap src) {
             Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format32bppArgb);
             rotated.SetResolution(src.HorizontalResolution, src.VerticalResolution);
             
@@ -101,6 +102,60 @@ namespace OCRUtil {
             g.Dispose();
 
             return rotated;
+        }
+
+        public static Bitmap RotateClockwise(Bitmap src) {
+            Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format32bppArgb);
+            rotated.SetResolution(src.HorizontalResolution, src.VerticalResolution);
+
+            Graphics g = Graphics.FromImage(rotated);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+
+            g.TranslateTransform(rotated.Width, 0);
+            g.RotateTransform(90);
+
+            g.DrawImageUnscaled(src, 0, 0);
+            g.Dispose();
+
+            return rotated;
+        }
+
+        public static Bitmap HorizontalConcat(List<Bitmap> images) {
+            int height = images.Select(img => img.Height).Max();
+            int width = images.Select(img => img.Width).Sum();
+            Bitmap res = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            res.SetResolution(images[0].HorizontalResolution, images[0].VerticalResolution);
+            Graphics g = Graphics.FromImage(res);
+
+            int x = 0;
+            foreach (var img in images) {
+                img.SetResolution(images[0].HorizontalResolution, images[0].VerticalResolution);
+                g.DrawImageUnscaled(img, new Point(x, 0));
+                x += img.Width;
+            }
+
+            g.Dispose();
+            return res;
+        }
+
+        public static Bitmap VerticalConcat(List<Bitmap> images) {
+            int height = images.Select(img => img.Height).Sum();
+            int width = images.Select(img => img.Width).Max();
+            Bitmap res = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            res.SetResolution(images[0].HorizontalResolution, images[0].VerticalResolution);
+            
+            Graphics g = Graphics.FromImage(res);
+
+            int y = 0;
+            foreach (var img in images) {
+                img.SetResolution(images[0].HorizontalResolution, images[0].VerticalResolution);
+                g.DrawImageUnscaled(img, new Point(0, y));
+                y += img.Height;
+            }
+
+            g.Dispose();
+            return res;
         }
         
     }

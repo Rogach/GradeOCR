@@ -29,7 +29,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.edgePointsPanel = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
-            this.linesPanel = new System.Windows.Forms.Panel();
+            this.houghPanel = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -81,21 +81,21 @@
             this.label3.TabIndex = 3;
             this.label3.Text = "Edge points";
             // 
-            // linesPanel
+            // houghPanel
             // 
-            this.linesPanel.Location = new System.Drawing.Point(945, 25);
-            this.linesPanel.Name = "linesPanel";
-            this.linesPanel.Size = new System.Drawing.Size(305, 468);
-            this.linesPanel.TabIndex = 3;
+            this.houghPanel.Location = new System.Drawing.Point(945, 25);
+            this.houghPanel.Name = "houghPanel";
+            this.houghPanel.Size = new System.Drawing.Size(305, 468);
+            this.houghPanel.TabIndex = 3;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(942, 9);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(76, 13);
+            this.label4.Size = new System.Drawing.Size(124, 13);
             this.label4.TabIndex = 4;
-            this.label4.Text = "Extracted lines";
+            this.label4.Text = "Pseudo-Hough transform";
             // 
             // LineRecognitionDebugForm
             // 
@@ -103,7 +103,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1265, 504);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.linesPanel);
+            this.Controls.Add(this.houghPanel);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.edgePointsPanel);
             this.Controls.Add(this.label2);
@@ -125,7 +125,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Panel edgePointsPanel;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Panel linesPanel;
+        private System.Windows.Forms.Panel houghPanel;
         private System.Windows.Forms.Label label4;
     }
 }

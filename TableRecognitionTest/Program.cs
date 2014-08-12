@@ -11,8 +11,8 @@ using LineOCR;
 
 namespace TableRecognitionTest {
     class Program {
-        public static readonly string TableInputDir = "E:/Pronko/prj/Grader/ocr-data/register-bad";
-        public static readonly string TableOutputDir = "E:/Pronko/prj/Grader/ocr-data/register-bad-tables";
+        public static readonly string TableInputDir = "E:/Pronko/prj/Grader/ocr-data/register-test-input";
+        public static readonly string TableOutputDir = "E:/Pronko/prj/Grader/ocr-data/register-test-output";
 
         static void Main(string[] args) {
             Util.Timed("table processing", () => {
@@ -28,14 +28,7 @@ namespace TableRecognitionTest {
         }
 
         static Bitmap DrawTable(Bitmap src) {
-            Bitmap res = new Bitmap(src);
-            var tableOpt = TableOCR.Program.RecognizeTable(src);
-            var g = Graphics.FromImage(res);
-            tableOpt.ForEach(table => {
-                table.DrawTable(g, new Pen(Brushes.Red, 4));
-            });
-            g.Dispose();
-            return res;
+            return LineOCR.Program.CreateHoughImage(src);
         }
     }
 }
