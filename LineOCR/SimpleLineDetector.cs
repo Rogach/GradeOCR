@@ -54,11 +54,7 @@ namespace LineOCR {
             }
 
             return lines;
-            //if (lines.Count > 0) {
-            //    return new List<Line> { new Line(lines.First().p1, lines.Last().p2) };
-            //} else {
-            //    return lines;
-            //}
         }
+
     }
 }

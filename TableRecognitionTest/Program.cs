@@ -28,7 +28,8 @@ namespace TableRecognitionTest {
         }
 
         static Bitmap DrawTable(Bitmap src) {
-            return LineOCR.Program.CreateHoughImage(src);
+            var lrd = new LineRecognitionDebugObj(src);
+            return lrd.GetAggregateImage();
         }
     }
 }

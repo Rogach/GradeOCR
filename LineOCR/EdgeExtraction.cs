@@ -8,7 +8,7 @@ using OCRUtil;
 using LibUtil;
 
 namespace LineOCR {
-    public static class ExtractLines {
+    public static class EdgeExtraction {
 
         public static List<Point> ExtractEdgePoints(Bitmap src) {
             List<Point> edgePoints = new List<Point>();

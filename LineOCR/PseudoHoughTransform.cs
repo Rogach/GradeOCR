@@ -90,37 +90,6 @@ namespace LineOCR {
             return lines;
         }
 
-        public static List<Line> FormLines(List<Point> edgePoints, List<RawLine> rawLines, RecognitionParams options) {
-            List<Line> lines = new List<Line>();
-
-            foreach (var rawLine in rawLines) {
-                bool[] linePoints = new bool[options.width];
-                foreach (var pt in edgePoints) {
-                    if (Math.Abs(rawLine.yInt - (pt.Y - pt.X * rawLine.k)) < 2) {
-                        linePoints[pt.X] = true;
-                    }
-                }
-                var ld = new SimpleLineDetector(linePoints);
-                lines.AddRange(ld.GetLines(x => (int) Math.Round(rawLine.yInt + x * rawLine.k)));
-            }
-
-            return lines;
-        }
-
-        public static List<Line> ExtractLines(List<Point> edgePoints, List<Point> houghPeaks, RecognitionParams options) {
-            return FormLines(edgePoints, ExtractRawLines(houghPeaks, options), options);
-            //double[] angleMap = GetAngleMap(options);
-            //List<Line> lines = new List<Line>();
-            //foreach (var pt in houghPeaks) {
-            //    RawLine raw = new RawLine { yInt = pt.Y, k = angleMap[pt.X] };
-            //    lines.Add(
-            //        new Line(
-            //            new Point(0, raw.yInt),
-            //            new Point(options.width - 1, raw.yInt + (int) Math.Round(raw.k * options.width))));
-            //}
-            //return lines;
-        }
-
         public static Bitmap HoughTransformImage(int[,] hough) {
             int maxHough = 0;
             foreach (var h in hough) {

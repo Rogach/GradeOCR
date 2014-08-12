@@ -16,6 +16,7 @@ namespace LineOCR {
         private PictureView bwImagePV;
         private PictureView edgePointsPV;
         private PictureView houghPV;
+        private PictureView cyclicPatternsPV;
 
         public LineRecognitionDebugForm(Bitmap sourceImage) {
             InitializeComponent();
@@ -24,6 +25,7 @@ namespace LineOCR {
             bwImagePV = PictureView.InsertIntoPanel(bwImagePanel);
             edgePointsPV = PictureView.InsertIntoPanel(edgePointsPanel);
             houghPV = PictureView.InsertIntoPanel(houghPanel);
+            cyclicPatternsPV = PictureView.InsertIntoPanel(cyclicPatternsPanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
@@ -43,16 +45,20 @@ namespace LineOCR {
             Bitmap bwImage = Util.Timed("to bw image", () => ImageUtil.ToBlackAndWhite(sourceImage));
             this.bwImagePV.Image = bwImage;
 
-            List<Point> edgePoints = ExtractLines.ExtractEdgePoints(bwImage);
+            List<Point> edgePoints = EdgeExtraction.ExtractEdgePoints(bwImage);
             Console.WriteLine("extracted {0} edge points", edgePoints.Count);
-            Bitmap edgePointsImage = ExtractLines.DrawPoints(bwImage, edgePoints);
+            Bitmap edgePointsImage = EdgeExtraction.DrawPoints(bwImage, edgePoints);
             
             this.edgePointsPV.Image = edgePointsImage;
             this.edgePointsPV.AddDoubleClickListener((p, e) => {
                 Console.WriteLine(p);
             });
 
-            this.houghPV.Image = Util.Timed("hough image", () => Program.CreateHoughImage(sourceImage));
+            Util.Timed("hough image", () => {
+                var lrd = new LineRecognitionDebugObj(sourceImage);
+                this.houghPV.Image = lrd.GetHoughDebugImage();
+                this.cyclicPatternsPV.Image = lrd.GetCyclicPatternsImage();
+            });
         }
     }
 }

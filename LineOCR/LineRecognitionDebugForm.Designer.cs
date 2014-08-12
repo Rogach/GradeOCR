@@ -31,6 +31,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.houghPanel = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
+            this.cyclicPatternsPanel = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // sourceImagePanel
@@ -97,11 +99,29 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "Pseudo-Hough transform";
             // 
+            // cyclicPatternsPanel
+            // 
+            this.cyclicPatternsPanel.Location = new System.Drawing.Point(1256, 25);
+            this.cyclicPatternsPanel.Name = "cyclicPatternsPanel";
+            this.cyclicPatternsPanel.Size = new System.Drawing.Size(139, 468);
+            this.cyclicPatternsPanel.TabIndex = 4;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(1253, 9);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(122, 13);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "cyclic patterns detection";
+            // 
             // LineRecognitionDebugForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1265, 504);
+            this.ClientSize = new System.Drawing.Size(1407, 505);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.cyclicPatternsPanel);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.houghPanel);
             this.Controls.Add(this.label3);
@@ -127,5 +147,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel houghPanel;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Panel cyclicPatternsPanel;
+        private System.Windows.Forms.Label label5;
     }
 }
