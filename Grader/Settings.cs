@@ -13,7 +13,7 @@ namespace Grader {
     
     public class Settings {
         public DbConnectionStringSetting dbConnectionString = new DbConnectionStringSetting();
-        public DirSetting templatesLocation = new DirSetting("templatesLocation");
+        public DirSetting templatesLocation = new DirSetting("templatesLocation", "Расположение шаблонов");
         public StringSetting gradeViewTags = new StringSetting("gradeViewTags");
 
         public string GetTemplateLocation(string templateName) {
@@ -209,9 +209,14 @@ namespace Grader {
     }
 
     public class DirSetting : AbstractStringSetting {
-        public DirSetting(string settingName) : base(settingName) { }
+        private string dialogTitle;
+
+        public DirSetting(string settingName, string dialogTitle) : base(settingName) {
+            this.dialogTitle = dialogTitle;
+        }
         public override bool init() {
             var fbd = new FolderBrowserDialog();
+            fbd.Description = dialogTitle;
             DialogResult result = fbd.ShowDialog();
             if (result == DialogResult.OK) {
                 settingValue = fbd.SelectedPath;
