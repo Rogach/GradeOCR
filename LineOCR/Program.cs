@@ -19,8 +19,6 @@ namespace LineOCR {
         public bool detectCyclicPatterns;
         public int cyclicPatternsMinWidth;
         public int cyclicPatternsMaxWidth;
-        public bool detectDisparityLines;
-        public int verticalDisparityThreshold;
     }
 
     public static class Program {

@@ -33,8 +33,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.cyclicPatternsPanel = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
-            this.verticalLengthMapPanel = new System.Windows.Forms.Panel();
-            this.label6 = new System.Windows.Forms.Label();
             this.filteredLinesPanel = new System.Windows.Forms.Panel();
             this.label7 = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -119,25 +117,9 @@
             this.label5.TabIndex = 5;
             this.label5.Text = "cyclic patterns detection";
             // 
-            // verticalLengthMapPanel
-            // 
-            this.verticalLengthMapPanel.Location = new System.Drawing.Point(483, 25);
-            this.verticalLengthMapPanel.Name = "verticalLengthMapPanel";
-            this.verticalLengthMapPanel.Size = new System.Drawing.Size(305, 432);
-            this.verticalLengthMapPanel.TabIndex = 5;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(480, 9);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(96, 13);
-            this.label6.TabIndex = 6;
-            this.label6.Text = "vertical length map";
-            // 
             // filteredLinesPanel
             // 
-            this.filteredLinesPanel.Location = new System.Drawing.Point(794, 25);
+            this.filteredLinesPanel.Location = new System.Drawing.Point(483, 25);
             this.filteredLinesPanel.Name = "filteredLinesPanel";
             this.filteredLinesPanel.Size = new System.Drawing.Size(305, 432);
             this.filteredLinesPanel.TabIndex = 6;
@@ -145,7 +127,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(791, 9);
+            this.label7.Location = new System.Drawing.Point(480, 9);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(62, 13);
             this.label7.TabIndex = 7;
@@ -158,8 +140,6 @@
             this.ClientSize = new System.Drawing.Size(1110, 919);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.filteredLinesPanel);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.verticalLengthMapPanel);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.cyclicPatternsPanel);
             this.Controls.Add(this.label4);
@@ -189,8 +169,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Panel cyclicPatternsPanel;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Panel verticalLengthMapPanel;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Panel filteredLinesPanel;
         private System.Windows.Forms.Label label7;
     }

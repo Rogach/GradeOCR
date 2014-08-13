@@ -62,7 +62,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PseudoHoughTransform.cs" />
     <Compile Include="SimpleLineDetector.cs" />
-    <Compile Include="VerticalArtifactRemoval.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">

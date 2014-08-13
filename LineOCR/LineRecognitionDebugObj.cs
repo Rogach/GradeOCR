@@ -36,8 +36,6 @@ namespace LineOCR {
         Bitmap rawLinesImage;
         Bitmap filteredLinesImage;
 
-        Bitmap verticalLengthImage;
-
         public LineRecognitionDebugObj(Bitmap src) {
             this.src = src;
 
@@ -65,9 +63,7 @@ namespace LineOCR {
                 minLineLength = rotBw.Width / 10,
                 detectCyclicPatterns = true,
                 cyclicPatternsMinWidth = 10,
-                cyclicPatternsMaxWidth = 100,
-                detectDisparityLines = true,
-                verticalDisparityThreshold = 300
+                cyclicPatternsMaxWidth = 100
             };
 
             horizEdgePoints = EdgeExtraction.ExtractEdgePoints(bw);
@@ -87,14 +83,11 @@ namespace LineOCR {
 
             RecognitionParams vertNoFilterOptions = vertOptions;
             vertNoFilterOptions.detectCyclicPatterns = false;
-            vertNoFilterOptions.detectDisparityLines = false;
             vertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertNoFilterOptions);
             filteredVertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertOptions);
 
             rawLinesImage = DrawLines(bw, horizLines, vertLines, 2);
             filteredLinesImage = DrawLines(bw, horizLines, filteredVertLines, 4);
-
-            verticalLengthImage = VerticalArtifactRemoval.LengthMap(vertLines, vertOptions);
         }
 
         private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines, int lineWidth) {
@@ -119,7 +112,6 @@ namespace LineOCR {
             return ImageUtil.HorizontalConcat(new List<Bitmap> { 
                 GetHoughDebugImage(),
                 GetCyclicPatternsImage(),
-                GetVerticalLineLengthMap(),
                 GetFilteredLinesImage()
             });
         }
@@ -144,8 +136,5 @@ namespace LineOCR {
             return LineFilter.CyclicPatternsInLines(vertEdgePoints, vertRawLines, vertOptions);
         }
 
-        public Bitmap GetVerticalLineLengthMap() {
-            return verticalLengthImage;
-        }
     }
 }
