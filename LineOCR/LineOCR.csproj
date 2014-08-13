@@ -58,10 +58,12 @@
       <DependentUpon>LineRecognitionDebugForm.cs</DependentUpon>
     </Compile>
     <Compile Include="LineRecognitionDebugObj.cs" />
+    <Compile Include="LineNormalization.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PseudoHoughTransform.cs" />
     <Compile Include="SimpleLineDetector.cs" />
+    <Compile Include="TableBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">

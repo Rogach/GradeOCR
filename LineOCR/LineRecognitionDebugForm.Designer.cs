@@ -35,6 +35,10 @@
             this.label5 = new System.Windows.Forms.Label();
             this.filteredLinesPanel = new System.Windows.Forms.Panel();
             this.label7 = new System.Windows.Forms.Label();
+            this.normalizedLinesPanel = new System.Windows.Forms.Panel();
+            this.label6 = new System.Windows.Forms.Label();
+            this.tableRecognitionPanel = new System.Windows.Forms.Panel();
+            this.label8 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // sourceImagePanel
@@ -133,11 +137,47 @@
             this.label7.TabIndex = 7;
             this.label7.Text = "filtered lines";
             // 
+            // normalizedLinesPanel
+            // 
+            this.normalizedLinesPanel.Location = new System.Drawing.Point(794, 25);
+            this.normalizedLinesPanel.Name = "normalizedLinesPanel";
+            this.normalizedLinesPanel.Size = new System.Drawing.Size(305, 432);
+            this.normalizedLinesPanel.TabIndex = 7;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(791, 9);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(82, 13);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "normalizedLines";
+            // 
+            // tableRecognitionPanel
+            // 
+            this.tableRecognitionPanel.Location = new System.Drawing.Point(1105, 25);
+            this.tableRecognitionPanel.Name = "tableRecognitionPanel";
+            this.tableRecognitionPanel.Size = new System.Drawing.Size(305, 432);
+            this.tableRecognitionPanel.TabIndex = 8;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(1102, 9);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(85, 13);
+            this.label8.TabIndex = 9;
+            this.label8.Text = "table recognition";
+            // 
             // LineRecognitionDebugForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1110, 919);
+            this.ClientSize = new System.Drawing.Size(1420, 919);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.tableRecognitionPanel);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.normalizedLinesPanel);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.filteredLinesPanel);
             this.Controls.Add(this.label5);
@@ -171,5 +211,9 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Panel filteredLinesPanel;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Panel normalizedLinesPanel;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Panel tableRecognitionPanel;
+        private System.Windows.Forms.Label label8;
     }
 }

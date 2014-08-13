@@ -28,7 +28,7 @@ namespace LineOCR {
             Application.SetCompatibleTextRenderingDefault(false);
 
             Application.Run(new LineRecognitionDebugForm(
-                    ImageUtil.LoadImage(@"e:\Pronko\prj\Grader\ocr-data\register-test-input\reg013.jpg")));
+                    ImageUtil.LoadImage(@"e:\Pronko\prj\Grader\ocr-data\register-test-input\reg102.jpg")));
         }
     }
 }

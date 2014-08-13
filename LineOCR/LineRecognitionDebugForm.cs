@@ -18,6 +18,8 @@ namespace LineOCR {
         private PictureView houghPV;
         private PictureView cyclicPatternsPV;
         private PictureView filteredLinesPV;
+        private PictureView normalizedLinesPV;
+        private PictureView tableRecognitionPV;
 
         public LineRecognitionDebugForm(Bitmap sourceImage) {
             InitializeComponent();
@@ -28,6 +30,8 @@ namespace LineOCR {
             houghPV = PictureView.InsertIntoPanel(houghPanel);
             cyclicPatternsPV = PictureView.InsertIntoPanel(cyclicPatternsPanel);
             filteredLinesPV = PictureView.InsertIntoPanel(filteredLinesPanel);
+            normalizedLinesPV = PictureView.InsertIntoPanel(normalizedLinesPanel);
+            tableRecognitionPV = PictureView.InsertIntoPanel(tableRecognitionPanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
@@ -61,6 +65,8 @@ namespace LineOCR {
                 this.houghPV.Image = lrd.GetHoughDebugImage();
                 this.cyclicPatternsPV.Image = lrd.GetCyclicPatternsImage();
                 this.filteredLinesPV.Image = lrd.GetFilteredLinesImage();
+                this.normalizedLinesPV.Image = lrd.GetNormalizedLinesImage();
+                this.tableRecognitionPV.Image = lrd.GetTableRecognitionImage();
             });
         }
     }

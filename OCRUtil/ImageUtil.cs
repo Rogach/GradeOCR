@@ -87,6 +87,27 @@ namespace OCRUtil {
             return res;
         }
 
+        public static Bitmap Rotate(Bitmap src, float angle) {
+            Bitmap rotated = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+            rotated.SetResolution(src.HorizontalResolution, src.VerticalResolution);
+
+            Graphics g = Graphics.FromImage(rotated);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+
+            g.FillRectangle(Brushes.White, new Rectangle(0, 0, rotated.Width, rotated.Height));
+            
+            g.TranslateTransform(src.Width / 2, src.Height / 2);
+            g.RotateTransform((float) (angle / Math.PI * 180));
+            g.TranslateTransform(-src.Width / 2, -src.Height / 2);
+
+            g.DrawImageUnscaled(src, 0, 0);
+
+            g.Dispose();
+
+            return rotated;
+        }
+
         public static Bitmap RotateCounterClockwise(Bitmap src) {
             Bitmap rotated = new Bitmap(src.Height, src.Width, PixelFormat.Format32bppArgb);
             rotated.SetResolution(src.HorizontalResolution, src.VerticalResolution);

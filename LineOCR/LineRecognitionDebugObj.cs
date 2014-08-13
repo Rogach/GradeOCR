@@ -35,6 +35,8 @@ namespace LineOCR {
 
         Bitmap rawLinesImage;
         Bitmap filteredLinesImage;
+        Bitmap normalizedLinesImage;
+        Bitmap tableRecognitionImage;
 
         public LineRecognitionDebugObj(Bitmap src) {
             this.src = src;
@@ -88,6 +90,11 @@ namespace LineOCR {
 
             rawLinesImage = DrawLines(bw, horizLines, vertUnfilteredLines, 2);
             filteredLinesImage = DrawLines(bw, horizLines, vertLines, 4);
+
+            var lnorm = new LineNormalization(horizLines, vertLines, src);
+            normalizedLinesImage = DrawLines(bw, lnorm.normHorizLines, lnorm.normVertLines, 2);
+            var tb = new TableBuilder(lnorm);
+            tableRecognitionImage = tb.DebugImage(bw);
         }
 
         private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines, int lineWidth) {
@@ -122,6 +129,14 @@ namespace LineOCR {
 
         public Bitmap GetFilteredLinesImage() {
             return filteredLinesImage;
+        }
+
+        public Bitmap GetNormalizedLinesImage() {
+            return normalizedLinesImage;
+        }
+
+        public Bitmap GetTableRecognitionImage() {
+            return tableRecognitionImage;
         }
 
         public Bitmap GetHoughDebugImage() {

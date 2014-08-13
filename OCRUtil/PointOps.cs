@@ -35,6 +35,10 @@ namespace OCRUtil {
             return new PointF(p.X * m, p.Y * m);
         }
 
+        public static float DotProduct(PointF p1, PointF p2) {
+            return p1.X * p2.X + p1.Y * p2.Y;
+        }
+
         public static float CrossProduct(PointF p1, PointF p2) {
             return p1.X * p2.Y - p1.Y * p2.X;
         }
@@ -48,10 +52,18 @@ namespace OCRUtil {
             return new PointF(l.p2.X - l.p1.X, l.p2.Y - l.p1.Y);
         }
 
+        public static double Distance(PointF p) {
+            return Math.Sqrt(p.X * p.X + p.Y * p.Y);
+        }
+
         public static double Distance(PointF p1, PointF p2) {
             double dx = p1.X - p2.X;
             double dy = p1.Y - p2.Y;
             return Math.Sqrt(dx * dx + dy * dy);
+        }
+
+        public static Point TruncPt(PointF p) {
+            return new Point((int) Math.Round(p.X), (int) Math.Round(p.Y));
         }
     }
 }
