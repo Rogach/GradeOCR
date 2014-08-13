@@ -30,8 +30,8 @@ namespace LineOCR {
         Bitmap vertHoughPlainImage;
         Bitmap vertHoughImage;
         List<RawLine> vertRawLines;
+        List<Line> vertUnfilteredLines;
         List<Line> vertLines;
-        List<Line> filteredVertLines;
 
         Bitmap rawLinesImage;
         Bitmap filteredLinesImage;
@@ -83,11 +83,11 @@ namespace LineOCR {
 
             RecognitionParams vertNoFilterOptions = vertOptions;
             vertNoFilterOptions.detectCyclicPatterns = false;
-            vertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertNoFilterOptions);
-            filteredVertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertOptions);
+            vertUnfilteredLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertNoFilterOptions);
+            vertLines = LineFilter.ExtractLines(vertEdgePoints, vertRawLines, vertOptions);
 
-            rawLinesImage = DrawLines(bw, horizLines, vertLines, 2);
-            filteredLinesImage = DrawLines(bw, horizLines, filteredVertLines, 4);
+            rawLinesImage = DrawLines(bw, horizLines, vertUnfilteredLines, 2);
+            filteredLinesImage = DrawLines(bw, horizLines, vertLines, 4);
         }
 
         private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines, int lineWidth) {
