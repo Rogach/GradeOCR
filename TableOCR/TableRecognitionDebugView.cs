@@ -101,7 +101,8 @@ namespace TableOCR {
             gVert.Dispose();
             this.outputPV_vert.Image = drwVert;
 
-            Option<Table> tOpt = Table.CreateTable(lines, linesVert);
+            Option<Table> tOpt = null;// Table.CreateTable(lines, linesVert);
+            throw new NotImplementedException();
             tOpt.ForEach(t => {
                 Bitmap tablePic = new Bitmap(bwImage);
                 Graphics tableG = Graphics.FromImage(tablePic);

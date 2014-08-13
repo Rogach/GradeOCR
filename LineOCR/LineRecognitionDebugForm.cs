@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using OCRUtil;
 using LibUtil;
+using GradeOCR;
 
 namespace LineOCR {
     public partial class LineRecognitionDebugForm : Form {
@@ -20,6 +21,7 @@ namespace LineOCR {
         private PictureView filteredLinesPV;
         private PictureView normalizedLinesPV;
         private PictureView tableRecognitionPV;
+        private PictureView recognizedTablePV;
 
         public LineRecognitionDebugForm(Bitmap sourceImage) {
             InitializeComponent();
@@ -32,6 +34,7 @@ namespace LineOCR {
             filteredLinesPV = PictureView.InsertIntoPanel(filteredLinesPanel);
             normalizedLinesPV = PictureView.InsertIntoPanel(normalizedLinesPanel);
             tableRecognitionPV = PictureView.InsertIntoPanel(tableRecognitionPanel);
+            recognizedTablePV = PictureView.InsertIntoPanel(recognizedTablePanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
@@ -67,6 +70,20 @@ namespace LineOCR {
                 this.filteredLinesPV.Image = lrd.GetFilteredLinesImage();
                 this.normalizedLinesPV.Image = lrd.GetNormalizedLinesImage();
                 this.tableRecognitionPV.Image = lrd.GetTableRecognitionImage();
+
+                Bitmap recognizedTableImage = new Bitmap(bwImage);
+                Graphics g = Graphics.FromImage(recognizedTableImage);
+                lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 4));
+                g.Dispose();
+                this.recognizedTablePV.Image = recognizedTableImage;
+
+                GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
+                this.recognizedTablePV.AddDoubleClickListener((pt, e) => {
+                    lrd.recognizedTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                        var gradeRecognition = new GradeRecognitionDebugView(lrd.recognizedTable.GetCellImage(bwImage, cell.X, cell.Y), "<gen>", digestSet);
+                        gradeRecognition.ShowDialog();
+                    });
+                });
             });
         }
     }

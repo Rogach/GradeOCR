@@ -40,7 +40,7 @@ namespace TableOCR {
                         new Point(sourceImage.Width - 1 - ln.p1.Y, ln.p1.X), 
                         new Point(sourceImage.Width - 1 - ln.p2.Y, ln.p2.X));
                 });
-            return Table.CreateTable(hLines, vLines);
+            throw new NotImplementedException();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using LibUtil;
 using OCRUtil;
+using TableOCR;
 
 namespace LineOCR {
     public class LineRecognitionDebugObj {
@@ -37,6 +38,8 @@ namespace LineOCR {
         Bitmap filteredLinesImage;
         Bitmap normalizedLinesImage;
         Bitmap tableRecognitionImage;
+
+        public Table recognizedTable;
 
         public LineRecognitionDebugObj(Bitmap src) {
             this.src = src;
@@ -95,6 +98,7 @@ namespace LineOCR {
             normalizedLinesImage = DrawLines(bw, lnorm.normHorizLines, lnorm.normVertLines, 2);
             var tb = new TableBuilder(lnorm);
             tableRecognitionImage = tb.DebugImage(bw);
+            recognizedTable = tb.table;
         }
 
         private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines, int lineWidth) {

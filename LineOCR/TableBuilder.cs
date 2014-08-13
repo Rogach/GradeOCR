@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using OCRUtil;
 using LibUtil;
+using TableOCR;
 
 namespace LineOCR {
     public class TableBuilder {
@@ -15,12 +16,14 @@ namespace LineOCR {
         public PointF invHorizNormal;
         public PointF invVertNormal;
 
-        List<Line> rowLines;
+        public List<Line> rowLines;
 
         public Line leftEdge;
         public Line rightEdge;
 
         List<RowInfo> rows;
+
+        public Table table;
 
         public TableBuilder(LineNormalization lnorm) {
             double angle = lnorm.angle;
@@ -31,7 +34,7 @@ namespace LineOCR {
             invVertNormal = new PointF((float) Math.Sin(angle), (float) Math.Cos(angle));
 
             List<Line> horizLines = lnorm.normHorizLines;
-            List<Line> vertLines = lnorm.normRotVertLines;
+            List<Line> vertLines = lnorm.normRotVertLines.OrderBy(ln => ln.p1.X).ToList();
 
             List<float> allLeftEndPoints = horizLines.Select(ln => TableX(ln.p1)).OrderBy(x => x).ToList();
             List<float> allRightEndPoints = horizLines.Select(ln => TableX(ln.p2)).OrderBy(x => x).ToList();
@@ -73,6 +76,38 @@ namespace LineOCR {
                 }
                 rows.Add(new RowInfo { topLine = topLine, bottomLine = bottomLine, dividers = dividers });
             }
+
+            var rowClusters = ClusterRows();
+            List<RowInfo> bestCluster = rowClusters[0];
+            int clusterStart = rows.IndexOf(bestCluster.First());
+            int clusterEnd = rows.IndexOf(bestCluster.Last());
+            for (int r = clusterStart + 1; r <= clusterEnd; r++) {
+                // assert that cluster is contigious
+                if (RowDividerDifferenceScore(bestCluster.First(), rows[r]) > 0) {
+                    clusterEnd = r - 1;
+                    break;
+                }
+            }
+
+            table = new Table();
+            table.origin = ToPicture(new PointF(leftX, ToTable(bestCluster[0].topLine.p1).Y));
+            table.horizontalNormal = horizNormal;
+            table.verticalNormal = vertNormal;
+
+            table.rowHeights = new List<float>();
+            for (int r = clusterStart; r <= clusterEnd; r++) {
+                table.rowHeights.Add(RowHeight(rows[r]));
+            }
+            table.totalHeight = table.rowHeights.Sum();
+
+            table.columnWidths = new List<float>();
+            float prevColumn = leftX;
+            foreach (float d in bestCluster[0].dividers) {
+                table.columnWidths.Add(d - prevColumn);
+                prevColumn = d;
+            }
+            table.columnWidths.Add(rightX - prevColumn);
+            table.totalWidth = table.columnWidths.Sum();
         }
 
         private class RowInfo {
@@ -81,7 +116,44 @@ namespace LineOCR {
             public List<float> dividers { get; set; }
         }
 
-        
+        private List<List<RowInfo>> ClusterRows() {
+            List<List<RowInfo>> clusters = new List<List<RowInfo>>();
+            foreach (var row in rows) {
+                List<RowInfo> bestCluster = clusters.Find(cluster => RowDifference(row, cluster[0]) < 0.1);
+                if (bestCluster != null) {
+                    bestCluster.Add(row);
+                } else {
+                    List<RowInfo> newCluster = new List<RowInfo>();
+                    newCluster.Add(row);
+                    clusters.Add(newCluster);
+                }
+            }
+            clusters = clusters.OrderByDescending(clst => clst.Count).ToList();
+            return clusters;
+        }
+
+        private double RowDifference(RowInfo r1, RowInfo r2) {
+            double dividersScore = RowDividerDifferenceScore(r1, r2);
+            double heightScore = RowHeightDifferenceScore(r1, r2);
+            return dividersScore + heightScore;
+        }
+
+        private double RowDividerDifferenceScore(RowInfo r1, RowInfo r2) {
+            HashSet<float> dividers1 = new HashSet<float>(r1.dividers);
+            HashSet<float> dividers2 = new HashSet<float>(r2.dividers);
+            return 1 - (double) dividers1.Intersect(dividers2).Count() / dividers1.Union(dividers2).Count();
+        }
+
+        private float RowHeight(RowInfo r) {
+            return TableY(r.bottomLine.p1) - TableY(r.topLine.p1);
+        }
+
+        private double RowHeightDifferenceScore(RowInfo r1, RowInfo r2) {
+            float height1 = RowHeight(r1);
+            float height2 = RowHeight(r2);
+            float avgHeight = (height1 + height2) / 2;
+            return Math.Abs(height1 - height2) / avgHeight;
+        }
 
         public float TableX(PointF p) {
             return PointOps.DotProduct(p, horizNormal);
@@ -128,6 +200,14 @@ namespace LineOCR {
 
             g.Dispose();
 
+            return res;
+        }
+
+        public Bitmap ResultImage(Bitmap bw) {
+            Bitmap res = new Bitmap(bw);
+            Graphics g = Graphics.FromImage(res);
+            table.DrawTable(g, new Pen(Color.Red, 4));
+            g.Dispose();
             return res;
         }
     }

@@ -11,54 +11,13 @@ using OCRUtil;
 namespace TableOCR {
     
     public class Table {
-        private PointF origin;
-        private PointF horizontalNormal;
-        private PointF verticalNormal;
-        private List<float> rowHeights;
-        private float totalHeight;
-        private List<float> columnWidths;
-        private float totalWidth;
-
-        public static Option<Table> CreateTable(List<Line> horizontalLines, List<Line> verticalLines) {
-            // find horizontal lines that intersect all vertical ones
-            List<Line> hLines = horizontalLines.Where(hln => {
-                return verticalLines.All(vln => {
-                    PointF i = PointOps.Intersection(hln, vln);
-                    return hln.p1.X <= i.X && hln.p2.X >= i.X;
-                });
-            }).OrderBy(hln => hln.p1.Y).ToList();
-
-            List<Line> vLines = verticalLines.OrderBy(vln => vln.p1.X).ToList();
-
-            if (hLines.Count == 0 || vLines.Count == 0) {
-                return new None<Table>();
-            } else {
-                Table t = new Table();
-
-                t.origin = PointOps.Intersection(hLines[0], vLines[0]);
-                t.horizontalNormal = PointOps.Normalize(PointOps.FromLine(hLines[0]));
-                t.verticalNormal = PointOps.Normalize(PointOps.FromLine(vLines[0]));
-
-                t.columnWidths = new List<float>();
-                t.totalWidth = 0;
-                for (int q = 1; q < vLines.Count; q++) {
-                    PointF i = PointOps.Intersection(hLines[0], vLines[q]);
-                    float w = (i.X - t.origin.X) / t.horizontalNormal.X - t.totalWidth;
-                    t.columnWidths.Add(w);
-                    t.totalWidth += w;
-                }
-
-                t.rowHeights = new List<float>();
-                for (int q = 1; q < hLines.Count; q++) {
-                    PointF i = PointOps.Intersection(vLines[0], hLines[q]);
-                    float h = (i.Y - t.origin.Y) / t.verticalNormal.Y - t.totalHeight;
-                    t.rowHeights.Add(h);
-                    t.totalHeight += h;
-                }
-
-                return new Some<Table>(t);
-            }
-        }
+        public PointF origin;
+        public PointF horizontalNormal;
+        public PointF verticalNormal;
+        public List<float> rowHeights;
+        public float totalHeight;
+        public List<float> columnWidths;
+        public float totalWidth;
 
         public void DrawTable(Graphics g, Pen p) {
             PointF row = PointOps.Mult(horizontalNormal, totalWidth);

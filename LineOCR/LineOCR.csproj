@@ -66,6 +66,10 @@
     <Compile Include="TableBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GradeOCR\GradeOCR.csproj">
+      <Project>{510CB01C-1284-4535-9312-798760B6C55E}</Project>
+      <Name>GradeOCR</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">
       <Project>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</Project>
       <Name>OCRUtil</Name>
