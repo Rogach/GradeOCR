@@ -220,6 +220,7 @@ namespace OCRUtil {
                     }
                     pv._Image = _Image;
                     pv.ZoomToFit();
+                    pv.AllowMaximization = false;
                     f.Controls.Add(pv);
 
                     
