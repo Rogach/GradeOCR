@@ -86,16 +86,27 @@ namespace LineOCR {
 
             int clusterStart = rows.IndexOf(bestCluster.First());
             int clusterEnd = rows.IndexOf(bestCluster.Last());
-            for (int r = clusterStart + 1; r <= clusterEnd; r++) {
+            for (int r = clusterStart + 1; r < rows.Count; r++) {
                 // assert that cluster is contigious
                 if (RowDividerDifferenceScore(bestCluster.First(), rows[r]) > 0) {
                     clusterEnd = r - 1;
                     break;
                 }
+                clusterEnd = r;
             }
 
+            for (int r = clusterStart - 1; r >= 0; r--) {
+                if (RowDividerDifferenceScore(bestCluster.First(), rows[r]) > 0) {
+                    clusterStart = r + 1;
+                    break;
+                }
+                clusterStart = r;
+            }
+
+
+
             table = new Table();
-            table.origin = ToPicture(new PointF(leftX, ToTable(bestCluster[0].topLine.p1).Y));
+            table.origin = ToPicture(new PointF(leftX, ToTable(rows[clusterStart].topLine.p1).Y));
             table.horizontalNormal = horizNormal;
             table.verticalNormal = vertNormal;
 
