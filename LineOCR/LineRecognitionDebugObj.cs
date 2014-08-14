@@ -17,7 +17,7 @@ namespace LineOCR {
         public RecognitionParams horizOptions;
         public RecognitionParams vertOptions;
 
-        List<Point> horizEdgePoints;
+        public List<Point> horizEdgePoints;
         int[,] horizHough;
         List<Point> horizHoughPeaks;
         Bitmap horizHoughPlainImage;
@@ -25,7 +25,7 @@ namespace LineOCR {
         List<RawLine> horizRawLines;
         List<Line> horizLines;
 
-        List<Point> vertEdgePoints;
+        public List<Point> vertEdgePoints;
         int[,] vertHough;
         List<Point> vertHoughPeaks;
         Bitmap vertHoughPlainImage;

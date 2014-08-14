@@ -16,6 +16,8 @@ namespace LineOCR {
         private PictureView sourceImagePV;
         private PictureView bwImagePV;
         private PictureView edgePointsPV;
+        private PictureView rotBwImagePV;
+        private PictureView rotEdgePointsPV;
         private PictureView houghPV;
         private PictureView cyclicPatternsPV;
         private PictureView filteredLinesPV;
@@ -35,6 +37,8 @@ namespace LineOCR {
             normalizedLinesPV = PictureView.InsertIntoPanel(normalizedLinesPanel);
             tableRecognitionPV = PictureView.InsertIntoPanel(tableRecognitionPanel);
             recognizedTablePV = PictureView.InsertIntoPanel(recognizedTablePanel);
+            rotBwImagePV = PictureView.InsertIntoPanel(rotBwImagePanel);
+            rotEdgePointsPV = PictureView.InsertIntoPanel(rotEdgePointsPanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
@@ -51,38 +55,30 @@ namespace LineOCR {
 
             this.sourceImagePV.Image = sourceImage;
 
-            Bitmap bwImage = Util.Timed("to bw image", () => ImageUtil.ToBlackAndWhite(sourceImage));
-            this.bwImagePV.Image = bwImage;
+            var lrd = new LineRecognitionDebugObj(sourceImage);
 
-            List<Point> edgePoints = EdgeExtraction.ExtractEdgePoints(bwImage);
-            Console.WriteLine("extracted {0} edge points", edgePoints.Count);
-            Bitmap edgePointsImage = EdgeExtraction.DrawPoints(bwImage, edgePoints);
-            
-            this.edgePointsPV.Image = edgePointsImage;
-            this.edgePointsPV.AddDoubleClickListener((p, e) => {
-                Console.WriteLine(p);
-            });
+            this.bwImagePV.Image = lrd.bw;
+            this.edgePointsPV.Image = EdgeExtraction.DrawPoints(lrd.bw, lrd.horizEdgePoints);
+            this.rotBwImagePV.Image = lrd.rotBw;
+            this.rotEdgePointsPV.Image = EdgeExtraction.DrawPoints(lrd.rotBw, lrd.vertEdgePoints);
 
-            Util.Timed("hough image", () => {
-                var lrd = new LineRecognitionDebugObj(sourceImage);
-                this.houghPV.Image = lrd.GetHoughDebugImage();
-                this.cyclicPatternsPV.Image = lrd.GetCyclicPatternsImage();
-                this.filteredLinesPV.Image = lrd.GetFilteredLinesImage();
-                this.normalizedLinesPV.Image = lrd.GetNormalizedLinesImage();
-                this.tableRecognitionPV.Image = lrd.GetTableRecognitionImage();
+            this.houghPV.Image = lrd.GetHoughDebugImage();
+            this.cyclicPatternsPV.Image = lrd.GetCyclicPatternsImage();
+            this.filteredLinesPV.Image = lrd.GetFilteredLinesImage();
+            this.normalizedLinesPV.Image = lrd.GetNormalizedLinesImage();
+            this.tableRecognitionPV.Image = lrd.GetTableRecognitionImage();
 
-                Bitmap recognizedTableImage = new Bitmap(bwImage);
-                Graphics g = Graphics.FromImage(recognizedTableImage);
-                lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 2));
-                g.Dispose();
-                this.recognizedTablePV.Image = recognizedTableImage;
+            Bitmap recognizedTableImage = new Bitmap(lrd.bw);
+            Graphics g = Graphics.FromImage(recognizedTableImage);
+            lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 2));
+            g.Dispose();
+            this.recognizedTablePV.Image = recognizedTableImage;
 
-                GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
-                this.recognizedTablePV.AddDoubleClickListener((pt, e) => {
-                    lrd.recognizedTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                        var gradeRecognition = new GradeRecognitionDebugView(lrd.recognizedTable.GetCellImage(bwImage, cell.X, cell.Y), "<gen>", digestSet);
-                        gradeRecognition.ShowDialog();
-                    });
+            GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
+            this.recognizedTablePV.AddDoubleClickListener((pt, e) => {
+                lrd.recognizedTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                    var gradeRecognition = new GradeRecognitionDebugView(lrd.recognizedTable.GetCellImage(lrd.bw, cell.X, cell.Y), "<gen>", digestSet);
+                    gradeRecognition.ShowDialog();
                 });
             });
         }
