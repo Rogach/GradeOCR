@@ -38,10 +38,11 @@ namespace LineOCR {
                     if (linePoints[i])
                         acc[(i - from) % w]++;
                 }
-                int max = acc.Max();
-                int sum = acc.Sum();
-                double ratio = (double) sum / (max * acc.Length);
-                if (ratio < 0.5) return true;
+
+                int threshold = (to - from) / w / 5;
+                double cyclicPatternSize = (double) acc.Where(a => a < threshold).Count() / w;
+                if (cyclicPatternSize > 0.2) return true;
+
             }
             return false;
         }
@@ -63,9 +64,12 @@ namespace LineOCR {
                             acc[(i - from) % w]++;
                         }
                     }
+
                     int max = acc.Max();
-                    int sum = acc.Sum();
-                    double ratio = (double) sum / (max * acc.Length);
+
+                    int threshold = (to - from) / w / 5;
+                    double cyclicPatternSize = (double) acc.Where(a => a < threshold).Count() / w;
+                                        
                     for (int i = 0; i < w; i++) {
                         byte v = (byte) (acc[i] * 255 / max);
                         *ptr = v;
@@ -76,7 +80,7 @@ namespace LineOCR {
                     }
                     
                     for (int i = w; i < windowTo + extraWidth; i++) {
-                        if (ratio < 0.5) {
+                        if (cyclicPatternSize > 0.2) {
                             *ptr = 0;
                             *(ptr + 1) = 0;
                             *(ptr + 2) = 255;
