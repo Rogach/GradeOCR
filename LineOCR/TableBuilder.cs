@@ -79,6 +79,11 @@ namespace LineOCR {
 
             var rowClusters = ClusterRows();
             List<RowInfo> bestCluster = rowClusters[0];
+
+            HealRowDividers(bestCluster);
+            rowClusters = ClusterRows();
+            bestCluster = rowClusters[0];
+
             int clusterStart = rows.IndexOf(bestCluster.First());
             int clusterEnd = rows.IndexOf(bestCluster.Last());
             for (int r = clusterStart + 1; r <= clusterEnd; r++) {
@@ -132,6 +137,21 @@ namespace LineOCR {
             return clusters;
         }
 
+        private RowInfo RowClusterCenter(List<RowInfo> rowCluster) {
+            double[] distances = new double[rowCluster.Count];
+            for (int r1 = 0; r1 < rowCluster.Count; r1++) {
+                for (int r2 = 0; r2 < rowCluster.Count; r2++) {
+                    distances[r1] += RowDifference(rowCluster[r1], rowCluster[r2]);
+                }
+            }
+            double minDistance = distances.Min();
+            for (int r = 0; r < rowCluster.Count; r++) {
+                if (distances[r] == minDistance)
+                    return rowCluster[r];
+            }
+            throw new ArgumentException("unable to found row info for min distance");
+        }
+
         private double RowDifference(RowInfo r1, RowInfo r2) {
             double dividersScore = RowDividerDifferenceScore(r1, r2);
             double heightScore = RowHeightDifferenceScore(r1, r2);
@@ -153,6 +173,15 @@ namespace LineOCR {
             float height2 = RowHeight(r2);
             float avgHeight = (height1 + height2) / 2;
             return Math.Abs(height1 - height2) / avgHeight;
+        }
+
+        private void HealRowDividers(List<RowInfo> bestCluster) {
+            RowInfo bestRow = RowClusterCenter(bestCluster);
+            foreach (var row in rows) {
+                if (RowDifference(bestCluster[0], row) < 0.3) {
+                    row.dividers = new List<float>(bestRow.dividers);
+                }
+            }
         }
 
         public float TableX(PointF p) {
