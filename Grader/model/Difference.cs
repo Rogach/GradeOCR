@@ -35,7 +35,7 @@ namespace Grader.model {
                     select cadet;
                 var cadetList = cadetQuery.ToList();
 
-                ProgressDialogs.ForEach(cadetList, cadet => {
+                foreach (var cadet in cadetList) {
                     var fio = new Tuple<string, string, string>(cadet.Фамилия, cadet.Имя, cadet.Отчество);
                     try {
                         dataMap.Add(fio, cadet.КодПодразделения);
@@ -64,9 +64,9 @@ namespace Grader.model {
                         output = output.GetOffset(1, 0);
                     }
 
-                });
+                };
 
-                ProgressDialogs.ForEach(inputMap.Keys, fio => {
+                foreach (var fio in inputMap.Keys) {
                     if (dataMap.GetOption(fio).IsEmpty()) {
                         // new cadet was added
                         output.Value = fio.Item1;
@@ -76,7 +76,7 @@ namespace Grader.model {
                         output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.Green;
                         output = output.GetOffset(1, 0);
                     }
-                });
+                };
 
                 ExcelTemplates.ActivateExcel(outputSheet);
             });
