@@ -102,6 +102,10 @@ namespace LineOCR {
         }
 
         private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines, int lineWidth) {
+            return DrawLines(src, horizLines.Select(ln => new LineF(ln)).ToList(), vertLines.Select(ln => new LineF(ln)).ToList(), lineWidth);
+        }
+
+        private Bitmap DrawLines(Bitmap src, List<LineF> horizLines, List<LineF> vertLines, int lineWidth) {
             Bitmap res = new Bitmap(src);
 
             Graphics g = Graphics.FromImage(res);
@@ -111,8 +115,8 @@ namespace LineOCR {
             }
             foreach (var ln in vertLines) {
                 g.DrawLine(p,
-                    new Point(bw.Width - 1 - ln.p1.Y, ln.p1.X),
-                    new Point(bw.Width - 1 - ln.p2.Y, ln.p2.X));
+                    new PointF(bw.Width - 1 - ln.p1.Y, ln.p1.X),
+                    new PointF(bw.Width - 1 - ln.p2.Y, ln.p2.X));
             }
             g.Dispose();
 

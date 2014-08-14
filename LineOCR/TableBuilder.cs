@@ -16,7 +16,7 @@ namespace LineOCR {
         public PointF invHorizNormal;
         public PointF invVertNormal;
 
-        public List<Line> rowLines;
+        public List<LineF> rowLines;
 
         public Line leftEdge;
         public Line rightEdge;
@@ -33,8 +33,8 @@ namespace LineOCR {
             invHorizNormal = new PointF((float) Math.Cos(angle), (float) -Math.Sin(angle));
             invVertNormal = new PointF((float) Math.Sin(angle), (float) Math.Cos(angle));
 
-            List<Line> horizLines = lnorm.normHorizLines;
-            List<Line> vertLines = lnorm.normRotVertLines.OrderBy(ln => ln.p1.X).ToList();
+            List<LineF> horizLines = lnorm.normHorizLines;
+            List<LineF> vertLines = lnorm.normRotVertLines.OrderBy(ln => ln.p1.X).ToList();
 
             List<float> allLeftEndPoints = horizLines.Select(ln => TableX(ln.p1)).OrderBy(x => x).ToList();
             List<float> allRightEndPoints = horizLines.Select(ln => TableX(ln.p2)).OrderBy(x => x).ToList();
@@ -48,8 +48,8 @@ namespace LineOCR {
                 .Where(ln => Math.Abs(TableX(ln.p2) - rightMedian) < sideEgdeThreshold)
                 .OrderBy(ln => TableY(ln.p1)).ToList();
 
-            List<Point> leftEndPoints = rowLines.Select(ln => ln.p1).ToList();
-            List<Point> rightEndPoints = rowLines.Select(ln => ln.p2).ToList();
+            List<PointF> leftEndPoints = rowLines.Select(ln => ln.p1).ToList();
+            List<PointF> rightEndPoints = rowLines.Select(ln => ln.p2).ToList();
 
             float leftX = leftEndPoints.Select(pt => TableX(pt)).Average();
             float rightX = rightEndPoints.Select(pt => TableX(pt)).Average();
@@ -65,10 +65,10 @@ namespace LineOCR {
             rows = new List<RowInfo>();
             for (int r = 0; r < rowLines.Count - 1; r++) {
                 List<float> dividers = new List<float>();
-                Line topLine = rowLines[r];
-                Line bottomLine = rowLines[r + 1];
+                LineF topLine = rowLines[r];
+                LineF bottomLine = rowLines[r + 1];
                 foreach (var ln in vertLines) {
-                    if (Math.Abs(TableX(ln.p1) - leftX) > 10 && Math.Abs(TableX(ln.p1) - rightX) > 10) {
+                    if (TableX(ln.p1) - leftX > 10 && TableX(ln.p1) - rightX < -10) {
                         if (TableY(ln.p1) - 5 <= TableY(topLine.p1) && TableY(ln.p2) + 5 >= TableY(bottomLine.p1)) {
                             dividers.Add((TableX(ln.p1) + TableX(ln.p2)) / 2);
                         }
@@ -111,8 +111,8 @@ namespace LineOCR {
         }
 
         private class RowInfo {
-            public Line topLine { get; set; }
-            public Line bottomLine { get; set; }
+            public LineF topLine { get; set; }
+            public LineF bottomLine { get; set; }
             public List<float> dividers { get; set; }
         }
 

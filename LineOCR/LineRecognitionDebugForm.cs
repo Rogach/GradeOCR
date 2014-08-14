@@ -73,7 +73,7 @@ namespace LineOCR {
 
                 Bitmap recognizedTableImage = new Bitmap(bwImage);
                 Graphics g = Graphics.FromImage(recognizedTableImage);
-                lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 4));
+                lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 2));
                 g.Dispose();
                 this.recognizedTablePV.Image = recognizedTableImage;
 

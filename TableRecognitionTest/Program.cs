@@ -32,7 +32,11 @@ namespace TableRecognitionTest {
 
         static Bitmap DrawTable(Bitmap src) {
             var lrd = new LineRecognitionDebugObj(src);
-            return lrd.GetAggregateImage();
+            Bitmap bw = ImageUtil.ToBlackAndWhite(src);
+            Graphics g = Graphics.FromImage(bw);
+            lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 4));
+            g.Dispose();
+            return bw;
         }
     }
 }
