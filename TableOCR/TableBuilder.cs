@@ -5,9 +5,8 @@ using System.Text;
 using System.Drawing;
 using OCRUtil;
 using LibUtil;
-using TableOCR;
 
-namespace LineOCR {
+namespace TableOCR {
     public class TableBuilder {
         public static readonly int sideEgdeThreshold = 100;
 

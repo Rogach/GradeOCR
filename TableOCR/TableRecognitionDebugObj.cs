@@ -7,8 +7,8 @@ using LibUtil;
 using OCRUtil;
 using TableOCR;
 
-namespace LineOCR {
-    public class LineRecognitionDebugObj {
+namespace TableOCR {
+    public class TableRecognitionDebugObj {
         private Bitmap src;
 
         public Bitmap bw;
@@ -41,7 +41,7 @@ namespace LineOCR {
 
         public Table recognizedTable;
 
-        public LineRecognitionDebugObj(Bitmap src) {
+        public TableRecognitionDebugObj(Bitmap src) {
             this.src = src;
 
             bw = ImageUtil.ToBlackAndWhite(src);

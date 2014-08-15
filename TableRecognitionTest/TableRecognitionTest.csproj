@@ -52,10 +52,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LineOCR\LineOCR.csproj">
-      <Project>{AA27086D-C2E9-4C24-94A8-17E5B0F6C37E}</Project>
-      <Name>LineOCR</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">
       <Project>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</Project>
       <Name>OCRUtil</Name>

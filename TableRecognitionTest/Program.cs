@@ -31,7 +31,7 @@ namespace TableRecognitionTest {
         }
 
         static Bitmap DrawTable(Bitmap src) {
-            var lrd = new LineRecognitionDebugObj(src);
+            var lrd = new TableRecognitionDebugObj(src);
             Bitmap bw = ImageUtil.ToBlackAndWhite(src);
             Graphics g = Graphics.FromImage(bw);
             lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 4));

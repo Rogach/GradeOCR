@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 using OCRUtil;
 using LibUtil;
 
-namespace LineOCR {
+namespace TableOCR {
     public static class EdgeExtraction {
 
         public static List<Point> ExtractEdgePoints(Bitmap src) {

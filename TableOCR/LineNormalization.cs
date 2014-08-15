@@ -6,7 +6,7 @@ using System.Drawing;
 using OCRUtil;
 using LibUtil;
 
-namespace LineOCR {
+namespace TableOCR {
     public class LineNormalization {
 
         public double angle;

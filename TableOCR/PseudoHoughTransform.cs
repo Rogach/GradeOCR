@@ -8,7 +8,7 @@ using OCRUtil;
 using LibUtil;
 using TableOCR;
 
-namespace LineOCR {
+namespace TableOCR {
     public struct RawLine {
         public int yInt;
         public double k;

@@ -7,7 +7,7 @@ using LibUtil;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace LineOCR {
+namespace TableOCR {
     public static class LineFilter {
 
         public static List<Line> ExtractLines(List<Point> edgePoints, List<RawLine> rawLines, RecognitionParams options) {
@@ -20,7 +20,7 @@ namespace LineOCR {
                         linePoints[pt.X] = true;
                     }
                 }
-                var ld = new SimpleLineDetector(linePoints);
+                var ld = new LineDetector(linePoints);
                 var segments = ld.GetLines(x => (int) Math.Round(rawLine.yInt + x * rawLine.k));
                 if (segments.Count > 0) {
                     Line totalLine = GetTotalLine(segments);
@@ -125,7 +125,7 @@ namespace LineOCR {
                         linePoints[pt.X] = true;
                     }
                 }
-                var ld = new SimpleLineDetector(linePoints);
+                var ld = new LineDetector(linePoints);
                 var lines = ld.GetLines(x => (int) Math.Round(rawLine.yInt + x * rawLine.k));
                 if (lines.Count > 0) {
                     images.Add(CyclicPatternsImage(linePoints, lines.First().p1.X, lines.Last().p2.X));
