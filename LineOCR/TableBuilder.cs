@@ -55,9 +55,6 @@ namespace LineOCR {
             float leftX = leftEndPoints.Select(pt => TableX(pt)).Average();
             float rightX = rightEndPoints.Select(pt => TableX(pt)).Average();
 
-            rowLines = HealRows(horizLines, rowLines, leftX, rightX);
-            rowLines = rowLines.OrderBy(ln => TableY(ln.p1)).ToList();
-
             PointF leftEdgeTop = new PointF(leftX, TableY(leftEndPoints.First()));
             PointF leftEdgeBottom = new PointF(leftX, TableY(leftEndPoints.Last()));
             leftEdge = new Line(PointOps.TruncPt(ToPicture(leftEdgeTop)), PointOps.TruncPt(ToPicture(leftEdgeBottom)));
@@ -107,22 +104,23 @@ namespace LineOCR {
                 clusterStart = r;
             }
 
-
+            rows = rows.GetRange(clusterStart, clusterEnd - clusterStart + 1);
+            rows = HealRows(rows, horizLines, leftX, rightX);
 
             table = new Table();
-            table.origin = ToPicture(new PointF(leftX, ToTable(rows[clusterStart].topLine.p1).Y));
+            table.origin = ToPicture(new PointF(leftX, ToTable(rows[0].topLine.p1).Y));
             table.horizontalNormal = horizNormal;
             table.verticalNormal = vertNormal;
 
             table.rowHeights = new List<float>();
-            for (int r = clusterStart; r <= clusterEnd; r++) {
-                table.rowHeights.Add(RowHeight(rows[r]));
+            foreach (var row in rows) {
+                table.rowHeights.Add(RowHeight(row));
             }
             table.totalHeight = table.rowHeights.Sum();
 
             table.columnWidths = new List<float>();
             float prevColumn = leftX;
-            foreach (float d in bestCluster[0].dividers) {
+            foreach (float d in RowClusterCenter(bestCluster).dividers) {
                 table.columnWidths.Add(d - prevColumn);
                 prevColumn = d;
             }
@@ -200,29 +198,24 @@ namespace LineOCR {
         }
 
         /* 
-         * Perform missing row lines guessing by
-         * calculating median row height and fitting several such
-         * heights into big rows
+         * Heal rows by calculating median row height
+         * and splitting bigger rows by that row height
          */
-        private List<LineF> HealRows(List<LineF> horizLines, List<LineF> rowLines, float leftX, float rightX) {
-            List<float> rowHeights = new List<float>();
-            for (int r = 0; r < rowLines.Count - 1; r++) {
-                rowHeights.Add(TableY(rowLines[r + 1].p1) - TableY(rowLines[r].p1));
-            }
-            float medianRowHeight = rowHeights.OrderBy(h => h).ToList()[rowHeights.Count / 2];
+        private List<RowInfo> HealRows(List<RowInfo> rows, List<LineF> horizLines, float leftX, float rightX) {
+            List<float> rowHeights = rows.Select(row => RowHeight(row)).OrderBy(h => h).ToList();
+            float medianRowHeight = rowHeights[rowHeights.Count / 2];
 
-            List<LineF> healedRowLines = new List<LineF>(rowLines);
-            for (int r = 0; r < rowLines.Count - 1; r++) {
-                float possibleInnerRows = rowHeights[r] / medianRowHeight;
+            return rows.SelectMany(row => {
+                float possibleInnerRows = RowHeight(row) / medianRowHeight;
                 int innerRowCount = (int) Math.Round(possibleInnerRows);
                 float ratio = innerRowCount / possibleInnerRows;
                 if (innerRowCount > 1 && ratio > 0.9 && ratio < 1.1) {
                     // this row can be divided into several smaller ones
                     // because we can fit whole number of median row heights into it
-                    float innerRowHeight = rowHeights[r] / innerRowCount;
+                    float innerRowHeight = RowHeight(row) / innerRowCount;
                     List<LineF> innerRowLines = new List<LineF>();
                     for (int ir = 1; ir < innerRowCount; ir++) {
-                        float irY = TableY(rowLines[r].p1) + ir * innerRowHeight;
+                        float irY = TableY(row.topLine.p1) + ir * innerRowHeight;
                         if (horizLines.Find(hl => Math.Abs(TableY(hl.p1) - irY) < 5) != null) {
                             // we can find real (sub-threshold) line for this Y,
                             // so we confirm our guess
@@ -230,14 +223,28 @@ namespace LineOCR {
                         }
                     }
                     // check that we were able to confirm our guess for all inner lines
-                    if (innerRowLines.Count == (innerRowCount - 1)) {
-                        // add guessed lines to main list of lines
-                        healedRowLines.AddRange(innerRowLines);
+                    if (innerRowLines.Count == innerRowCount - 1) {
+                        // return guessed rows
+                        List<RowInfo> innerRows = new List<RowInfo>();
+                        innerRowLines.Add(row.bottomLine);
+                        LineF prevLine = row.topLine;
+                        for (int ir = 0; ir < innerRowCount; ir++) {
+                            innerRows.Add(new RowInfo {
+                                topLine = prevLine,
+                                bottomLine = innerRowLines[ir],
+                                dividers = new List<float>(row.dividers)
+                            });
+                            prevLine = innerRowLines[ir];
+                        }
+                        return innerRows;
+                    } else {
+                        // return orignal row
+                        return new List<RowInfo> { row };
                     }
+                } else {
+                    return new List<RowInfo> { row };
                 }
-            }
-
-            return healedRowLines;
+            }).ToList();
         }
 
         public float TableX(PointF p) {

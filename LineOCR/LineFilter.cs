@@ -23,12 +23,29 @@ namespace LineOCR {
                 var ld = new SimpleLineDetector(linePoints);
                 var segments = ld.GetLines(x => (int) Math.Round(rawLine.yInt + x * rawLine.k));
                 if (segments.Count > 0) {
-                    if (!options.detectCyclicPatterns || !HasCyclicPatterns(linePoints, segments.First().p1.X, segments.Last().p2.X, options))
-                        lines.Add(new Line(segments.First().p1, segments.Last().p2));
+                    Line totalLine = GetTotalLine(segments);
+                    bool hasCyclicPattenrs = 
+                        options.detectCyclicPatterns &&
+                        HasCyclicPatterns(linePoints, totalLine.p1.X, totalLine.p2.X, options);
+                    if (!hasCyclicPattenrs)
+                        lines.Add(totalLine);
                 }
             }
 
             return lines;
+        }
+
+        public static Line GetTotalLine(List<Line> segments) {
+            Line totalLine = new Line(segments.First().p1, segments.Last().p2);
+            if (segments.Sum(ln => ln.Length()) / totalLine.Length() > 0.7) {
+                return totalLine;
+            } else {
+                if (segments.First().Length() > segments.Last().Length()) {
+                    return GetTotalLine(segments.GetRange(0, segments.Count - 1));
+                } else {
+                    return GetTotalLine(segments.Skip(1).ToList());
+                }
+            }
         }
 
         public static bool HasCyclicPatterns(bool[] linePoints, int from, int to, RecognitionParams options) {
