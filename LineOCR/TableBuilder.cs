@@ -46,13 +46,17 @@ namespace LineOCR {
                 horizLines
                 .Where(ln => Math.Abs(TableX(ln.p1) - leftMedian) < sideEgdeThreshold)
                 .Where(ln => Math.Abs(TableX(ln.p2) - rightMedian) < sideEgdeThreshold)
-                .OrderBy(ln => TableY(ln.p1)).ToList();
-
+                .OrderBy(ln => TableY(ln.p1))
+                .ToList();
+            
             List<PointF> leftEndPoints = rowLines.Select(ln => ln.p1).ToList();
             List<PointF> rightEndPoints = rowLines.Select(ln => ln.p2).ToList();
 
             float leftX = leftEndPoints.Select(pt => TableX(pt)).Average();
             float rightX = rightEndPoints.Select(pt => TableX(pt)).Average();
+
+            rowLines = HealRows(horizLines, rowLines, leftX, rightX);
+            rowLines = rowLines.OrderBy(ln => TableY(ln.p1)).ToList();
 
             PointF leftEdgeTop = new PointF(leftX, TableY(leftEndPoints.First()));
             PointF leftEdgeBottom = new PointF(leftX, TableY(leftEndPoints.Last()));
@@ -64,17 +68,17 @@ namespace LineOCR {
 
             rows = new List<RowInfo>();
             for (int r = 0; r < rowLines.Count - 1; r++) {
-                List<float> dividers = new List<float>();
-                LineF topLine = rowLines[r];
-                LineF bottomLine = rowLines[r + 1];
+                rows.Add(new RowInfo { topLine = rowLines[r], bottomLine = rowLines[r + 1], dividers = new List<float>() });
+            }
+
+            foreach (var row in rows) {
                 foreach (var ln in vertLines) {
                     if (TableX(ln.p1) - leftX > 10 && TableX(ln.p1) - rightX < -10) {
-                        if (TableY(ln.p1) - 5 <= TableY(topLine.p1) && TableY(ln.p2) + 5 >= TableY(bottomLine.p1)) {
-                            dividers.Add((TableX(ln.p1) + TableX(ln.p2)) / 2);
+                        if (TableY(ln.p1) - 5 <= TableY(row.topLine.p1) && TableY(ln.p2) + 5 >= TableY(row.bottomLine.p1)) {
+                            row.dividers.Add((TableX(ln.p1) + TableX(ln.p2)) / 2);
                         }
                     }
                 }
-                rows.Add(new RowInfo { topLine = topLine, bottomLine = bottomLine, dividers = dividers });
             }
 
             var rowClusters = ClusterRows();
@@ -193,6 +197,47 @@ namespace LineOCR {
                     row.dividers = new List<float>(bestRow.dividers);
                 }
             }
+        }
+
+        /* 
+         * Perform missing row lines guessing by
+         * calculating median row height and fitting several such
+         * heights into big rows
+         */
+        private List<LineF> HealRows(List<LineF> horizLines, List<LineF> rowLines, float leftX, float rightX) {
+            List<float> rowHeights = new List<float>();
+            for (int r = 0; r < rowLines.Count - 1; r++) {
+                rowHeights.Add(TableY(rowLines[r + 1].p1) - TableY(rowLines[r].p1));
+            }
+            float medianRowHeight = rowHeights.OrderBy(h => h).ToList()[rowHeights.Count / 2];
+
+            List<LineF> healedRowLines = new List<LineF>(rowLines);
+            for (int r = 0; r < rowLines.Count - 1; r++) {
+                float possibleInnerRows = rowHeights[r] / medianRowHeight;
+                int innerRowCount = (int) Math.Round(possibleInnerRows);
+                float ratio = innerRowCount / possibleInnerRows;
+                if (innerRowCount > 1 && ratio > 0.9 && ratio < 1.1) {
+                    // this row can be divided into several smaller ones
+                    // because we can fit whole number of median row heights into it
+                    float innerRowHeight = rowHeights[r] / innerRowCount;
+                    List<LineF> innerRowLines = new List<LineF>();
+                    for (int ir = 1; ir < innerRowCount; ir++) {
+                        float irY = TableY(rowLines[r].p1) + ir * innerRowHeight;
+                        if (horizLines.Find(hl => Math.Abs(TableY(hl.p1) - irY) < 5) != null) {
+                            // we can find real (sub-threshold) line for this Y,
+                            // so we confirm our guess
+                            innerRowLines.Add(new LineF(ToPicture(new PointF(leftX, irY)), ToPicture(new PointF(rightX, irY))));
+                        }
+                    }
+                    // check that we were able to confirm our guess for all inner lines
+                    if (innerRowLines.Count == (innerRowCount - 1)) {
+                        // add guessed lines to main list of lines
+                        healedRowLines.AddRange(innerRowLines);
+                    }
+                }
+            }
+
+            return healedRowLines;
         }
 
         public float TableX(PointF p) {
