@@ -42,8 +42,12 @@ namespace TableOCR {
             List<Line> horizLines = RecognizeLines(bw, horizOptions);
             List<Line> vertLines = RecognizeLines(rotBw, vertOptions);
 
-            var lnorm = new LineNormalization(horizLines, vertLines, sourceImage);
-            return TableBuilder.NewBuilder(lnorm).table;
+            if (horizLines.Count == 0 || vertLines.Count == 0) {
+                return new None<Table>();
+            } else {
+                var lnorm = new LineNormalization(horizLines, vertLines, sourceImage);
+                return TableBuilder.NewBuilder(lnorm).table;
+            }
         }
 
         private static List<Line> RecognizeLines(Bitmap bw, RecognitionOptions options) {
