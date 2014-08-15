@@ -7,7 +7,6 @@ using System.IO;
 using TableOCR;
 using System.Drawing;
 using LibUtil;
-using LineOCR;
 
 namespace TableRecognitionTest {
     class Program {
@@ -31,10 +30,11 @@ namespace TableRecognitionTest {
         }
 
         static Bitmap DrawTable(Bitmap src) {
-            var lrd = new TableRecognitionDebugObj(src);
             Bitmap bw = ImageUtil.ToBlackAndWhite(src);
             Graphics g = Graphics.FromImage(bw);
-            lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 4));
+            TableOCR.Program.RecognizeTable(src).ForEach(table => {
+                table.DrawTable(g, new Pen(Color.Red, 4));
+            });
             g.Dispose();
             return bw;
         }

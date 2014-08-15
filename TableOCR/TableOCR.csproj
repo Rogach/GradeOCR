@@ -78,19 +78,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EdgeExtraction.cs" />
+    <Compile Include="CyclicPatternDetector.cs" />
+    <Compile Include="EdgePointExtraction.cs" />
     <Compile Include="LineFilter.cs" />
     <Compile Include="LineNormalization.cs" />
+    <Compile Include="RawLine.cs" />
     <Compile Include="TableRecognitionDebugView.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="TableRecognitionDebugView.Designer.cs">
       <DependentUpon>TableRecognitionDebugView.cs</DependentUpon>
     </Compile>
-    <Compile Include="TableRecognitionDebugObj.cs" />
     <Compile Include="PseudoHoughTransform.cs" />
-    <Compile Include="RecognitionParams.cs" />
-    <Compile Include="LineDetector.cs" />
+    <Compile Include="RecognitionOptions.cs" />
+    <Compile Include="SegmentDetector.cs" />
     <Compile Include="TableBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

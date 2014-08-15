@@ -48,39 +48,104 @@ namespace TableOCR {
         }
 
         private void RunOCR(Bitmap sourceImage) {
-            RecognitionParams horizOptions = new RecognitionParams {
-                maxAngleFactor = 0.03f,
-                houghThreshold = 50
-            };
-
             this.sourceImagePV.Image = sourceImage;
 
-            var lrd = new TableRecognitionDebugObj(sourceImage);
+            Bitmap bw = ImageUtil.ToBlackAndWhite(sourceImage);
+            this.bwImagePV.Image = bw;
+            Bitmap rotBw = ImageUtil.RotateCounterClockwise(bw);
+            this.rotBwImagePV.Image = rotBw;
 
-            this.bwImagePV.Image = lrd.bw;
-            this.edgePointsPV.Image = EdgeExtraction.DrawPoints(lrd.bw, lrd.horizEdgePoints);
-            this.rotBwImagePV.Image = lrd.rotBw;
-            this.rotEdgePointsPV.Image = EdgeExtraction.DrawPoints(lrd.rotBw, lrd.vertEdgePoints);
+            var horizOptions = RecognitionOptions.HorizontalOptions();
+            horizOptions.imageWidth = bw.Width;
+            horizOptions.imageHeight = bw.Height;
 
-            this.houghPV.Image = lrd.GetHoughDebugImage();
-            this.cyclicPatternsPV.Image = lrd.GetCyclicPatternsImage();
-            this.filteredLinesPV.Image = lrd.GetFilteredLinesImage();
-            this.normalizedLinesPV.Image = lrd.GetNormalizedLinesImage();
-            this.tableRecognitionPV.Image = lrd.GetTableRecognitionImage();
+            var vertOptions = RecognitionOptions.VerticalOptions();
+            vertOptions.imageWidth = rotBw.Width;
+            vertOptions.imageHeight = rotBw.Height;
 
-            Bitmap recognizedTableImage = new Bitmap(lrd.bw);
-            Graphics g = Graphics.FromImage(recognizedTableImage);
-            lrd.recognizedTable.DrawTable(g, new Pen(Color.Red, 2));
-            g.Dispose();
-            this.recognizedTablePV.Image = recognizedTableImage;
+            List<Point> horizEdgePoints = EdgePointExtraction.ExtractEdgePoints(bw);
+            this.edgePointsPV.Image = EdgePointExtraction.DrawPoints(bw, horizEdgePoints);
+            int[,] horizHough = PseudoHoughTransform.HoughTransform(horizEdgePoints, horizOptions);
+            List<Point> horizHoughPeaks = PseudoHoughTransform.FindHoughPeaks(horizHough, horizOptions);
+            Bitmap horizHoughPlainImage = PseudoHoughTransform.HoughTransformImage(horizHough);
+            Bitmap horizHoughImage = PseudoHoughTransform.HoughTransformImageWithPeaks(horizHough, horizHoughPeaks);
+            List<RawLine> horizRawLines = PseudoHoughTransform.ExtractRawLines(horizHoughPeaks, horizOptions);
+            List<Line> horizLines = LineFilter.FilterLines(horizEdgePoints, horizRawLines, horizOptions);
+
+            List<Point> vertEdgePoints = EdgePointExtraction.ExtractEdgePoints(rotBw);
+            this.rotEdgePointsPV.Image = EdgePointExtraction.DrawPoints(rotBw, vertEdgePoints);
+            int[,] vertHough = PseudoHoughTransform.HoughTransform(vertEdgePoints, vertOptions);
+            List<Point> vertHoughPeaks = PseudoHoughTransform.FindHoughPeaks(vertHough, vertOptions);
+            Bitmap vertHoughPlainImage = PseudoHoughTransform.HoughTransformImage(vertHough);
+            Bitmap vertHoughImage = PseudoHoughTransform.HoughTransformImageWithPeaks(vertHough, vertHoughPeaks);
+            List<RawLine> vertRawLines = PseudoHoughTransform.ExtractRawLines(vertHoughPeaks, vertOptions);
+            this.cyclicPatternsPV.Image = CyclicPatternDetector.CyclicPatternsInLines(vertEdgePoints, vertRawLines, vertOptions);
+            
+            RecognitionOptions vertNoFilterOptions = vertOptions;
+            vertNoFilterOptions.detectCyclicPatterns = false;
+            List<Line> vertUnfilteredLines = LineFilter.FilterLines(vertEdgePoints, vertRawLines, vertNoFilterOptions);
+            List<Line> vertLines = LineFilter.FilterLines(vertEdgePoints, vertRawLines, vertOptions);
+
+            Bitmap rawLinesImage = DrawLines(bw, horizLines, vertUnfilteredLines, 2);
+            Bitmap filteredLinesImage = DrawLines(bw, horizLines, vertLines, 4);
+            this.filteredLinesPV.Image = filteredLinesImage;
+
+            this.houghPV.Image = ImageUtil.VerticalConcat(new List<Bitmap> {
+                ImageUtil.HorizontalConcat(new List<Bitmap> { rawLinesImage, horizHoughImage, horizHoughPlainImage }),
+                ImageUtil.RotateClockwise(vertHoughImage),
+                ImageUtil.RotateClockwise(vertHoughPlainImage)
+            });
+
+            var lnorm = new LineNormalization(horizLines, vertLines, sourceImage);
+            Bitmap normalizedLinesImage = DrawLines(bw, lnorm.normHorizLines, lnorm.normVertLines, 2);
+            this.normalizedLinesPV.Image = normalizedLinesImage;
+            var tb = TableBuilder.NewBuilder(lnorm);
+            Bitmap tableRecognitionImage = tb.DebugImage(bw);
+            this.tableRecognitionPV.Image = tableRecognitionImage;
+            Option<Table> recognizedTable = tb.table;
+            
+            recognizedTable.ForEach(table => {
+                Bitmap recognizedTableImage = new Bitmap(bw);
+                Graphics g = Graphics.FromImage(recognizedTableImage);
+                table.DrawTable(g, new Pen(Color.Red, 2));
+                g.Dispose();
+                this.recognizedTablePV.Image = recognizedTableImage;
+            });
+            if (recognizedTable.IsEmpty()) {
+                Console.WriteLine("no table was recognized");
+            }
 
             GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
             this.recognizedTablePV.AddDoubleClickListener((pt, e) => {
-                lrd.recognizedTable.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                    var gradeRecognition = new GradeRecognitionDebugView(lrd.recognizedTable.GetCellImage(lrd.bw, cell.X, cell.Y), "<gen>", digestSet);
-                    gradeRecognition.ShowDialog();
+                recognizedTable.ForEach(table => {
+                    table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
+                        var gradeRecognition = new GradeRecognitionDebugView(table.GetCellImage(bw, cell.X, cell.Y), "<gen>", digestSet);
+                        gradeRecognition.ShowDialog();
+                    });
                 });
             });
+        }
+
+        private Bitmap DrawLines(Bitmap src, List<Line> horizLines, List<Line> vertLines, int lineWidth) {
+            return DrawLines(src, horizLines.Select(ln => new LineF(ln)).ToList(), vertLines.Select(ln => new LineF(ln)).ToList(), lineWidth);
+        }
+
+        private Bitmap DrawLines(Bitmap src, List<LineF> horizLines, List<LineF> vertLines, int lineWidth) {
+            Bitmap res = new Bitmap(src);
+
+            Graphics g = Graphics.FromImage(res);
+            Pen p = new Pen(Brushes.Red, lineWidth);
+            foreach (var ln in horizLines) {
+                g.DrawLine(p, ln.p1, ln.p2);
+            }
+            foreach (var ln in vertLines) {
+                g.DrawLine(p,
+                    new PointF(src.Width - 1 - ln.p1.Y, ln.p1.X),
+                    new PointF(src.Width - 1 - ln.p2.Y, ln.p2.X));
+            }
+            g.Dispose();
+
+            return res;
         }
     }
 }

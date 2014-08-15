@@ -18,18 +18,38 @@ namespace TableOCR {
             OpenFileDialog fd = new OpenFileDialog();
             fd.Title = "Выберите изображение ведомости";
             if (fd.ShowDialog() == DialogResult.OK) {
-                Bitmap sourceImage = (Bitmap) Image.FromFile(fd.FileName);
-                Util.Timed("to std format", () => {
-                    sourceImage = ImageUtil.ToStdFormat(sourceImage);
-                });
+                Bitmap sourceImage = ImageUtil.LoadImage(fd.FileName);
 
                 Application.Run(new TableRecognitionDebugView(sourceImage));
             }
         }
 
+        /*
+         * Convenience function to recognize table in an image.
+         */
         public static Option<Table> RecognizeTable(Bitmap sourceImage) {
-            Bitmap sourceImageVert = ImageUtil.RotateCounterClockwise(sourceImage);
-            return new Some<Table>(new TableRecognitionDebugObj(sourceImage).recognizedTable);
+            Bitmap bw = ImageUtil.ToBlackAndWhite(sourceImage);
+            Bitmap rotBw = ImageUtil.RotateCounterClockwise(bw);
+
+            var horizOptions = RecognitionOptions.HorizontalOptions();
+            horizOptions.imageWidth = bw.Width;
+            horizOptions.imageHeight = bw.Height;
+
+            var vertOptions = RecognitionOptions.VerticalOptions();
+            vertOptions.imageWidth = rotBw.Width;
+            vertOptions.imageHeight = rotBw.Height;
+
+            List<Line> horizLines = RecognizeLines(bw, horizOptions);
+            List<Line> vertLines = RecognizeLines(rotBw, vertOptions);
+
+            var lnorm = new LineNormalization(horizLines, vertLines, sourceImage);
+            return TableBuilder.NewBuilder(lnorm).table;
+        }
+
+        private static List<Line> RecognizeLines(Bitmap bw, RecognitionOptions options) {
+            List<Point> edgePoints = EdgePointExtraction.ExtractEdgePoints(bw);
+            List<RawLine> rawLines = PseudoHoughTransform.RecognizeLines(edgePoints, options);
+            return LineFilter.FilterLines(edgePoints, rawLines, options);
         }
     }
 }

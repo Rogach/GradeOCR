@@ -7,71 +7,102 @@ using OCRUtil;
 using LibUtil;
 
 namespace TableOCR {
+
+    /*
+     * Builds a table for given set of horizontal/vertical lines.
+     *
+     * First, we find median for left and right end points of horizontal lines.
+     * We take those points as X values for left and right edge lines of new table.
+     *  
+     * Afterwards, we retain only the rows lines that fall within certain threshold of those edge lines
+     * (thus removing some of the artifacts).
+     * Resulting row lines are paired with each other (from top to bottom) and form "rows" of our table.
+     * 
+     * Then, for each row, we find which vertical lines intersect it, thus retrieving cell borders.
+     * 
+     * We cluster resulting rows. Clustering distance is defined 
+     * as differences in row height and set of vertical row dividers.
+     * Biggest row cluster is then assumed to contain out target rows.
+     * 
+     * Those lines that are close to biggest row cluster, but do not exactly qualify,
+     * are assumed to be "damaged" and are healed by replacing row dividers by those of main cluster.
+     * 
+     * Main cluster is then extended up and down, considering only row dividers when accepting new rows
+     * (thus we allow several rows to be of wildly different width).
+     * 
+     * Rows that have height as integer multiple of median row height are assumed to be "damaged" and
+     * are healed by splitting them into smaller rows (we only accept such split if there are real, but not
+     * long enough lines in original image).
+     */
     public class TableBuilder {
+
+        public static Option<Table> ExtractTable(LineNormalization lnorm) {
+            return NewBuilder(lnorm).table;
+        }
+
+        public static TableBuilder NewBuilder(LineNormalization lnorm) {
+            return new TableBuilder(lnorm.angle, lnorm.normHorizLines, lnorm.normRotVertLines);
+        }
+
+        /* Threshold for distance of line end point to table edge.
+         * Used when filtering horizontal lines.
+         */
         public static readonly int sideEgdeThreshold = 100;
 
-        public PointF horizNormal;
-        public PointF vertNormal;
-        public PointF invHorizNormal;
-        public PointF invVertNormal;
+        PointF horizNormal;
+        PointF vertNormal;
+        PointF invHorizNormal;
+        PointF invVertNormal;
 
-        public List<LineF> rowLines;
+        List<LineF> rowLines;
 
-        public Line leftEdge;
-        public Line rightEdge;
+        float leftEdgeX;
+        float rightEdgeX;
+
+        LineF leftEdge;
+        LineF rightEdge;
+
+        private class RowInfo {
+            public LineF topLine { get; set; }
+            public LineF bottomLine { get; set; }
+            public List<float> dividers { get; set; }
+        }
 
         List<RowInfo> rows;
 
-        public Table table;
+        public Option<Table> table = new None<Table>();
 
-        public TableBuilder(LineNormalization lnorm) {
-            double angle = lnorm.angle;
-            
-            horizNormal = new PointF((float) Math.Cos(angle), (float) Math.Sin(angle));
-            vertNormal = new PointF((float) -Math.Sin(angle), (float) Math.Cos(angle));
-            invHorizNormal = new PointF((float) Math.Cos(angle), (float) -Math.Sin(angle));
-            invVertNormal = new PointF((float) Math.Sin(angle), (float) Math.Cos(angle));
+        public TableBuilder(double tableAngle, List<LineF> horizLines, List<LineF> vertLines) {
+            horizNormal = new PointF((float) Math.Cos(tableAngle), (float) Math.Sin(tableAngle));
+            vertNormal = new PointF((float) -Math.Sin(tableAngle), (float) Math.Cos(tableAngle));
+            invHorizNormal = new PointF((float) Math.Cos(tableAngle), (float) -Math.Sin(tableAngle));
+            invVertNormal = new PointF((float) Math.Sin(tableAngle), (float) Math.Cos(tableAngle));
 
-            List<LineF> horizLines = lnorm.normHorizLines;
-            List<LineF> vertLines = lnorm.normRotVertLines.OrderBy(ln => ln.p1.X).ToList();
+            // convert incoming lines into table space
+            horizLines = horizLines.ConvertAll(ln => new LineF(ToTable(ln.p1), ToTable(ln.p2)));
+            vertLines = vertLines.ConvertAll(ln => new LineF(ToTable(ln.p1), ToTable(ln.p2)));
 
-            List<float> allLeftEndPoints = horizLines.Select(ln => TableX(ln.p1)).OrderBy(x => x).ToList();
-            List<float> allRightEndPoints = horizLines.Select(ln => TableX(ln.p2)).OrderBy(x => x).ToList();
+            BuildTable(horizLines, vertLines);
+        }
 
-            float leftMedian = allLeftEndPoints[allLeftEndPoints.Count / 2];
-            float rightMedian = allRightEndPoints[allRightEndPoints.Count / 2];
+        private void BuildTable(List<LineF> horizLines, List<LineF> vertLines) {
+            rowLines = ExtractTableRowLines(horizLines);
+            if (rowLines.Count < 2) return;
 
-            rowLines =
-                horizLines
-                .Where(ln => Math.Abs(TableX(ln.p1) - leftMedian) < sideEgdeThreshold)
-                .Where(ln => Math.Abs(TableX(ln.p2) - rightMedian) < sideEgdeThreshold)
-                .OrderBy(ln => TableY(ln.p1))
-                .ToList();
-            
-            List<PointF> leftEndPoints = rowLines.Select(ln => ln.p1).ToList();
-            List<PointF> rightEndPoints = rowLines.Select(ln => ln.p2).ToList();
+            CalculateEdgeLines();
 
-            float leftX = leftEndPoints.Select(pt => TableX(pt)).Average();
-            float rightX = rightEndPoints.Select(pt => TableX(pt)).Average();
-
-            PointF leftEdgeTop = new PointF(leftX, TableY(leftEndPoints.First()));
-            PointF leftEdgeBottom = new PointF(leftX, TableY(leftEndPoints.Last()));
-            leftEdge = new Line(PointOps.TruncPt(ToPicture(leftEdgeTop)), PointOps.TruncPt(ToPicture(leftEdgeBottom)));
-
-            PointF rightEdgeTop = new PointF(rightX, TableY(rightEndPoints.First()));
-            PointF rightEdgeBottom = new PointF(rightX, TableY(rightEndPoints.Last()));
-            rightEdge = new Line(PointOps.TruncPt(ToPicture(rightEdgeTop)), PointOps.TruncPt(ToPicture(rightEdgeBottom)));
-
+            // build row objects
             rows = new List<RowInfo>();
             for (int r = 0; r < rowLines.Count - 1; r++) {
                 rows.Add(new RowInfo { topLine = rowLines[r], bottomLine = rowLines[r + 1], dividers = new List<float>() });
             }
 
+            // calculate vertical row dividers
             foreach (var row in rows) {
                 foreach (var ln in vertLines) {
-                    if (TableX(ln.p1) - leftX > 10 && TableX(ln.p1) - rightX < -10) {
-                        if (TableY(ln.p1) - 5 <= TableY(row.topLine.p1) && TableY(ln.p2) + 5 >= TableY(row.bottomLine.p1)) {
-                            row.dividers.Add((TableX(ln.p1) + TableX(ln.p2)) / 2);
+                    if (ln.p1.X - leftEdgeX > 10 && ln.p1.X - rightEdgeX < -10) {
+                        if (ln.p1.Y - 5 <= row.topLine.p1.Y && ln.p2.Y + 5 >= row.bottomLine.p1.Y) {
+                            row.dividers.Add((ln.p1.X + ln.p2.X) / 2);
                         }
                     }
                 }
@@ -86,8 +117,9 @@ namespace TableOCR {
 
             int clusterStart = rows.IndexOf(bestCluster.First());
             int clusterEnd = rows.IndexOf(bestCluster.Last());
+
+            // try extending cluster down
             for (int r = clusterStart + 1; r < rows.Count; r++) {
-                // assert that cluster is contigious
                 if (RowDividerDifferenceScore(bestCluster.First(), rows[r]) > 0) {
                     clusterEnd = r - 1;
                     break;
@@ -95,6 +127,7 @@ namespace TableOCR {
                 clusterEnd = r;
             }
 
+            // try extending cluster up
             for (int r = clusterStart - 1; r >= 0; r--) {
                 if (RowDividerDifferenceScore(bestCluster.First(), rows[r]) > 0) {
                     clusterStart = r + 1;
@@ -104,33 +137,60 @@ namespace TableOCR {
             }
 
             rows = rows.GetRange(clusterStart, clusterEnd - clusterStart + 1);
-            rows = HealRows(rows, horizLines, leftX, rightX);
+            rows = HealRows(rows, horizLines, leftEdgeX, rightEdgeX);
 
-            table = new Table();
-            table.origin = ToPicture(new PointF(leftX, ToTable(rows[0].topLine.p1).Y));
-            table.horizontalNormal = horizNormal;
-            table.verticalNormal = vertNormal;
+            this.table = new Some<Table>(new Table());
+            this.table.ForEach(table => {
+                table.origin = ToPicture(new PointF(leftEdgeX, rows[0].topLine.p1.Y));
+                table.horizontalNormal = horizNormal;
+                table.verticalNormal = vertNormal;
 
-            table.rowHeights = new List<float>();
-            foreach (var row in rows) {
-                table.rowHeights.Add(RowHeight(row));
-            }
-            table.totalHeight = table.rowHeights.Sum();
+                table.rowHeights = new List<float>();
+                foreach (var row in rows) {
+                    table.rowHeights.Add(RowHeight(row));
+                }
+                table.totalHeight = table.rowHeights.Sum();
 
-            table.columnWidths = new List<float>();
-            float prevColumn = leftX;
-            foreach (float d in RowClusterCenter(bestCluster).dividers) {
-                table.columnWidths.Add(d - prevColumn);
-                prevColumn = d;
-            }
-            table.columnWidths.Add(rightX - prevColumn);
-            table.totalWidth = table.columnWidths.Sum();
+                table.columnWidths = new List<float>();
+                float prevColumn = leftEdgeX;
+                foreach (float d in RowClusterCenter(bestCluster).dividers) {
+                    table.columnWidths.Add(d - prevColumn);
+                    prevColumn = d;
+                }
+                table.columnWidths.Add(rightEdgeX - prevColumn);
+                table.totalWidth = table.columnWidths.Sum();
+            });
         }
 
-        private class RowInfo {
-            public LineF topLine { get; set; }
-            public LineF bottomLine { get; set; }
-            public List<float> dividers { get; set; }
+        public List<LineF> ExtractTableRowLines(List<LineF> horizLines) {
+            // calculate X values for left and right table edge
+            float leftMedian = horizLines.Select(ln => ln.p1.X).Median();
+            float rightMedian = horizLines.Select(ln => ln.p2.X).Median();
+
+            // retain only lines that have ends within threshold distance from table edges
+            return
+                horizLines
+                .Where(ln => Math.Abs(ln.p1.X - leftMedian) < sideEgdeThreshold)
+                .Where(ln => Math.Abs(ln.p2.X - rightMedian) < sideEgdeThreshold)
+                .OrderBy(ln => ln.p1.Y)
+                .ToList();
+        }
+
+        public void CalculateEdgeLines() {
+            List<PointF> leftEndPoints = rowLines.Select(ln => ln.p1).ToList();
+            List<PointF> rightEndPoints = rowLines.Select(ln => ln.p2).ToList();
+
+            // recalculate X values for left and right table edges (minimizing RMSD from end points)
+            leftEdgeX = leftEndPoints.Select(pt => pt.X).Average();
+            rightEdgeX = rightEndPoints.Select(pt => pt.X).Average();
+
+            PointF leftEdgeTop = new PointF(leftEdgeX, leftEndPoints.First().Y);
+            PointF leftEdgeBottom = new PointF(leftEdgeX, leftEndPoints.Last().Y);
+            leftEdge = new LineF(leftEdgeTop, leftEdgeBottom);
+
+            PointF rightEdgeTop = new PointF(rightEdgeX, rightEndPoints.First().Y);
+            PointF rightEdgeBottom = new PointF(rightEdgeX, rightEndPoints.Last().Y);
+            rightEdge = new LineF(rightEdgeTop, rightEdgeBottom);
         }
 
         private List<List<RowInfo>> ClusterRows() {
@@ -214,11 +274,11 @@ namespace TableOCR {
                     float innerRowHeight = RowHeight(row) / innerRowCount;
                     List<LineF> innerRowLines = new List<LineF>();
                     for (int ir = 1; ir < innerRowCount; ir++) {
-                        float irY = TableY(row.topLine.p1) + ir * innerRowHeight;
-                        if (horizLines.Find(hl => Math.Abs(TableY(hl.p1) - irY) < 5) != null) {
+                        float irY = row.topLine.p1.Y + ir * innerRowHeight;
+                        if (horizLines.Find(hl => Math.Abs(hl.p1.Y - irY) < 5) != null) {
                             // we can find real (sub-threshold) line for this Y,
                             // so we confirm our guess
-                            innerRowLines.Add(new LineF(ToPicture(new PointF(leftX, irY)), ToPicture(new PointF(rightX, irY))));
+                            innerRowLines.Add(new LineF(new PointF(leftX, irY), new PointF(rightX, irY)));
                         }
                     }
                     // check that we were able to confirm our guess for all inner lines
@@ -275,30 +335,22 @@ namespace TableOCR {
 
             Graphics g = Graphics.FromImage(res);
 
-            g.DrawLine(new Pen(Color.Green, 4), leftEdge.p1, leftEdge.p2);
-            g.DrawLine(new Pen(Color.Green, 4), rightEdge.p1, rightEdge.p2);
+            g.DrawLine(new Pen(Color.Green, 4), ToPicture(leftEdge.p1), ToPicture(leftEdge.p2));
+            g.DrawLine(new Pen(Color.Green, 4), ToPicture(rightEdge.p1), ToPicture(rightEdge.p2));
             foreach (var row in rowLines) {
-                g.DrawLine(new Pen(Color.Red, 4), row.p1, row.p2);
+                g.DrawLine(new Pen(Color.Red, 4), ToPicture(row.p1), ToPicture(row.p2));
             }
 
             foreach (var row in rows) {
                 foreach (float d in row.dividers) {
                     g.DrawLine(new Pen(Color.Blue, 4),
-                        PointOps.TruncPt(ToPicture(new PointF(d, ToTable(row.topLine.p1).Y))),
-                        PointOps.TruncPt(ToPicture(new PointF(d, ToTable(row.bottomLine.p1).Y))));
+                        ToPicture(new PointF(d, row.topLine.p1.Y)),
+                        ToPicture(new PointF(d, row.bottomLine.p1.Y)));
                 }
             }
 
             g.Dispose();
 
-            return res;
-        }
-
-        public Bitmap ResultImage(Bitmap bw) {
-            Bitmap res = new Bitmap(bw);
-            Graphics g = Graphics.FromImage(res);
-            table.DrawTable(g, new Pen(Color.Red, 4));
-            g.Dispose();
             return res;
         }
     }

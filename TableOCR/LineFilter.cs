@@ -8,131 +8,40 @@ using System.Drawing;
 using System.Drawing.Imaging;
 
 namespace TableOCR {
-    public static class LineFilter {
 
-        public static List<Line> ExtractLines(List<Point> edgePoints, List<RawLine> rawLines, RecognitionParams options) {
+    public static class LineFilter {
+        
+        /*
+         * Forms solid lines from set of raw lines.
+         * Discards lines that have cyclic patterns in them.
+         */
+        public static List<Line> FilterLines(List<Point> edgePoints, List<RawLine> rawLines, RecognitionOptions options) {
             List<Line> lines = new List<Line>();
 
             foreach (var rawLine in rawLines) {
-                bool[] linePoints = new bool[options.width];
+                
+                // convert rawLine to list of black/white pixels
+                bool[] linePoints = new bool[options.imageWidth];
                 foreach (var pt in edgePoints) {
                     if (Math.Abs(rawLine.yInt - (pt.Y - pt.X * rawLine.k)) < 2) {
                         linePoints[pt.X] = true;
                     }
                 }
-                var ld = new LineDetector(linePoints);
-                var segments = ld.GetLines(x => (int) Math.Round(rawLine.yInt + x * rawLine.k));
+
+                var segments = SegmentDetector.GetSegments(linePoints, rawLine);
+
                 if (segments.Count > 0) {
-                    Line totalLine = GetTotalLine(segments);
-                    bool hasCyclicPattenrs = 
-                        options.detectCyclicPatterns &&
-                        HasCyclicPatterns(linePoints, totalLine.p1.X, totalLine.p2.X, options);
-                    if (!hasCyclicPattenrs)
-                        lines.Add(totalLine);
+                    Line solidLine = SegmentDetector.GetSolidLine(segments);
+
+                    if (!options.detectCyclicPatterns ||
+                        !CyclicPatternDetector.HasCyclicPatterns(linePoints, solidLine.p1.X, solidLine.p2.X, options)) {
+                        lines.Add(solidLine);
+                    }
                 }
             }
 
             return lines;
         }
 
-        public static Line GetTotalLine(List<Line> segments) {
-            Line totalLine = new Line(segments.First().p1, segments.Last().p2);
-            if (segments.Sum(ln => ln.Length()) / totalLine.Length() > 0.7) {
-                return totalLine;
-            } else {
-                if (segments.First().Length() > segments.Last().Length()) {
-                    return GetTotalLine(segments.GetRange(0, segments.Count - 1));
-                } else {
-                    return GetTotalLine(segments.Skip(1).ToList());
-                }
-            }
-        }
-
-        public static bool HasCyclicPatterns(bool[] linePoints, int from, int to, RecognitionParams options) {
-            for (int w = options.cyclicPatternsMinWidth; w <= options.cyclicPatternsMaxWidth; w++) {
-                int[] acc = new int[w];
-                for (int i = from; i <= to; i++) {
-                    if (linePoints[i])
-                        acc[(i - from) % w]++;
-                }
-
-                int threshold = (to - from) / w / 5;
-                double cyclicPatternSize = (double) acc.Where(a => a < threshold).Count() / w;
-                if (cyclicPatternSize > 0.2) return true;
-
-            }
-            return false;
-        }
-
-        public static Bitmap CyclicPatternsImage(bool[] linePoints, int from, int to) {
-            int windowFrom = 10;
-            int windowTo = 100;
-            int extraWidth = 50;
-            Bitmap res = new Bitmap(windowTo + extraWidth, windowTo - windowFrom + 1, PixelFormat.Format32bppArgb);
-
-            unsafe {
-                BitmapData bd = res.LockBits(ImageLockMode.WriteOnly);
-                byte* ptr = (byte*) bd.Scan0.ToPointer();
-
-                for (int w = windowFrom; w <= windowTo; w++) {
-                    int[] acc = new int[w];
-                    for (int i = from; i <= to; i++) {
-                        if (linePoints[i]) {
-                            acc[(i - from) % w]++;
-                        }
-                    }
-
-                    int max = acc.Max();
-
-                    int threshold = (to - from) / w / 5;
-                    double cyclicPatternSize = (double) acc.Where(a => a < threshold).Count() / w;
-                                        
-                    for (int i = 0; i < w; i++) {
-                        byte v = (byte) (acc[i] * 255 / max);
-                        *ptr = v;
-                        *(ptr + 1) = v;
-                        *(ptr + 2) = v;
-                        *(ptr + 3) = 255;
-                        ptr += 4;
-                    }
-                    
-                    for (int i = w; i < windowTo + extraWidth; i++) {
-                        if (cyclicPatternSize > 0.2) {
-                            *ptr = 0;
-                            *(ptr + 1) = 0;
-                            *(ptr + 2) = 255;
-                            *(ptr + 3) = 255;
-                        }
-                        ptr += 4;
-                    }
-                }
-
-                res.UnlockBits(bd);
-            }
-
-            return res;
-        }
-
-        public static Bitmap CyclicPatternsInLines(List<Point> edgePoints, List<RawLine> rawLines, RecognitionParams options) {
-            rawLines = rawLines.OrderBy(l => l.yInt).ToList();
-
-            List<Bitmap> images = new List<Bitmap>();
-
-            foreach (var rawLine in rawLines) {
-                bool[] linePoints = new bool[options.width];
-                foreach (var pt in edgePoints) {
-                    if (Math.Abs(rawLine.yInt - (pt.Y - pt.X * rawLine.k)) < 2) {
-                        linePoints[pt.X] = true;
-                    }
-                }
-                var ld = new LineDetector(linePoints);
-                var lines = ld.GetLines(x => (int) Math.Round(rawLine.yInt + x * rawLine.k));
-                if (lines.Count > 0) {
-                    images.Add(CyclicPatternsImage(linePoints, lines.First().p1.X, lines.Last().p2.X));
-                }
-            }
-
-            return ImageUtil.VerticalConcat(images);
-        }
     }
 }

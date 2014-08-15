@@ -10,15 +10,26 @@ using OCRUtil;
 
 namespace TableOCR {
     
+    /*
+     * Contains information about recognized table.
+     * Carries row/column dimensions, table origin, table rotation.
+     */
     public class Table {
+        /* Top-left table point */
         public PointF origin;
+        /* Normal vector (oriented in row direction) */
         public PointF horizontalNormal;
+        /* Normal vector (oriented in column direction) */
         public PointF verticalNormal;
+        
         public List<float> rowHeights;
         public float totalHeight;
         public List<float> columnWidths;
         public float totalWidth;
 
+        /*
+         * Draw a table on provided graphics canvas with provided pen.
+         */
         public void DrawTable(Graphics g, Pen p) {
             PointF row = PointOps.Mult(horizontalNormal, totalWidth);
             PointF r = origin;
@@ -37,6 +48,9 @@ namespace TableOCR {
             }
         }
 
+        /* 
+         * Locates top-left cell corner at `x` column and `y` row.
+         */
         public PointF GetTopLeftCellCorner(int x, int y) {
             PointF p = origin;
             for (int q = 0; q < x; q++) {
@@ -48,6 +62,9 @@ namespace TableOCR {
             return p;
         }
 
+        /*
+         * Returns contour for cell at `x` column and `y` row.
+         */ 
         public GraphicsPath GetCellContour(int x, int y) {
             var gp = new GraphicsPath();
             gp.AddPolygon(
@@ -61,6 +78,10 @@ namespace TableOCR {
             return gp;
         }
 
+        /*
+         * Calculates row/column for given coordinates.
+         * If given coordinates are outside the table, returns None.
+         */
         public Option<Point> GetCellAtPoint(float px, float py) {
             px -= origin.X;
             py -= origin.Y;
@@ -88,6 +109,10 @@ namespace TableOCR {
             }
         }
 
+        /*
+         * Extracts cell contents image from provided image in cell
+         * of `x` column, `y` row.
+         */
         public Bitmap GetCellImage(Bitmap img, int x, int y) {
             int padding = 1;
 

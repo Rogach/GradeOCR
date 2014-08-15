@@ -7,6 +7,12 @@ using OCRUtil;
 using LibUtil;
 
 namespace TableOCR {
+
+    /*
+     * For given set of vertical and horizontal lines,
+     * rotates lines so that they all have the same angle
+     * (so afterwards we can assume that table, rows and columns are strictly rectangular)
+     */
     public class LineNormalization {
 
         public double angle;

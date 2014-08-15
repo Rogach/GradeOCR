@@ -8,7 +8,12 @@ using OCRUtil;
 using LibUtil;
 
 namespace TableOCR {
-    public static class EdgeExtraction {
+
+    /*
+     * Simple extraction of black pixels that have white pixels right above
+     * them. Those pixels usually form edges afterwards.
+     */
+    public static class EdgePointExtraction {
 
         public static List<Point> ExtractEdgePoints(Bitmap src) {
             List<Point> edgePoints = new List<Point>();
@@ -17,7 +22,7 @@ namespace TableOCR {
                 BitmapData bd = src.LockBits(ImageLockMode.ReadOnly);
                 uint* ptr = (uint*) bd.Scan0.ToPointer();
 
-                // for some reason, calculation of these expression
+                // for some reason, calculation of these expressions
                 // is not moved outside the inner loops
                 // execution time horribly suffers
                 int srcWidth = src.Width;
@@ -39,6 +44,9 @@ namespace TableOCR {
             return edgePoints;
         }
 
+        /*
+         * Create white image with black pixels at coordinates, specified by `points`.
+         */
         public static Bitmap DrawPoints(Bitmap src, List<Point> points) {
             Bitmap res = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
             res.SetResolution(src.HorizontalResolution, src.VerticalResolution);
