@@ -18,7 +18,6 @@ namespace FinderCircles {
                 byte* ptr = (byte*) bd.Scan0.ToPointer();
 
                 for (int y = patternRadius; y < img.Height - patternRadius; y++) {
-                    if (y % 10 == 0) Console.WriteLine("y = {0}", y);
                     for (int x = patternRadius; x < img.Width - patternRadius; x++) {
                         int hy = y - patternRadius;
                         int hx = x - patternRadius;
@@ -86,7 +85,7 @@ namespace FinderCircles {
             return res;
         }
 
-        public static List<Point> LocatePeaks(int[,] hough) {
+        public static List<Point> LocatePeaks(int[,] hough, int patternSize) {
             int max = int.MinValue;
             int maxX = 0;
             int maxY = 0;

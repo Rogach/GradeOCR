@@ -37,20 +37,19 @@ namespace FinderCircles {
             Bitmap grayImage = ImageUtil.ToGrayscale(sourceImage);
             this.inputImagePV.Image = grayImage;
 
-
             NoiseFilter filter = new FilterSeq(
-                new RandomNoise()
+                new RandomBlots(0.2),
+                new RandomNoise(0.2),
+                new RandomLines(0.2),
+                new RandomStripes(0.3, 20)
             );
-            Bitmap noiseImage = filter.Apply(sourceImage, 0.9);
+            Bitmap noiseImage = filter.Apply(sourceImage);
             this.noiseImagePV.Image = noiseImage;
 
             int[,] hough = Util.Timed("hough transform", () => CircleHoughTransform.HoughTransform(noiseImage, patternSize));
             Bitmap houghTransformImage = CircleHoughTransform.HoughTransformImage(hough);
             this.houghImagePV.Image = houghTransformImage;
-            List<Point> peaks = CircleHoughTransform.LocatePeaks(hough);
-            foreach (var p in peaks) {
-                Console.WriteLine("Located peak at {0}x{1}", p.X + patternSize, p.Y + patternSize);
-            }
+            List<Point> peaks = CircleHoughTransform.LocatePeaks(hough, patternSize);
             this.houghPeakImagePV.Image = CircleHoughTransform.DrawPeaks(houghTransformImage, peaks);
         }
     }
