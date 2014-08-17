@@ -39,8 +39,8 @@ namespace FinderCircles {
             this.inputImagePV.Image = grayImage;
 
             NoiseFilter filter = new FilterSeq(
-                new RandomBlots(0.10),
-                new RandomNoise(0.10),
+                new RandomBlots(0.2),
+                new RandomNoise(0.2),
                 new RandomStripes(0.5, 20)
             );
 

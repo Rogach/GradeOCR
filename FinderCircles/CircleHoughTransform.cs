@@ -65,7 +65,7 @@ namespace FinderCircles {
                         for (int y = 0; y < imgHeight; y++) {
                             for (int x = 0; x < imgWidth; x++) {
                                 byte v = *ptr;
-                                hough[patternRadius + y + ptWP.Y, patternRadius + x + ptWP.X] += v;
+                                hough[patternRadius + y + ptWP.Y, patternRadius + x + ptWP.X] += v * 68 / 100;
                                 ptr += 4;
                             }
                         }
@@ -75,7 +75,7 @@ namespace FinderCircles {
                         for (int y = 0; y < imgHeight; y++) {
                             for (int x = 0; x < imgWidth; x++) {
                                 byte v = *ptr;
-                                hough[patternRadius + y + ptWM.Y, patternRadius + x + ptWM.X] -= v;
+                                hough[patternRadius + y + ptWM.Y, patternRadius + x + ptWM.X] -= v * 68 / 100;
                                 ptr += 4;
                             }
                         }
