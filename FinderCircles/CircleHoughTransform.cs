@@ -8,57 +8,97 @@ using System.Drawing.Imaging;
 using LibUtil;
 
 namespace FinderCircles {
+    
+    public struct Point3 {
+        public int X;
+        public int Y;
+        public int Z;
+        public Point3(int X, int Y, int Z) {
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
+        }
+        public override string ToString() {
+            return String.Format("[X={0},Y={1},Z={2}]", X, Y, Z);
+        }
+    }
+
     public static class CircleHoughTransform {
-        
-        public static int[,] HoughTransform(Bitmap img, int patternRadius) {
-            int[,] hough = new int[img.Height + patternRadius * 2, img.Width + patternRadius * 2];
-            List<Point> blackMinus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != 1 && thisP == 1);
-            List<Point> blackPlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP == 1 && thisP != 1);
-            List<Point> whitePlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != -1 && thisP == -1);
-            List<Point> whiteMinus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP == -1 && thisP != -1);
 
-            unsafe {
-                BitmapData bd = img.LockBits(ImageLockMode.ReadOnly);
-                byte* ptr = (byte*) bd.Scan0.ToPointer();
+        public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius) {
+            int imgHeight = img.Height;
+            int imgWidth = img.Width;
+            int[,,] fullHough = new int[maxPatternRadius - minPatternRadius + 1, img.Height, img.Width];
+            for (int patternRadius = minPatternRadius; patternRadius <= maxPatternRadius; patternRadius++) {
+                int[,] hough = new int[img.Height + patternRadius * 2, img.Width + patternRadius * 2];
+                List<Point> blackMinus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != 1 && thisP == 1);
+                List<Point> blackPlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP == 1 && thisP != 1);
+                List<Point> whitePlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != -1 && thisP == -1);
+                List<Point> whiteMinus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP == -1 && thisP != -1);
 
-                for (int y = 0; y < img.Height; y++) {
-                    for (int x = 0; x < img.Width; x++) {
-                        byte v = *ptr;
-                        foreach (var ptBM in blackMinus) {
-                            hough[patternRadius + y + ptBM.Y, patternRadius + x + ptBM.X] -= v;
-                        }
-                        foreach (var ptBP in blackPlus) {
-                            hough[patternRadius + y + ptBP.Y, patternRadius + x + ptBP.X] += v;
-                        }
-                        foreach (var ptWP in whitePlus) {
-                            hough[patternRadius + y + ptWP.Y, patternRadius + x + ptWP.X] += v;
-                        }
-                        foreach (var ptWM in whiteMinus) {
-                            hough[patternRadius + y + ptWM.Y, patternRadius + x + ptWM.X] -= v;
-                        }
+                unsafe {
+                    BitmapData bd = img.LockBits(ImageLockMode.ReadOnly);
+                    byte* ptr;
 
-                        ptr += 4;
+                    foreach (var ptBM in blackMinus) {
+                        ptr = (byte*) bd.Scan0.ToPointer();
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *ptr;
+                                hough[patternRadius + y + ptBM.Y, patternRadius + x + ptBM.X] -= v;
+                                ptr += 4;
+                            }
+                        }
+                    }
+                    foreach (var ptBP in blackPlus) {
+                        ptr = (byte*) bd.Scan0.ToPointer();
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *ptr;
+                                hough[patternRadius + y + ptBP.Y, patternRadius + x + ptBP.X] += v;
+                                ptr += 4;
+                            }
+                        }
+                    }
+                    foreach (var ptWP in whitePlus) {
+                        ptr = (byte*) bd.Scan0.ToPointer();
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *ptr;
+                                hough[patternRadius + y + ptWP.Y, patternRadius + x + ptWP.X] += v;
+                                ptr += 4;
+                            }
+                        }
+                    }
+                    foreach (var ptWM in whiteMinus) {
+                        ptr = (byte*) bd.Scan0.ToPointer();
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *ptr;
+                                hough[patternRadius + y + ptWM.Y, patternRadius + x + ptWM.X] -= v;
+                                ptr += 4;
+                            }
+                        }
+                    }
+
+                    int houghHeight = hough.GetLength(0);
+                    int houghWidth = hough.GetLength(1) - 1;
+                    for (int y = 0; y < houghHeight; y++) {
+                        for (int x = 0; x < houghWidth; x++) {
+                            hough[y, x + 1] += hough[y, x];
+                        }
+                    }
+
+                    img.UnlockBits(bd);
+                }
+                for (int y = 0; y < imgHeight; y++) {
+                    for (int x = 0; x < imgWidth; x++) {
+                        fullHough[patternRadius - minPatternRadius, y, x] = hough[patternRadius + y, patternRadius + x];
                     }
                 }
-
-
-                for (int y = 0; y < hough.GetLength(0); y++) {
-                    for (int x = 0; x < hough.GetLength(1) - 1; x++) {
-                        hough[y, x + 1] += hough[y, x];
-                    }
-                }
-
-                img.UnlockBits(bd);
             }
 
-            int[,] trimmedHough = new int[img.Height - patternRadius * 2, img.Width - patternRadius * 2];
-            for (int y = patternRadius; y < img.Height - patternRadius; y++) {
-                for (int x = patternRadius; x < img.Width - patternRadius; x++) {
-                    trimmedHough[y - patternRadius, x - patternRadius] = hough[y + patternRadius, x + patternRadius];
-                }
-            }
-
-            return trimmedHough;
+            return fullHough;
         }
 
         public static List<Point> CaclulateOffsetTable(int patternRadius, Func<int, int, bool> testPixel) {
@@ -78,7 +118,7 @@ namespace FinderCircles {
             return pts;
         }
 
-        public static Bitmap HoughTransformImage(int[,] hough) {
+        public static Bitmap HoughTransformImage(int[,,] hough) {
             int max = int.MinValue;
             int min = int.MaxValue;
             foreach (int h in hough) {
@@ -87,8 +127,9 @@ namespace FinderCircles {
             }
             if (max == min) max = min + 1;
 
-            int height = hough.GetLength(0);
-            int width = hough.GetLength(1);
+            int zdim = hough.GetLength(0);
+            int height = hough.GetLength(1);
+            int width = hough.GetLength(2);
             Bitmap res = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             unsafe {
                 BitmapData bd = res.LockBits(ImageLockMode.WriteOnly);
@@ -96,7 +137,11 @@ namespace FinderCircles {
 
                 for (int y = 0; y < height; y++) {
                     for (int x = 0; x < width; x++) {
-                        byte v = (byte) ((hough[y, x] - min) * 255 / (max - min));
+                        byte v = byte.MinValue;
+                        for (int z = 0; z < zdim; z++) {
+                            byte zv = (byte) ((hough[z, y, x] - min) * 255 / (max - min));
+                            if (zv > v) v = zv;
+                        }
                         *ptr = v;
                         *(ptr + 1) = v;
                         *(ptr + 2) = v;
@@ -110,23 +155,27 @@ namespace FinderCircles {
             return res;
         }
 
-        public static List<Point> LocatePeaks(int[,] hough, int patternSize) {
+        public static List<Point3> LocatePeaks(int[,,] hough) {
             int max = int.MinValue;
             int maxX = 0;
             int maxY = 0;
-            for (int y = 0; y < hough.GetLength(0); y++) {
-                for (int x = 0; x < hough.GetLength(1); x++) {
-                    if (hough[y, x] > max) {
-                        max = hough[y, x];
-                        maxX = x;
-                        maxY = y;
+            int maxZ = 0;
+            for (int z = 0; z < hough.GetLength(0); z++) {
+                for (int y = 0; y < hough.GetLength(1); y++) {
+                    for (int x = 0; x < hough.GetLength(2); x++) {
+                        if (hough[z, y, x] > max) {
+                            max = hough[z, y, x];
+                            maxX = x;
+                            maxY = y;
+                            maxZ = z;
+                        }
                     }
                 }
             }
-            return new List<Point> { new Point(maxX, maxY) };
+            return new List<Point3> { new Point3(maxX, maxY, maxZ) };
         }
 
-        public static Bitmap DrawPeaks(Bitmap src, List<Point> peaks) {
+        public static Bitmap DrawPeaks(Bitmap src, List<Point3> peaks) {
             Bitmap res = new Bitmap(src);
 
             unsafe {
