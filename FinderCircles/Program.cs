@@ -11,27 +11,28 @@ namespace FinderCircles {
     class Program {
         [STAThread]
         static void Main(string[] args) {
-            Util.Timed("stress test", () => {
-                StressTest();
-            });
 
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
+            //Util.Timed("stress test", () => {
+            //    StressTest();
+            //});
 
-            //int patternRadius = 25;
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
 
-            //Bitmap sourceImage = new Bitmap(200, 200, PixelFormat.Format32bppArgb);
-            //Graphics g = Graphics.FromImage(sourceImage);
-            //g.FillRectangle(Brushes.White, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
-            //g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(10, 10));
-            //g.Dispose();
+            int patternRadius = 25;
 
-            //Application.Run(new FinderCircleDebugView(sourceImage));
+            Bitmap sourceImage = new Bitmap(200, 200, PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage(sourceImage);
+            g.FillRectangle(Brushes.White, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
+            g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(50, 50));
+            g.Dispose();
+
+            Application.Run(new FinderCircleDebugView(sourceImage));
         }
 
         static void StressTest() {
             int patternSize = 25;
-            int N = 10;
+            int N = 30;
             int success = 0;
             int failure = 0;
 
@@ -47,10 +48,10 @@ namespace FinderCircles {
                 g.Dispose();
 
                 NoiseFilter filter = new FilterSeq(
-                    new RandomBlots(0.2),
-                    new RandomNoise(0.2),
-                    new RandomLines(0.2),
-                    new RandomStripes(0.3, 20)
+                    new RandomBlots(0.15),
+                    new RandomNoise(0.15),
+                    new RandomLines(0.15),
+                    new RandomStripes(0.2, 20)
                 );
 
                 Bitmap noisedImage = filter.Apply(sourceImage);

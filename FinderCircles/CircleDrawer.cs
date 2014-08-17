@@ -23,13 +23,10 @@ namespace FinderCircles {
                         PointF p = new PointF(x, y);
                         float r = (float) PointOps.Distance(p, center) / radius;
 
-                        if (r < 3f / 9) {
+                        int px = GetPixelAtRadius(r);
+                        if (px == 1) {
                             *ptr = 0xff000000;
-                        } else if (r < 5f / 9) {
-                            *ptr = 0xffffffff;
-                        } else if (r < 7f / 9) {
-                            *ptr = 0xff000000;
-                        } else if (r < 1) {
+                        } else if (px == -1) {
                             *ptr = 0xffffffff;
                         }
 
@@ -41,6 +38,21 @@ namespace FinderCircles {
             }
 
             return img;
+        }
+
+        /* Returns 1 if pixel is black, 0 if transparent, -1 if pixel is white */
+        public static int GetPixelAtRadius(float r) {
+            if (r < 3f / 9) {
+                return 1;
+            } else if (r < 5f / 9) {
+                return -1;
+            } else if (r < 7f / 9) {
+                return 1;
+            } else if (r < 1) {
+                return -1;
+            } else {
+                return 0;
+            }
         }
     }
 }
