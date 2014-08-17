@@ -62,6 +62,12 @@ namespace OCRUtil {
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
+        public static double Distance(int x1, int y1, int x2, int y2) {
+            int dx = x1 - x2;
+            int dy = y1 - y2;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
+
         public static Point TruncPt(PointF p) {
             return new Point((int) Math.Round(p.X), (int) Math.Round(p.Y));
         }

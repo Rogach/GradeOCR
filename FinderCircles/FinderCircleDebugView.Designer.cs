@@ -31,6 +31,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.houghPeaksImagePanel = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
+            this.resultImagePanel = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // inputImagePanel
@@ -97,11 +99,29 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "Hough transform with peaks";
             // 
+            // resultImagePanel
+            // 
+            this.resultImagePanel.Location = new System.Drawing.Point(624, 25);
+            this.resultImagePanel.Name = "resultImagePanel";
+            this.resultImagePanel.Size = new System.Drawing.Size(300, 300);
+            this.resultImagePanel.TabIndex = 3;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(621, 9);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(37, 13);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "Result";
+            // 
             // FinderCircleDebugView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(628, 655);
+            this.ClientSize = new System.Drawing.Size(939, 655);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.resultImagePanel);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.houghPeaksImagePanel);
             this.Controls.Add(this.label3);
@@ -127,5 +147,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel houghPeaksImagePanel;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Panel resultImagePanel;
+        private System.Windows.Forms.Label label5;
     }
 }

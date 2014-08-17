@@ -57,6 +57,7 @@
     <Compile Include="FinderCircleDebugView.Designer.cs">
       <DependentUpon>FinderCircleDebugView.cs</DependentUpon>
     </Compile>
+    <Compile Include="ImageScaling.cs" />
     <Compile Include="NoiseFilter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

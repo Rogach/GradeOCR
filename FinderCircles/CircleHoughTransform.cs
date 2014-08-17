@@ -9,7 +9,7 @@ using LibUtil;
 
 namespace FinderCircles {
     
-    public struct Point3 {
+    public class Point3 {
         public int X;
         public int Y;
         public int Z;
@@ -24,6 +24,18 @@ namespace FinderCircles {
     }
 
     public static class CircleHoughTransform {
+
+        public static List<Point3> LocateFinderCircles(Bitmap img, int minPatternRadius, int maxPatternRadius, int patternCount) {
+            int scaleFactor = GetScaleFactor(minPatternRadius);
+            Bitmap downscaledImage = ImageScaling.ScaleDown(img, scaleFactor);
+            int[,,] hough = HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor);
+            return LocatePeaks(hough, patternCount, minPatternRadius / scaleFactor).ConvertAll(p => 
+                new Point3(p.X * scaleFactor, p.Y * scaleFactor, p.Z * scaleFactor + minPatternRadius));
+        }
+
+        public static int GetScaleFactor(int minPatternRadius) {
+            return (int) Math.Ceiling((double) minPatternRadius / 10);
+        }
 
         public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius) {
             int imgHeight = img.Height;
@@ -155,7 +167,10 @@ namespace FinderCircles {
             return res;
         }
 
-        public static List<Point3> LocatePeaks(int[,,] hough) {
+        public static List<Point3> LocatePeaks(int[,,] hough, int patternCount, int minPatternSize) {
+            return LocatePeaks(hough, patternCount, new List<Point3>(), minPatternSize);
+        }
+        public static List<Point3> LocatePeaks(int[,,] hough, int patternCount, List<Point3> foundPeaks, int minPatternSize) {
             int max = int.MinValue;
             int maxX = 0;
             int maxY = 0;
@@ -163,7 +178,8 @@ namespace FinderCircles {
             for (int z = 0; z < hough.GetLength(0); z++) {
                 for (int y = 0; y < hough.GetLength(1); y++) {
                     for (int x = 0; x < hough.GetLength(2); x++) {
-                        if (hough[z, y, x] > max) {
+                        Point3 neighbourPeak = foundPeaks.Find(p => PointOps.Distance(x, y, p.X, p.Y) < minPatternSize);
+                        if (neighbourPeak == null && hough[z, y, x] > max) {
                             max = hough[z, y, x];
                             maxX = x;
                             maxY = y;
@@ -172,7 +188,12 @@ namespace FinderCircles {
                     }
                 }
             }
-            return new List<Point3> { new Point3(maxX, maxY, maxZ) };
+            foundPeaks.Add(new Point3(maxX, maxY, maxZ));
+            if (patternCount == 1) {
+                return foundPeaks;
+            } else {
+                return LocatePeaks(hough, patternCount - 1, foundPeaks, minPatternSize);
+            }
         }
 
         public static Bitmap DrawPeaks(Bitmap src, List<Point3> peaks) {

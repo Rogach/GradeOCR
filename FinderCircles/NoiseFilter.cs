@@ -12,6 +12,12 @@ namespace FinderCircles {
         Bitmap Apply(Bitmap src);
     }
 
+    public class EmptyFilter : NoiseFilter {
+        public Bitmap Apply(Bitmap src) {
+            return src;
+        }
+    }
+
     public class FilterSeq : NoiseFilter {
         private NoiseFilter[] filters;
         public FilterSeq(params NoiseFilter[] filters) {
