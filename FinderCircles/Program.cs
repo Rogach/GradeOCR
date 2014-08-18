@@ -23,7 +23,7 @@ namespace FinderCircles {
             //Bitmap sourceImage = new Bitmap(1000, 1000, PixelFormat.Format32bppArgb);
             //Graphics g = Graphics.FromImage(sourceImage);
             //g.FillRectangle(Brushes.White, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
-            //g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(300, 400));
+            //g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(0, 0));
             //g.Dispose();
 
             //Application.Run(new FinderCircleDebugView(sourceImage, 90, 110));

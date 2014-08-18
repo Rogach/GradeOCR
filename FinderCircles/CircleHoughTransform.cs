@@ -36,18 +36,32 @@ namespace FinderCircles {
 
         public static Point3 TunePeak(Bitmap img, int minPatternRadius, int maxPatternRadius, Point3 peak) {
             int scaleFactor = GetScaleFactor(minPatternRadius);
+            int tuneScaleFactor = GetTuneScaleFactor(minPatternRadius);
+
+            int wSize = scaleFactor * 2 + maxPatternRadius * 2;
             int wx = peak.X - scaleFactor - maxPatternRadius;
             int wy = peak.Y - scaleFactor - maxPatternRadius;
-            Bitmap window = ImageScaling.ScaleDown(img, 1,
-                new Rectangle(wx, wy, scaleFactor * 2 + maxPatternRadius * 2, scaleFactor * 2 + maxPatternRadius * 2));
-            int[,,] hough = HoughTransform(window, minPatternRadius, maxPatternRadius);
+
+            // clamp window to main image bounds
+            wx = Math.Min(img.Width - wSize, Math.Max(0, wx));
+            wy = Math.Min(img.Height - wSize, Math.Max(0, wy));
+
+            Bitmap window = ImageScaling.ScaleDown(img, tuneScaleFactor, new Rectangle(wx, wy, wSize, wSize));
+            int[, ,] hough = HoughTransform(window, minPatternRadius / tuneScaleFactor, maxPatternRadius / tuneScaleFactor);
 
             Point3 tunedPeak = LocatePeak(hough);
-            return new Point3(tunedPeak.X + wx, tunedPeak.Y + wy, tunedPeak.Z + minPatternRadius);
+            return new Point3(
+                tunedPeak.X * tuneScaleFactor + wx, 
+                tunedPeak.Y * tuneScaleFactor + wy, 
+                tunedPeak.Z * tuneScaleFactor + minPatternRadius);
         }
 
         public static int GetScaleFactor(int minPatternRadius) {
             return (int) Math.Floor((double) minPatternRadius / 10);
+        }
+
+        public static int GetTuneScaleFactor(int minPatterRadius) {
+            return (int) Math.Floor((double) minPatterRadius / 40);
         }
 
         public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius) {
