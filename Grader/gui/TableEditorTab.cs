@@ -224,6 +224,13 @@ namespace Grader.gui {
             public object GetValue(object obj) {
                 return getValue(obj);
             }
+            public string GetSortValue(object obj) {
+                if (type == typeof(int)) {
+                    return getValue(obj).ToString().PadLeft(10, '0');
+                } else {
+                    return getValue(obj).ToString();
+                }
+            }
             public void SetValue(object obj, object value) {
                 setValue(obj, value);
             }
@@ -379,11 +386,11 @@ namespace Grader.gui {
             sortColumnIndex.ForEach(sortCol => {
                 if (ascendingSort) {
                     objects = objects.OrderBy(obj => {
-                        return tdef.Columns[sortCol].GetValue(obj).ToString();
+                        return tdef.Columns[sortCol].GetSortValue(obj);
                     }).ToList();
                 } else {
                     objects = objects.OrderByDescending(obj => {
-                        return tdef.Columns[sortCol].GetValue(obj).ToString();
+                        return tdef.Columns[sortCol].GetSortValue(obj);
                     }).ToList();
                 }
             });
