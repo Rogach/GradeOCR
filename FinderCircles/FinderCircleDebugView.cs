@@ -50,7 +50,7 @@ namespace FinderCircles {
                 CircleHoughTransform.HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor));
             Bitmap houghTransformImage = CircleHoughTransform.HoughTransformImage(hough);
             this.houghImagePV.Image = houghTransformImage;
-            List<Point3> peaks = CircleHoughTransform.LocatePeaks(hough, 1, minPatternRadius / scaleFactor);
+            List<Point3> peaks = CircleHoughTransform.LocatePeaks(hough, 2, minPatternRadius / scaleFactor);
             List<Point3> descaledPeaks = peaks.ConvertAll(p => new Point3(p.X * scaleFactor, p.Y * scaleFactor, p.Z * scaleFactor + minPatternRadius));
             foreach (var p in descaledPeaks) {
                 Console.WriteLine("Raw peak at {0}x{1}x{2}", p.X, p.Y, p.Z);
