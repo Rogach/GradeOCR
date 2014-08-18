@@ -35,6 +35,14 @@
             this.label5 = new System.Windows.Forms.Label();
             this.tunedResultImagePanel = new System.Windows.Forms.Panel();
             this.label6 = new System.Windows.Forms.Label();
+            this.dataMatrixLocationPanel = new System.Windows.Forms.Panel();
+            this.label7 = new System.Windows.Forms.Label();
+            this.rotatedDataMatrixPanel = new System.Windows.Forms.Panel();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.inputDataLabel = new System.Windows.Forms.Label();
+            this.outputDataLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // inputImagePanel
@@ -133,11 +141,91 @@
             this.label6.TabIndex = 6;
             this.label6.Text = "Tuned result";
             // 
+            // dataMatrixLocationPanel
+            // 
+            this.dataMatrixLocationPanel.Location = new System.Drawing.Point(930, 25);
+            this.dataMatrixLocationPanel.Name = "dataMatrixLocationPanel";
+            this.dataMatrixLocationPanel.Size = new System.Drawing.Size(300, 300);
+            this.dataMatrixLocationPanel.TabIndex = 4;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(927, 9);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(100, 13);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "Data matrix location";
+            // 
+            // rotatedDataMatrixPanel
+            // 
+            this.rotatedDataMatrixPanel.Location = new System.Drawing.Point(930, 344);
+            this.rotatedDataMatrixPanel.Name = "rotatedDataMatrixPanel";
+            this.rotatedDataMatrixPanel.Size = new System.Drawing.Size(300, 140);
+            this.rotatedDataMatrixPanel.TabIndex = 5;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(927, 328);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(99, 13);
+            this.label8.TabIndex = 8;
+            this.label8.Text = "Rotated data matrix";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(519, 659);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(31, 13);
+            this.label9.TabIndex = 9;
+            this.label9.Text = "Input";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(511, 674);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(39, 13);
+            this.label10.TabIndex = 10;
+            this.label10.Text = "Output";
+            // 
+            // inputDataLabel
+            // 
+            this.inputDataLabel.AutoSize = true;
+            this.inputDataLabel.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            this.inputDataLabel.Location = new System.Drawing.Point(556, 659);
+            this.inputDataLabel.Name = "inputDataLabel";
+            this.inputDataLabel.Size = new System.Drawing.Size(672, 14);
+            this.inputDataLabel.TabIndex = 11;
+            this.inputDataLabel.Text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 " +
+                "00 00 00 00 00";
+            // 
+            // outputDataLabel
+            // 
+            this.outputDataLabel.AutoSize = true;
+            this.outputDataLabel.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
+            this.outputDataLabel.Location = new System.Drawing.Point(556, 673);
+            this.outputDataLabel.Name = "outputDataLabel";
+            this.outputDataLabel.Size = new System.Drawing.Size(672, 14);
+            this.outputDataLabel.TabIndex = 12;
+            this.outputDataLabel.Text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 " +
+                "00 00 00 00 00";
+            // 
             // FinderCircleDebugView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(939, 655);
+            this.ClientSize = new System.Drawing.Size(1240, 696);
+            this.Controls.Add(this.outputDataLabel);
+            this.Controls.Add(this.inputDataLabel);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.rotatedDataMatrixPanel);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.dataMatrixLocationPanel);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.tunedResultImagePanel);
             this.Controls.Add(this.label5);
@@ -171,5 +259,13 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Panel tunedResultImagePanel;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Panel dataMatrixLocationPanel;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Panel rotatedDataMatrixPanel;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label inputDataLabel;
+        private System.Windows.Forms.Label outputDataLabel;
     }
 }

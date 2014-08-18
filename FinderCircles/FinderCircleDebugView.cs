@@ -17,8 +17,11 @@ namespace ARCode {
         private PictureView houghPeakImagePV;
         private PictureView roughResultImagePV;
         private PictureView tunedResultImagePV;
+        private PictureView dataMatrixLocationPV;
+        private PictureView rotatedDataMatrixPV;
+        private PictureView cellValuesImagePV;
 
-        public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius) {
+        public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, bool[] inputData) {
             InitializeComponent();
 
             this.inputImagePV = PictureView.InsertIntoPanel(inputImagePanel);
@@ -27,15 +30,20 @@ namespace ARCode {
             this.houghPeakImagePV = PictureView.InsertIntoPanel(houghPeaksImagePanel);
             this.roughResultImagePV = PictureView.InsertIntoPanel(roughResultImagePanel);
             this.tunedResultImagePV = PictureView.InsertIntoPanel(tunedResultImagePanel);
+            this.dataMatrixLocationPV = PictureView.InsertIntoPanel(dataMatrixLocationPanel);
+            this.rotatedDataMatrixPV = PictureView.InsertIntoPanel(rotatedDataMatrixPanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
-                    RunOCR(sourceImage, minPatternRadius, maxPatternRadius);
+                    RunOCR(sourceImage, minPatternRadius, maxPatternRadius, inputData);
                 });
             });
         }
 
-        private void RunOCR(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius) {
+        private void RunOCR(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, bool[] inputData) {
+            this.inputDataLabel.Text = HexUtil.ToHexString(inputData);
+            Console.WriteLine(this.inputDataLabel.Text);
+
             Bitmap grayImage = ImageUtil.ToGrayscale(sourceImage);
             this.inputImagePV.Image = grayImage;
 
@@ -63,7 +71,17 @@ namespace ARCode {
             this.houghPeakImagePV.Image = CircleHoughTransform.DrawPeaks(houghTransformImage, peaks);
             this.roughResultImagePV.Image = CircleHoughTransform.DrawPeaks(noiseImage, descaledPeaks);
             this.tunedResultImagePV.Image = CircleHoughTransform.DrawPeaks(noiseImage, tunedPeaks);
-        }
 
+            FinderPatternPair fpp = new FinderPatternPair();
+            fpp.p1 = new Point(tunedPeaks[0].X, tunedPeaks[0].Y);
+            fpp.size1 = tunedPeaks[0].Z;
+            fpp.p2 = new Point(tunedPeaks[1].X, tunedPeaks[1].Y);
+            fpp.size2 = tunedPeaks[1].Z;
+
+            DataMatrixExtraction dme = new DataMatrixExtraction(noiseImage, fpp);
+            dataMatrixLocationPV.Image = dme.PositioningDebugImage();
+            rotatedDataMatrixPV.Image = dme.rotatedMatrix;
+            outputDataLabel.Text = HexUtil.ToHexString(dme.extractedData);
+        }
     }
 }

@@ -49,14 +49,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ARCodeBuilder.cs" />
     <Compile Include="CircleDrawer.cs" />
     <Compile Include="CircleHoughTransform.cs" />
+    <Compile Include="DataMatrixDrawer.cs" />
+    <Compile Include="DataMatrixExtraction.cs" />
     <Compile Include="FinderCircleDebugView.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FinderCircleDebugView.Designer.cs">
       <DependentUpon>FinderCircleDebugView.cs</DependentUpon>
     </Compile>
+    <Compile Include="FinderPatternRecognition.cs" />
+    <Compile Include="HexUtil.cs" />
     <Compile Include="ImageScaling.cs" />
     <Compile Include="NoiseFilter.cs" />
     <Compile Include="Program.cs" />

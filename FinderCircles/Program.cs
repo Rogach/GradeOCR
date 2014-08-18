@@ -19,23 +19,39 @@ namespace ARCode {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            int patternRadius = 100;
+            bool[] codeData = new bool[256];
+            Random r = new Random();
+            for (int q = 0; q < codeData.Length; q++) {
+                codeData[q] = r.NextDouble() < 0.5;
+            }
+
+            int patternRadius = 60;
 
             Bitmap sourceImage = new Bitmap(1000, 1000, PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(sourceImage);
             g.FillRectangle(Brushes.White, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
-            g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(100, 200));
-            g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(700, 200));
+
+            g.TranslateTransform(sourceImage.Width / 2, sourceImage.Height / 2);
+            g.RotateTransform(-15);
+            g.TranslateTransform(-sourceImage.Width / 2, -sourceImage.Height / 2);
+
+            Bitmap codeImage = ARCodeBuilder.BuildCode(codeData, patternRadius);
+
+            g.DrawImage(codeImage, new Point(150, 400));
+
             g.Dispose();
 
-            Application.Run(new FinderCircleDebugView(sourceImage, 90, 110));
+            //Bitmap sourceImage = ImageUtil.LoadImage("E:/arcode-scan5.jpg");
+            //sourceImage.Save("E:/arcode.png");
+
+            Application.Run(new FinderCircleDebugView(sourceImage, 55, 65, codeData));
         }
 
         public static NoiseFilter GetTestNoiseFilter() {
+            //return new EmptyFilter();
             return new FilterSeq(
                         new RandomBlots(0.2),
-                        new RandomNoise(0.2),
-                        new RandomStripes(0.2, 20)
+                        new RandomNoise(0.2)
                     );
         }
 
