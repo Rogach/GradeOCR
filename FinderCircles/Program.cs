@@ -19,11 +19,9 @@ namespace ARCode {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            bool[] codeData = new bool[256];
             Random r = new Random();
-            for (int q = 0; q < codeData.Length; q++) {
-                codeData[q] = r.NextDouble() < 0.5;
-            }
+            uint value = (uint) r.Next();
+            //uint value = 777777777;
 
             int patternRadius = 60;
 
@@ -35,16 +33,16 @@ namespace ARCode {
             g.RotateTransform(-15);
             g.TranslateTransform(-sourceImage.Width / 2, -sourceImage.Height / 2);
 
-            Bitmap codeImage = ARCodeBuilder.BuildCode(codeData, patternRadius);
+            Bitmap codeImage = ARCodeBuilder.BuildCode(value, patternRadius);
 
             g.DrawImage(codeImage, new Point(150, 400));
 
             g.Dispose();
 
-            //Bitmap sourceImage = ImageUtil.LoadImage("E:/arcode-scan5.jpg");
-            //sourceImage.Save("E:/arcode.png");
+            //Bitmap sourceImage = ImageUtil.LoadImage("E:/arcode-scan10.jpg");
+            //sourceImage.Save("E:/arcodeScan.png");
 
-            Application.Run(new FinderCircleDebugView(sourceImage, 55, 65, codeData));
+            Application.Run(new FinderCircleDebugView(sourceImage, 55, 65, value));
         }
 
         public static NoiseFilter GetTestNoiseFilter() {

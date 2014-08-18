@@ -52,6 +52,7 @@
     <Compile Include="ARCodeBuilder.cs" />
     <Compile Include="CircleDrawer.cs" />
     <Compile Include="CircleHoughTransform.cs" />
+    <Compile Include="DataMarshaller.cs" />
     <Compile Include="DataMatrixDrawer.cs" />
     <Compile Include="DataMatrixExtraction.cs" />
     <Compile Include="FinderCircleDebugView.cs">

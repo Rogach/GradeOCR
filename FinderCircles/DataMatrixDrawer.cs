@@ -28,7 +28,7 @@ namespace ARCode {
                     for (int x = 0; x < width; x++) {
                         int cx = (int) Math.Floor((float) x * columnCount / width);
                         int cy = (int) Math.Floor((float) y * rowCount / height);
-                        *(ptr++) = data[cy * columnCount + cx] ? 0xff000000 : 0xffffffff;
+                        *(ptr++) = data[cx * rowCount + cy] ? 0xff000000 : 0xffffffff;
                     }
                 }
 

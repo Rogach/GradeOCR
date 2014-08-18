@@ -73,7 +73,7 @@ namespace ARCode {
             extractedData = new bool[DataMatrixDrawer.rowCount * DataMatrixDrawer.columnCount];
             for (int y = 0; y < DataMatrixDrawer.rowCount; y++) {
                 for (int x = 0; x < DataMatrixDrawer.columnCount; x++) {
-                    extractedData[y * DataMatrixDrawer.columnCount + x] = cellSum[y, x] < threshold;
+                    extractedData[x * DataMatrixDrawer.rowCount + y] = cellSum[y, x] < threshold;
                 }
             }
         }

@@ -21,7 +21,7 @@ namespace ARCode {
         private PictureView rotatedDataMatrixPV;
         private PictureView cellValuesImagePV;
 
-        public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, bool[] inputData) {
+        public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue) {
             InitializeComponent();
 
             this.inputImagePV = PictureView.InsertIntoPanel(inputImagePanel);
@@ -35,14 +35,13 @@ namespace ARCode {
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
-                    RunOCR(sourceImage, minPatternRadius, maxPatternRadius, inputData);
+                    RunOCR(sourceImage, minPatternRadius, maxPatternRadius, inputValue);
                 });
             });
         }
 
-        private void RunOCR(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, bool[] inputData) {
-            this.inputDataLabel.Text = HexUtil.ToHexString(inputData);
-            Console.WriteLine(this.inputDataLabel.Text);
+        private void RunOCR(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue) {
+            this.inputDataLabel.Text = inputValue.ToString();
 
             Bitmap grayImage = ImageUtil.ToGrayscale(sourceImage);
             this.inputImagePV.Image = grayImage;
@@ -81,7 +80,7 @@ namespace ARCode {
             DataMatrixExtraction dme = new DataMatrixExtraction(noiseImage, fpp);
             dataMatrixLocationPV.Image = dme.PositioningDebugImage();
             rotatedDataMatrixPV.Image = dme.rotatedMatrix;
-            outputDataLabel.Text = HexUtil.ToHexString(dme.extractedData);
+            outputDataLabel.Text = DataMarshaller.UnMarshallInt(dme.extractedData).ToString();
         }
     }
 }
