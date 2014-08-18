@@ -38,8 +38,9 @@ namespace FinderCircles {
             int scaleFactor = GetScaleFactor(minPatternRadius);
             int wx = peak.X - scaleFactor - maxPatternRadius;
             int wy = peak.Y - scaleFactor - maxPatternRadius;
-            int[,,] hough = HoughTransform(img, minPatternRadius, maxPatternRadius,
-                wx, wy, scaleFactor * 2 + maxPatternRadius * 2, scaleFactor * 2 + maxPatternRadius * 2);
+            Bitmap window = ImageScaling.ScaleDown(img, 1,
+                new Rectangle(wx, wy, scaleFactor * 2 + maxPatternRadius * 2, scaleFactor * 2 + maxPatternRadius * 2));
+            int[,,] hough = HoughTransform(window, minPatternRadius, maxPatternRadius);
 
             Point3 tunedPeak = LocatePeak(hough);
             return new Point3(tunedPeak.X + wx, tunedPeak.Y + wy, tunedPeak.Z + minPatternRadius);
@@ -50,17 +51,12 @@ namespace FinderCircles {
         }
 
         public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius) {
-            return HoughTransform(img, minPatternRadius, maxPatternRadius, 0, 0, img.Width, img.Height);
-        }
-
-        public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius, int wX, int wY, int width, int height) {
-            Console.WriteLine("HoughTransform({0}x{1}, {2}--{3})", width, height, minPatternRadius, maxPatternRadius);
-            int[,,] fullHough = new int[maxPatternRadius - minPatternRadius + 1, height, width];
-
             int imgWidth = img.Width;
             int imgHeight = img.Height;
+            int[,,] fullHough = new int[maxPatternRadius - minPatternRadius + 1, imgHeight, imgWidth];
+
             for (int patternRadius = minPatternRadius; patternRadius <= maxPatternRadius; patternRadius++) {
-                int[,] hough = new int[height + patternRadius * 2, width + patternRadius * 2];
+                int[,] hough = new int[imgHeight + patternRadius * 2, imgWidth + patternRadius * 2];
                 List<Point> blackMinus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != 1 && thisP == 1);
                 List<Point> blackPlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP == 1 && thisP != 1);
                 List<Point> whitePlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != -1 && thisP == -1);
@@ -71,33 +67,33 @@ namespace FinderCircles {
                     byte* ptr = (byte*) bd.Scan0.ToPointer();
 
                     foreach (var ptBM in blackMinus) {
-                        for (int y = 0; y < height; y++) {
-                            for (int x = 0; x < width; x++) {
-                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *(ptr + 4 * (y * imgWidth + x));
                                 hough[patternRadius + y + ptBM.Y, patternRadius + x + ptBM.X] -= v;
                             }
                         }
                     }
                     foreach (var ptBP in blackPlus) {
-                        for (int y = 0; y < height; y++) {
-                            for (int x = 0; x < width; x++) {
-                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *(ptr + 4 * (y * imgWidth + x));
                                 hough[patternRadius + y + ptBP.Y, patternRadius + x + ptBP.X] += v;
                             }
                         }
                     }
                     foreach (var ptWP in whitePlus) {
-                        for (int y = 0; y < height; y++) {
-                            for (int x = 0; x < width; x++) {
-                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *(ptr + 4 * (y * imgWidth + x));
                                 hough[patternRadius + y + ptWP.Y, patternRadius + x + ptWP.X] += v * 68 / 100;
                             }
                         }
                     }
                     foreach (var ptWM in whiteMinus) {
-                        for (int y = 0; y < height; y++) {
-                            for (int x = 0; x < width; x++) {
-                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                        for (int y = 0; y < imgHeight; y++) {
+                            for (int x = 0; x < imgWidth; x++) {
+                                byte v = *(ptr + 4 * (y * imgWidth + x));
                                 hough[patternRadius + y + ptWM.Y, patternRadius + x + ptWM.X] -= v * 68 / 100;
                             }
                         }
@@ -113,13 +109,13 @@ namespace FinderCircles {
 
                     img.UnlockBits(bd);
                 }
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
+                for (int y = 0; y < imgHeight; y++) {
+                    for (int x = 0; x < imgWidth; x++) {
                         fullHough[patternRadius - minPatternRadius, y, x] = hough[patternRadius + y, patternRadius + x];
                     }
                 }
             }
-            
+
             return fullHough;
         }
 
@@ -198,7 +194,6 @@ namespace FinderCircles {
                     }
                 }
             }
-            Console.WriteLine(new Point3(maxX, maxY, maxZ));
             return new Point3(maxX, maxY, maxZ);
         }
 

@@ -10,7 +10,11 @@ using LibUtil;
 namespace FinderCircles {
     public static class ImageScaling {
         public static Bitmap ScaleDown(Bitmap src, int factor) {
-            Bitmap res = new Bitmap(src.Width / factor, src.Height / factor, PixelFormat.Format32bppArgb);
+            return ScaleDown(src, factor, new Rectangle(0, 0, src.Width, src.Height));
+        }
+
+        public static Bitmap ScaleDown(Bitmap src, int factor, Rectangle bounds) {
+            Bitmap res = new Bitmap(bounds.Width / factor, bounds.Height / factor, PixelFormat.Format32bppArgb);
 
             unsafe {
                 BitmapData srcBD = src.LockBits(ImageLockMode.ReadOnly);
@@ -26,7 +30,7 @@ namespace FinderCircles {
                         int sum = 0;
                         for (int dy = 0; dy < factor; dy++) {
                             for (int dx = 0; dx < factor; dx++) {
-                                sum += *(srcPtr + 4 * ((y * factor + dy) * src.Width + x * factor + dx));
+                                sum += *(srcPtr + 4 * ((bounds.Y + y * factor + dy) * src.Width + bounds.X + x * factor + dx));
                             }
                         }
                         byte v = (byte) (sum / (factor * factor));
