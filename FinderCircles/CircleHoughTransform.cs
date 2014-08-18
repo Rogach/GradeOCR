@@ -29,22 +29,38 @@ namespace FinderCircles {
             int scaleFactor = GetScaleFactor(minPatternRadius);
             Bitmap downscaledImage = ImageScaling.ScaleDown(img, scaleFactor);
             int[,,] hough = HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor);
-            return LocatePeaks(hough, patternCount, minPatternRadius / scaleFactor).ConvertAll(p => 
+            List<Point3> roughPeaks = LocatePeaks(hough, patternCount, minPatternRadius / scaleFactor).ConvertAll(p =>
                 new Point3(p.X * scaleFactor, p.Y * scaleFactor, p.Z * scaleFactor + minPatternRadius));
+            return roughPeaks.ConvertAll(peak => TunePeak(img, minPatternRadius, maxPatternRadius, peak));
+        }
+
+        public static Point3 TunePeak(Bitmap img, int minPatternRadius, int maxPatternRadius, Point3 peak) {
+            int scaleFactor = GetScaleFactor(minPatternRadius);
+            int wx = peak.X - scaleFactor - maxPatternRadius;
+            int wy = peak.Y - scaleFactor - maxPatternRadius;
+            int[,,] hough = HoughTransform(img, minPatternRadius, maxPatternRadius,
+                wx, wy, scaleFactor * 2 + maxPatternRadius * 2, scaleFactor * 2 + maxPatternRadius * 2);
+
+            Point3 tunedPeak = LocatePeak(hough);
+            return new Point3(tunedPeak.X + wx, tunedPeak.Y + wy, tunedPeak.Z + minPatternRadius);
         }
 
         public static int GetScaleFactor(int minPatternRadius) {
-            return (int) Math.Ceiling((double) minPatternRadius / 10);
+            return (int) Math.Floor((double) minPatternRadius / 10);
         }
 
-        public static int[, ,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius) {
+        public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius) {
             return HoughTransform(img, minPatternRadius, maxPatternRadius, 0, 0, img.Width, img.Height);
         }
 
         public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius, int wX, int wY, int width, int height) {
+            Console.WriteLine("HoughTransform({0}x{1}, {2}--{3})", width, height, minPatternRadius, maxPatternRadius);
             int[,,] fullHough = new int[maxPatternRadius - minPatternRadius + 1, height, width];
+
+            int imgWidth = img.Width;
+            int imgHeight = img.Height;
             for (int patternRadius = minPatternRadius; patternRadius <= maxPatternRadius; patternRadius++) {
-                int[,] hough = new int[height + patternRadius * 2, height + patternRadius * 2];
+                int[,] hough = new int[height + patternRadius * 2, width + patternRadius * 2];
                 List<Point> blackMinus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != 1 && thisP == 1);
                 List<Point> blackPlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP == 1 && thisP != 1);
                 List<Point> whitePlus = CaclulateOffsetTable(patternRadius, (prevP, thisP) => prevP != -1 && thisP == -1);
@@ -52,45 +68,37 @@ namespace FinderCircles {
 
                 unsafe {
                     BitmapData bd = img.LockBits(ImageLockMode.ReadOnly);
-                    byte* ptr;
+                    byte* ptr = (byte*) bd.Scan0.ToPointer();
 
                     foreach (var ptBM in blackMinus) {
-                        ptr = (byte*) bd.Scan0.ToPointer();
                         for (int y = 0; y < height; y++) {
                             for (int x = 0; x < width; x++) {
-                                byte v = *ptr;
-                                hough[wY + patternRadius + y + ptBM.Y, wX + patternRadius + x + ptBM.X] -= v;
-                                ptr += 4;
+                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                                hough[patternRadius + y + ptBM.Y, patternRadius + x + ptBM.X] -= v;
                             }
                         }
                     }
                     foreach (var ptBP in blackPlus) {
-                        ptr = (byte*) bd.Scan0.ToPointer();
                         for (int y = 0; y < height; y++) {
                             for (int x = 0; x < width; x++) {
-                                byte v = *ptr;
-                                hough[wY + patternRadius + y + ptBP.Y, wX + patternRadius + x + ptBP.X] += v;
-                                ptr += 4;
+                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                                hough[patternRadius + y + ptBP.Y, patternRadius + x + ptBP.X] += v;
                             }
                         }
                     }
                     foreach (var ptWP in whitePlus) {
-                        ptr = (byte*) bd.Scan0.ToPointer();
                         for (int y = 0; y < height; y++) {
                             for (int x = 0; x < width; x++) {
-                                byte v = *ptr;
-                                hough[wY + patternRadius + y + ptWP.Y, wX + patternRadius + x + ptWP.X] += v * 68 / 100;
-                                ptr += 4;
+                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                                hough[patternRadius + y + ptWP.Y, patternRadius + x + ptWP.X] += v * 68 / 100;
                             }
                         }
                     }
                     foreach (var ptWM in whiteMinus) {
-                        ptr = (byte*) bd.Scan0.ToPointer();
                         for (int y = 0; y < height; y++) {
                             for (int x = 0; x < width; x++) {
-                                byte v = *ptr;
-                                hough[wY + patternRadius + y + ptWM.Y, wX + patternRadius + x + ptWM.X] -= v * 68 / 100;
-                                ptr += 4;
+                                byte v = *(ptr + 4 * ((wY + y) * imgWidth + wX + x));
+                                hough[patternRadius + y + ptWM.Y, patternRadius + x + ptWM.X] -= v * 68 / 100;
                             }
                         }
                     }
@@ -111,7 +119,7 @@ namespace FinderCircles {
                     }
                 }
             }
-
+            
             return fullHough;
         }
 
@@ -172,6 +180,28 @@ namespace FinderCircles {
         public static List<Point3> LocatePeaks(int[,,] hough, int patternCount, int minPatternSize) {
             return LocatePeaks(hough, patternCount, new List<Point3>(), minPatternSize);
         }
+
+        public static Point3 LocatePeak(int[,,] hough) {
+            int max = int.MinValue;
+            int maxX = 0;
+            int maxY = 0;
+            int maxZ = 0;
+            for (int z = 0; z < hough.GetLength(0); z++) {
+                for (int y = 0; y < hough.GetLength(1); y++) {
+                    for (int x = 0; x < hough.GetLength(2); x++) {
+                        if (hough[z, y, x] > max) {
+                            max = hough[z, y, x];
+                            maxX = x;
+                            maxY = y;
+                            maxZ = z;
+                        }
+                    }
+                }
+            }
+            Console.WriteLine(new Point3(maxX, maxY, maxZ));
+            return new Point3(maxX, maxY, maxZ);
+        }
+
         public static List<Point3> LocatePeaks(int[,,] hough, int patternCount, List<Point3> foundPeaks, int minPatternSize) {
             int max = int.MinValue;
             int maxX = 0;

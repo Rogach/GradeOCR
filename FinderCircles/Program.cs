@@ -11,23 +11,22 @@ namespace FinderCircles {
     class Program {
         [STAThread]
         static void Main(string[] args) {
-            //Util.Timed("stress test", () => {
-            //    StressTest();
-            //});
+            Util.Timed("stress test", () => {
+                StressTest();
+            });
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            //Application.EnableVisualStyles();
+            //Application.SetCompatibleTextRenderingDefault(false);
 
-            int patternRadius = 100;
+            //int patternRadius = 100;
 
-            Bitmap sourceImage = new Bitmap(1000, 1000, PixelFormat.Format32bppArgb);
-            Graphics g = Graphics.FromImage(sourceImage);
-            g.FillRectangle(Brushes.White, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
-            g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(50, 50));
-            g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(400, 300));
-            g.Dispose();
+            //Bitmap sourceImage = new Bitmap(1000, 1000, PixelFormat.Format32bppArgb);
+            //Graphics g = Graphics.FromImage(sourceImage);
+            //g.FillRectangle(Brushes.White, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
+            //g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), new Point(300, 400));
+            //g.Dispose();
 
-            Application.Run(new FinderCircleDebugView(sourceImage, 90, 110));
+            //Application.Run(new FinderCircleDebugView(sourceImage, 90, 110));
         }
 
         public static NoiseFilter GetTestNoiseFilter() {
@@ -70,8 +69,8 @@ namespace FinderCircles {
                 time += (end - stt).TotalMilliseconds;
 
                 bool succ =
-                    Math.Abs(recognizedLocation.X - patternLocation.X) < 20 &&
-                    Math.Abs(recognizedLocation.Y - patternLocation.Y) < 20;
+                    Math.Abs(recognizedLocation.X - patternLocation.X) < 2 &&
+                    Math.Abs(recognizedLocation.Y - patternLocation.Y) < 2;
                 if (succ) {
                     success++;
                     Console.WriteLine("({0}/{1}) Success.", q + 1, N);

@@ -222,9 +222,7 @@ namespace OCRUtil {
                     pv.ZoomToFit();
                     pv.AllowMaximization = false;
                     f.Controls.Add(pv);
-
                     
-
                     f.ShowDialog();
                 }
             });

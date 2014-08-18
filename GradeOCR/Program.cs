@@ -17,16 +17,16 @@ namespace GradeOCR {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            //Application.Run(new MassGradeView(new Size(50, 50), b => {
-            //    return NormalizeImage(b);
-            //}));
+            Application.Run(new MassGradeView(new Size(50, 50), b => {
+                return NormalizeImage(b);
+            }));
 
-            string gradeFile = @"e:\Pronko\prj\Grader\ocr-data\test-data\grade-unsort\g00003.png";
-            Application.Run(
-                new GradeRecognitionDebugView(
-                    ImageUtil.LoadImage(gradeFile),
-                    gradeFile,
-                    GradeDigestSet.ReadDefault()));
+            //string gradeFile = @"e:\Pronko\prj\Grader\ocr-data\test-data\grade-unsort\g00003.png";
+            //Application.Run(
+            //    new GradeRecognitionDebugView(
+            //        ImageUtil.LoadImage(gradeFile),
+            //        gradeFile,
+            //        GradeDigestSet.ReadDefault()));
         }
 
         public static Bitmap NormalizeImage(Bitmap img) {

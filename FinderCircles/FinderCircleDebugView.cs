@@ -15,7 +15,8 @@ namespace FinderCircles {
         private PictureView noiseImagePV;
         private PictureView houghImagePV;
         private PictureView houghPeakImagePV;
-        private PictureView resultImagePV;
+        private PictureView roughResultImagePV;
+        private PictureView tunedResultImagePV;
 
         public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius) {
             InitializeComponent();
@@ -24,7 +25,8 @@ namespace FinderCircles {
             this.noiseImagePV = PictureView.InsertIntoPanel(noiseImagePanel);
             this.houghImagePV = PictureView.InsertIntoPanel(houghImagePanel);
             this.houghPeakImagePV = PictureView.InsertIntoPanel(houghPeaksImagePanel);
-            this.resultImagePV = PictureView.InsertIntoPanel(resultImagePanel);
+            this.roughResultImagePV = PictureView.InsertIntoPanel(roughResultImagePanel);
+            this.tunedResultImagePV = PictureView.InsertIntoPanel(tunedResultImagePanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
@@ -41,19 +43,26 @@ namespace FinderCircles {
             this.noiseImagePV.Image = noiseImage;
 
             int scaleFactor = CircleHoughTransform.GetScaleFactor(minPatternRadius);
+            Console.WriteLine("scaleFactor = " + scaleFactor);
             Bitmap downscaledImage = ImageScaling.ScaleDown(noiseImage, scaleFactor);
 
             int[,,] hough = Util.Timed("hough transform", () => 
                 CircleHoughTransform.HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor));
             Bitmap houghTransformImage = CircleHoughTransform.HoughTransformImage(hough);
             this.houghImagePV.Image = houghTransformImage;
-            List<Point3> peaks = CircleHoughTransform.LocatePeaks(hough, 2, minPatternRadius / scaleFactor);
+            List<Point3> peaks = CircleHoughTransform.LocatePeaks(hough, 1, minPatternRadius / scaleFactor);
             List<Point3> descaledPeaks = peaks.ConvertAll(p => new Point3(p.X * scaleFactor, p.Y * scaleFactor, p.Z * scaleFactor + minPatternRadius));
             foreach (var p in descaledPeaks) {
-                Console.WriteLine("Peak at {0}x{1}x{2}", p.X, p.Y, p.Z);
+                Console.WriteLine("Raw peak at {0}x{1}x{2}", p.X, p.Y, p.Z);
+            }
+            List<Point3> tunedPeaks = Util.Timed("tune peaks", () =>
+                descaledPeaks.ConvertAll(peak => CircleHoughTransform.TunePeak(noiseImage, minPatternRadius, maxPatternRadius, peak)));
+            foreach (var p in tunedPeaks) {
+                Console.WriteLine("Tuned peak at {0}x{1}x{2}", p.X, p.Y, p.Z);
             }
             this.houghPeakImagePV.Image = CircleHoughTransform.DrawPeaks(houghTransformImage, peaks);
-            this.resultImagePV.Image = CircleHoughTransform.DrawPeaks(noiseImage, descaledPeaks);
+            this.roughResultImagePV.Image = CircleHoughTransform.DrawPeaks(noiseImage, descaledPeaks);
+            this.tunedResultImagePV.Image = CircleHoughTransform.DrawPeaks(noiseImage, tunedPeaks);
         }
 
     }
