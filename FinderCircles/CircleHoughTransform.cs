@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using LibUtil;
 
-namespace FinderCircles {
+namespace ARCode {
     
     public class Point3 {
         public int X;

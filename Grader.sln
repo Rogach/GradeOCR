@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableRecognitionTest", "Tab
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeImageMove", "GradeImageMove\GradeImageMove.csproj", "{283F540E-CE68-41D3-9B68-43CD9D0B8F4B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinderCircles", "FinderCircles\FinderCircles.csproj", "{C15B0676-F887-482C-999D-87494F197B7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AR-Code", "FinderCircles\AR-Code.csproj", "{C15B0676-F887-482C-999D-87494F197B7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

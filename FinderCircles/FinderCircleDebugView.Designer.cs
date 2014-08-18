@@ -1,4 +1,4 @@
-﻿namespace FinderCircles {
+﻿namespace ARCode {
     partial class FinderCircleDebugView {
         /// <summary>
         /// Required designer variable.

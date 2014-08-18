@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 using OCRUtil;
 using LibUtil;
 
-namespace FinderCircles {
+namespace ARCode {
     public static class ImageScaling {
         public static Bitmap ScaleDown(Bitmap src, int factor) {
             return ScaleDown(src, factor, new Rectangle(0, 0, src.Width, src.Height));

@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using OCRUtil;
 using LibUtil;
 
-namespace FinderCircles {
+namespace ARCode {
     public partial class FinderCircleDebugView : Form {
         private PictureView inputImagePV;
         private PictureView noiseImagePV;

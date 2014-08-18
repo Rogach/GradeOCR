@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using LibUtil;
 using OCRUtil;
 
-namespace FinderCircles {
+namespace ARCode {
     class Program {
         [STAThread]
         static void Main(string[] args) {

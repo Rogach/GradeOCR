@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 using OCRUtil;
 using LibUtil;
 
-namespace FinderCircles {
+namespace ARCode {
     public static class CircleDrawer {
         public static Bitmap GetFinderCircleImage(int radius) {
             Bitmap img = new Bitmap(radius * 2 + 1, radius * 2 + 1, PixelFormat.Format32bppArgb);

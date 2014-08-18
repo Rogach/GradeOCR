@@ -7,7 +7,7 @@ using System.Drawing.Imaging;
 using OCRUtil;
 using LibUtil;
 
-namespace FinderCircles {
+namespace ARCode {
     public interface NoiseFilter {
         Bitmap Apply(Bitmap src);
     }

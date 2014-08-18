@@ -8,8 +8,8 @@
     <ProjectGuid>{C15B0676-F887-482C-999D-87494F197B7D}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FinderCircles</RootNamespace>
-    <AssemblyName>FinderCircles</AssemblyName>
+    <RootNamespace>ARCode</RootNamespace>
+    <AssemblyName>ARCode</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
