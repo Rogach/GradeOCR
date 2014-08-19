@@ -135,7 +135,7 @@ namespace Grader.gui {
             gradeView.AllowUserToDeleteRows = false;
             gradeView.AllowUserToResizeColumns = true;
             gradeView.AllowUserToOrderColumns = false;
-            gradeView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            gradeView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.Controls.Add(gradeView);
 
             gradeView.CellBeginEdit += new DataGridViewCellCancelEventHandler(delegate(object sender, DataGridViewCellCancelEventArgs e) {
@@ -222,7 +222,7 @@ namespace Grader.gui {
 
             originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
 
-            List<GradeDesc> grades = gradeQuery.ToList()
+            List<GradeDesc> grades = gradeQuery.ToList();
             foreach (var gd in grades) {
                 gd.soldier = idToSoldierDesc[gd.grade.КодПроверяемого];
             }
