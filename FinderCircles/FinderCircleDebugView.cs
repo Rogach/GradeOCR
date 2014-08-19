@@ -35,7 +35,9 @@ namespace ARCode {
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
-                    RunOCR(sourceImage, minPatternRadius, maxPatternRadius, inputValue);
+                    Util.Timed("full AR-code OCR", () => {
+                        RunOCR(sourceImage, minPatternRadius, maxPatternRadius, inputValue);
+                    });
                 });
             });
         }

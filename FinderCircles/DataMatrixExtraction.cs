@@ -75,7 +75,7 @@ namespace ARCode {
             extractedData = new bool[DataMatrixDrawer.rowCount * DataMatrixDrawer.columnCount];
             for (int y = 0; y < DataMatrixDrawer.rowCount; y++) {
                 for (int x = 0; x < DataMatrixDrawer.columnCount; x++) {
-                    extractedData[x * DataMatrixDrawer.rowCount + y] = cellSum[y, x] < threshold;
+                    extractedData[y * DataMatrixDrawer.columnCount + x] = cellSum[y, x] < threshold;
                 }
             }
         }
@@ -110,7 +110,7 @@ namespace ARCode {
                         new PointF(cellWidth * (x + 1), cellHeight * (y + 1)),
                         new PointF(cellWidth * x, cellHeight * (y + 1))
                     });
-                    Color cellColor = extractedData[x * DataMatrixDrawer.rowCount + y] ? Color.Blue : Color.Red;
+                    Color cellColor = extractedData[y * DataMatrixDrawer.columnCount + x] ? Color.Blue : Color.Red;
                     g.FillPath(new SolidBrush(Color.FromArgb(50, cellColor)), gp);
                 }
             }
