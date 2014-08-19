@@ -8,7 +8,7 @@ using OCRUtil;
 using LibUtil;
 
 namespace ARCode {
-    public static class CircleDrawer {
+    public static class FinderCircleDrawer {
         public static Bitmap GetFinderCircleImage(int radius) {
             Bitmap img = new Bitmap(radius * 2 + 1, radius * 2 + 1, PixelFormat.Format32bppArgb);
 

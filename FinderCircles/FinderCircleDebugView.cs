@@ -15,11 +15,9 @@ namespace ARCode {
         private PictureView noiseImagePV;
         private PictureView houghImagePV;
         private PictureView houghPeakImagePV;
-        private PictureView roughResultImagePV;
-        private PictureView tunedResultImagePV;
+        private PictureView peakResultImagePV;
         private PictureView dataMatrixLocationPV;
         private PictureView rotatedDataMatrixPV;
-        private PictureView cellValuesImagePV;
         private PictureView recognizedDataMatrixPV;
 
         public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue) {
@@ -29,8 +27,7 @@ namespace ARCode {
             this.noiseImagePV = PictureView.InsertIntoPanel(noiseImagePanel);
             this.houghImagePV = PictureView.InsertIntoPanel(houghImagePanel);
             this.houghPeakImagePV = PictureView.InsertIntoPanel(houghPeaksImagePanel);
-            this.roughResultImagePV = PictureView.InsertIntoPanel(roughResultImagePanel);
-            this.tunedResultImagePV = PictureView.InsertIntoPanel(tunedResultImagePanel);
+            this.peakResultImagePV = PictureView.InsertIntoPanel(peakResultImagePanel);
             this.dataMatrixLocationPV = PictureView.InsertIntoPanel(dataMatrixLocationPanel);
             this.rotatedDataMatrixPV = PictureView.InsertIntoPanel(rotatedDataMatrixPanel);
             this.recognizedDataMatrixPV = PictureView.InsertIntoPanel(recognizedDataMatrixPanel);
@@ -69,9 +66,14 @@ namespace ARCode {
             foreach (var p in tunedPeaks) {
                 Console.WriteLine("Tuned peak at {0}x{1}x{2}", p.X, p.Y, p.Z);
             }
-            this.houghPeakImagePV.Image = CircleHoughTransform.DrawPeaks(houghTransformImage, peaks);
-            this.roughResultImagePV.Image = CircleHoughTransform.DrawPeaks(noiseImage, descaledPeaks);
-            this.tunedResultImagePV.Image = CircleHoughTransform.DrawPeaks(noiseImage, tunedPeaks);
+            Bitmap houghPeaksImage = new Bitmap(houghTransformImage);
+            CircleHoughTransform.DrawPeaks(houghPeaksImage, peaks, Color.Red);
+            this.houghPeakImagePV.Image = houghPeaksImage;
+
+            Bitmap resultPeaksImage = new Bitmap(noiseImage);
+            CircleHoughTransform.DrawPeaks(resultPeaksImage, descaledPeaks, Color.Red);
+            CircleHoughTransform.DrawPeaks(resultPeaksImage, tunedPeaks, Color.Green);
+            this.peakResultImagePV.Image = resultPeaksImage;
 
             FinderPatternPair fpp = new FinderPatternPair();
             fpp.p1 = new Point(tunedPeaks[0].X, tunedPeaks[0].Y);
@@ -85,5 +87,6 @@ namespace ARCode {
             recognizedDataMatrixPV.Image = dme.RecognitionDebugImage();
             outputDataLabel.Text = DataMarshaller.UnMarshallInt(dme.extractedData).ToString();
         }
+
     }
 }

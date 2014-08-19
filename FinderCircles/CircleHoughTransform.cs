@@ -142,7 +142,7 @@ namespace ARCode {
                     float r = (float) PointOps.Distance(p, center) / patternRadius;
                     PointF prevP = new PointF(cx - 1, cy);
                     float prevR = (float) PointOps.Distance(prevP, center) / patternRadius;
-                    if (testPixel(CircleDrawer.GetPixelAtRadius(prevR), CircleDrawer.GetPixelAtRadius(r))) {
+                    if (testPixel(FinderCircleDrawer.GetPixelAtRadius(prevR), FinderCircleDrawer.GetPixelAtRadius(r))) {
                         pts.Add(new Point(cx, cy));
                     }
                 }
@@ -237,21 +237,21 @@ namespace ARCode {
             }
         }
 
-        public static Bitmap DrawPeaks(Bitmap src, List<Point3> peaks) {
-            Bitmap res = new Bitmap(src);
-
+        public static void DrawPeaks(Bitmap src, List<Point3> peaks, Color c) {
             unsafe {
-                BitmapData bd = res.LockBits(ImageLockMode.WriteOnly);
-                uint* ptr = (uint*) bd.Scan0.ToPointer();
+                BitmapData bd = src.LockBits(ImageLockMode.WriteOnly);
+                byte* ptr = (byte*) bd.Scan0.ToPointer();
 
                 foreach (var pt in peaks) {
-                    *(ptr + pt.Y * src.Width + pt.X) = 0xffff0000;
+                    byte* p = ptr + 4 * (pt.Y * src.Width + pt.X);
+                    *p = c.B;
+                    *(p + 1) = c.G;
+                    *(p + 2) = c.R;
+                    *(p + 3) = c.A;
                 }
 
-                res.UnlockBits(bd);
+                src.UnlockBits(bd);
             }
-
-            return res;
         }
     }
 }

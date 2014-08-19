@@ -31,10 +31,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.houghPeaksImagePanel = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
-            this.roughResultImagePanel = new System.Windows.Forms.Panel();
+            this.peakResultImagePanel = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
-            this.tunedResultImagePanel = new System.Windows.Forms.Panel();
-            this.label6 = new System.Windows.Forms.Label();
             this.dataMatrixLocationPanel = new System.Windows.Forms.Panel();
             this.label7 = new System.Windows.Forms.Label();
             this.rotatedDataMatrixPanel = new System.Windows.Forms.Panel();
@@ -111,41 +109,25 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "Hough transform with peaks";
             // 
-            // roughResultImagePanel
+            // peakResultImagePanel
             // 
-            this.roughResultImagePanel.Location = new System.Drawing.Point(624, 25);
-            this.roughResultImagePanel.Name = "roughResultImagePanel";
-            this.roughResultImagePanel.Size = new System.Drawing.Size(300, 300);
-            this.roughResultImagePanel.TabIndex = 3;
+            this.peakResultImagePanel.Location = new System.Drawing.Point(624, 25);
+            this.peakResultImagePanel.Name = "peakResultImagePanel";
+            this.peakResultImagePanel.Size = new System.Drawing.Size(300, 300);
+            this.peakResultImagePanel.TabIndex = 3;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(621, 9);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(67, 13);
+            this.label5.Size = new System.Drawing.Size(125, 13);
             this.label5.TabIndex = 5;
-            this.label5.Text = "Rough result";
-            // 
-            // tunedResultImagePanel
-            // 
-            this.tunedResultImagePanel.Location = new System.Drawing.Point(624, 344);
-            this.tunedResultImagePanel.Name = "tunedResultImagePanel";
-            this.tunedResultImagePanel.Size = new System.Drawing.Size(300, 300);
-            this.tunedResultImagePanel.TabIndex = 4;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(621, 328);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(66, 13);
-            this.label6.TabIndex = 6;
-            this.label6.Text = "Tuned result";
+            this.label5.Text = "Peak results (with tuning)";
             // 
             // dataMatrixLocationPanel
             // 
-            this.dataMatrixLocationPanel.Location = new System.Drawing.Point(930, 25);
+            this.dataMatrixLocationPanel.Location = new System.Drawing.Point(624, 344);
             this.dataMatrixLocationPanel.Name = "dataMatrixLocationPanel";
             this.dataMatrixLocationPanel.Size = new System.Drawing.Size(300, 300);
             this.dataMatrixLocationPanel.TabIndex = 4;
@@ -153,7 +135,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(927, 9);
+            this.label7.Location = new System.Drawing.Point(621, 328);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(100, 13);
             this.label7.TabIndex = 7;
@@ -161,7 +143,7 @@
             // 
             // rotatedDataMatrixPanel
             // 
-            this.rotatedDataMatrixPanel.Location = new System.Drawing.Point(930, 344);
+            this.rotatedDataMatrixPanel.Location = new System.Drawing.Point(930, 25);
             this.rotatedDataMatrixPanel.Name = "rotatedDataMatrixPanel";
             this.rotatedDataMatrixPanel.Size = new System.Drawing.Size(300, 140);
             this.rotatedDataMatrixPanel.TabIndex = 5;
@@ -169,7 +151,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(927, 328);
+            this.label8.Location = new System.Drawing.Point(927, 9);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(99, 13);
             this.label8.TabIndex = 8;
@@ -178,7 +160,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(519, 659);
+            this.label9.Location = new System.Drawing.Point(1114, 616);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(31, 13);
             this.label9.TabIndex = 9;
@@ -187,7 +169,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(511, 674);
+            this.label10.Location = new System.Drawing.Point(1106, 630);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(39, 13);
             this.label10.TabIndex = 10;
@@ -197,27 +179,25 @@
             // 
             this.inputDataLabel.AutoSize = true;
             this.inputDataLabel.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
-            this.inputDataLabel.Location = new System.Drawing.Point(556, 659);
+            this.inputDataLabel.Location = new System.Drawing.Point(1151, 616);
             this.inputDataLabel.Name = "inputDataLabel";
-            this.inputDataLabel.Size = new System.Drawing.Size(672, 14);
+            this.inputDataLabel.Size = new System.Drawing.Size(77, 14);
             this.inputDataLabel.TabIndex = 11;
-            this.inputDataLabel.Text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 " +
-                "00 00 00 00 00";
+            this.inputDataLabel.Text = "0000000000";
             // 
             // outputDataLabel
             // 
             this.outputDataLabel.AutoSize = true;
             this.outputDataLabel.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (204)));
-            this.outputDataLabel.Location = new System.Drawing.Point(556, 673);
+            this.outputDataLabel.Location = new System.Drawing.Point(1151, 630);
             this.outputDataLabel.Name = "outputDataLabel";
-            this.outputDataLabel.Size = new System.Drawing.Size(672, 14);
+            this.outputDataLabel.Size = new System.Drawing.Size(77, 14);
             this.outputDataLabel.TabIndex = 12;
-            this.outputDataLabel.Text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 " +
-                "00 00 00 00 00";
+            this.outputDataLabel.Text = "0000000000";
             // 
             // recognizedDataMatrixPanel
             // 
-            this.recognizedDataMatrixPanel.Location = new System.Drawing.Point(930, 504);
+            this.recognizedDataMatrixPanel.Location = new System.Drawing.Point(930, 185);
             this.recognizedDataMatrixPanel.Name = "recognizedDataMatrixPanel";
             this.recognizedDataMatrixPanel.Size = new System.Drawing.Size(300, 140);
             this.recognizedDataMatrixPanel.TabIndex = 6;
@@ -225,7 +205,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(927, 487);
+            this.label20.Location = new System.Drawing.Point(930, 169);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(118, 13);
             this.label20.TabIndex = 13;
@@ -235,7 +215,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1240, 696);
+            this.ClientSize = new System.Drawing.Size(1240, 653);
             this.Controls.Add(this.label20);
             this.Controls.Add(this.recognizedDataMatrixPanel);
             this.Controls.Add(this.outputDataLabel);
@@ -246,10 +226,8 @@
             this.Controls.Add(this.rotatedDataMatrixPanel);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.dataMatrixLocationPanel);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.tunedResultImagePanel);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.roughResultImagePanel);
+            this.Controls.Add(this.peakResultImagePanel);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.houghPeaksImagePanel);
             this.Controls.Add(this.label3);
@@ -275,10 +253,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel houghPeaksImagePanel;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Panel roughResultImagePanel;
+        private System.Windows.Forms.Panel peakResultImagePanel;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Panel tunedResultImagePanel;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Panel dataMatrixLocationPanel;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Panel rotatedDataMatrixPanel;

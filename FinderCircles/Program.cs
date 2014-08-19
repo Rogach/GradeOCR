@@ -54,9 +54,9 @@ namespace ARCode {
         }
 
         static void StressTest() {
-            int patternRadius = 100;
-            int minPatternRadius = 90;
-            int maxPatternRadius = 110;
+            int patternRadius = 60;
+            int minPatternRadius = 55;
+            int maxPatternRadius = 65;
             int imgSize = 1000;
 
             int N = 100;
@@ -66,33 +66,40 @@ namespace ARCode {
             Random r = new Random();
             double time = 0;
             for (int q = 0; q < N; q++) {
-                Point3 patternLocation = new Point3(
-                    r.Next(imgSize - patternRadius * 2) + patternRadius, 
-                    r.Next(imgSize - patternRadius * 2) + patternRadius, 
-                    patternRadius);
-                Point patternDrawLocation = new Point(patternLocation.X - patternRadius, patternLocation.Y - patternRadius);
+                uint codeValue = (uint) r.Next();
+                Bitmap codeImage = ARCodeBuilder.BuildCode(codeValue, patternRadius);
 
+                int diag = (int) PointOps.Distance(0, 0, codeImage.Width, codeImage.Height);
+                Point codeLocation = new Point(
+                    r.Next(imgSize - diag) + diag / 2, 
+                    r.Next(imgSize - diag) + diag / 2);
+                
                 Bitmap sourceImage = new Bitmap(imgSize, imgSize, PixelFormat.Format32bppArgb);
                 Graphics g = Graphics.FromImage(sourceImage);
                 g.FillRectangle(Brushes.White, new Rectangle(0, 0, sourceImage.Width, sourceImage.Height));
-                g.DrawImage(CircleDrawer.GetFinderCircleImage(patternRadius), patternDrawLocation);
+                
+                g.TranslateTransform(codeLocation.X, codeLocation.Y);
+                g.RotateTransform((float) ((r.NextDouble() - 0.5) * 2));
+                g.TranslateTransform(-codeLocation.X, -codeLocation.Y);
+
+                Point codeDrawLocation = new Point(
+                    codeLocation.X - codeImage.Width / 2,
+                    codeLocation.Y - codeImage.Height / 2);
+
+                g.DrawImage(codeImage, codeDrawLocation);
                 g.Dispose();
 
                 Bitmap noisedImage = GetTestNoiseFilter().Apply(sourceImage);
+
                 DateTime stt = DateTime.Now;
-                Point3 recognizedLocation = CircleHoughTransform.LocateFinderCircles(noisedImage, minPatternRadius, maxPatternRadius, 1).First();
+                uint extractedValue = ARCodeExtractor.ExtractCode(noisedImage, minPatternRadius, maxPatternRadius);
                 DateTime end = DateTime.Now;
                 time += (end - stt).TotalMilliseconds;
 
-                bool succ =
-                    Math.Abs(recognizedLocation.X - patternLocation.X) < 2 &&
-                    Math.Abs(recognizedLocation.Y - patternLocation.Y) < 2;
-                if (succ) {
-                    success++;
+                if (extractedValue == codeValue) {
                     Console.WriteLine("({0}/{1}) Success.", q + 1, N);
                 } else {
-                    failure++;
-                    Console.WriteLine("({0}/{1}) Failure: expected {2}, got {3}", q + 1, N, patternLocation, recognizedLocation);
+                    Console.WriteLine("({0}/{1}) Success.", q + 1, N);
                 }
             }
             Console.WriteLine("successes/failures: {0}/{1}", success, failure);
