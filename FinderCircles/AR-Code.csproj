@@ -52,10 +52,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ARCodeBuilder.cs" />
-    <Compile Include="ARCodeExtractor.cs" />
+    <Compile Include="ARCode.cs" />
     <Compile Include="FinderCircleDrawer.cs" />
-    <Compile Include="CircleHoughTransform.cs" />
+    <Compile Include="FinderCircleHoughTransform.cs" />
     <Compile Include="DataMarshaller.cs" />
     <Compile Include="DataMatrixDrawer.cs" />
     <Compile Include="DataMatrixExtraction.cs" />
@@ -69,6 +68,7 @@
     <Compile Include="HexUtil.cs" />
     <Compile Include="ImageScaling.cs" />
     <Compile Include="NoiseFilter.cs" />
+    <Compile Include="Point3.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -5,6 +5,12 @@ using System.Text;
 using ZXing.Common.ReedSolomon;
 
 namespace ARCode {
+
+    /*
+     * Prepares uint value for storage in the code, and extracts value from processed code.
+     * Applies Reed-Solomon error correction algorithms to the data - half of the bits in
+     * input image can be destroyed, and value would still be extracted properly.
+     */
     public static class DataMarshaller {
 
         public static bool[] MarshallInt(uint value) {

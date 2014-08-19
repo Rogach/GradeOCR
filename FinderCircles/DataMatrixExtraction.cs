@@ -9,6 +9,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 
 namespace ARCode {
+
     public class DataMatrixExtraction {
 
         private Bitmap sourceImage;

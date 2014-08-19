@@ -8,23 +8,26 @@ using System.Drawing.Imaging;
 using LibUtil;
 
 namespace ARCode {
-    
-    public class Point3 {
-        public int X;
-        public int Y;
-        public int Z;
-        public Point3(int X, int Y, int Z) {
-            this.X = X;
-            this.Y = Y;
-            this.Z = Z;
-        }
-        public override string ToString() {
-            return String.Format("[X={0},Y={1},Z={2}]", X, Y, Z);
-        }
-    }
 
-    public static class CircleHoughTransform {
+    /*
+     * Applies Hough transform to given image.
+     * 
+     * We use finder circle contour as kernel for Hough transform,
+     * thus transforming 2d input image into 3d output space where pixel values
+     * signify probability of finder circle being present with center at that pixel
+     * (3d dimension is finder circle radius).
+     * Pixel with highes value is then determined and used as recognized location
+     * of finder circle in the image.
+     * 
+     * As optimization, input image is first severely downscaled (so that Hough transform
+     * run in reasonable time). Resulting peaks are then "tuned" against full-scale image,
+     * fixing their location with bigger precision.
+     */
+    public static class FinderCircleHoughTransform {
 
+        /*
+         * Convenience function to locate N finder circles with given pattern radius bounds.
+         */
         public static List<Point3> LocateFinderCircles(Bitmap img, int minPatternRadius, int maxPatternRadius, int patternCount) {
             int scaleFactor = GetScaleFactor(minPatternRadius);
             Bitmap downscaledImage = ImageScaling.ScaleDown(img, scaleFactor);
@@ -34,6 +37,12 @@ namespace ARCode {
             return roughPeaks.ConvertAll(peak => TunePeak(img, minPatternRadius, maxPatternRadius, peak));
         }
 
+        /*
+         * "Tune" peak location. Given a peak, re-applies Hough transform in some radius
+         * around this peak, and re-determines peak location.
+         * This function also downscales input image, though less severely than
+         * main transform.
+         */
         public static Point3 TunePeak(Bitmap img, int minPatternRadius, int maxPatternRadius, Point3 peak) {
             int scaleFactor = GetScaleFactor(minPatternRadius);
             int tuneScaleFactor = GetTuneScaleFactor(minPatternRadius);
@@ -56,14 +65,24 @@ namespace ARCode {
                 tunedPeak.Z * tuneScaleFactor + minPatternRadius);
         }
 
+        /*
+         * Get image downscale factor for main transform.
+         */
         public static int GetScaleFactor(int minPatternRadius) {
             return (int) Math.Floor((double) minPatternRadius / 10);
         }
 
+        /*
+         * Get image downscale factor for peak tuning stage.
+         */
         public static int GetTuneScaleFactor(int minPatterRadius) {
             return (int) Math.Floor((double) minPatterRadius / 40);
         }
 
+        /*
+         * Run Hough transform against given image.
+         * Returns Hough transform array - 1st dimension is pattern radius, 2nd and 3d are Y and X.
+         */
         public static int[,,] HoughTransform(Bitmap img, int minPatternRadius, int maxPatternRadius) {
             int imgWidth = img.Width;
             int imgHeight = img.Height;
@@ -133,7 +152,7 @@ namespace ARCode {
             return fullHough;
         }
 
-        public static List<Point> CaclulateOffsetTable(int patternRadius, Func<int, int, bool> testPixel) {
+        private static List<Point> CaclulateOffsetTable(int patternRadius, Func<int, int, bool> testPixel) {
             List<Point> pts = new List<Point>();
             PointF center = new PointF(0, 0);
             for (int cy = -patternRadius; cy <= patternRadius; cy++) {
@@ -150,7 +169,66 @@ namespace ARCode {
             return pts;
         }
 
-        public static Bitmap HoughTransformImage(int[,,] hough) {
+        /*
+         * Locate single peak in Hough transform array.
+         */
+        public static Point3 LocatePeak(int[,,] hough) {
+            int max = int.MinValue;
+            int maxX = 0;
+            int maxY = 0;
+            int maxZ = 0;
+            for (int z = 0; z < hough.GetLength(0); z++) {
+                for (int y = 0; y < hough.GetLength(1); y++) {
+                    for (int x = 0; x < hough.GetLength(2); x++) {
+                        if (hough[z, y, x] > max) {
+                            max = hough[z, y, x];
+                            maxX = x;
+                            maxY = y;
+                            maxZ = z;
+                        }
+                    }
+                }
+            }
+            return new Point3(maxX, maxY, maxZ);
+        }
+
+        /*
+         * Locate several peaks in Hough transform array.
+         */
+        public static List<Point3> LocatePeaks(int[, ,] hough, int patternCount, int minPatternSize) {
+            return LocatePeaks(hough, patternCount, new List<Point3>(), minPatternSize);
+        }
+
+        private static List<Point3> LocatePeaks(int[,,] hough, int patternCount, List<Point3> foundPeaks, int minPatternSize) {
+            int max = int.MinValue;
+            int maxX = 0;
+            int maxY = 0;
+            int maxZ = 0;
+            for (int z = 0; z < hough.GetLength(0); z++) {
+                for (int y = 0; y < hough.GetLength(1); y++) {
+                    for (int x = 0; x < hough.GetLength(2); x++) {
+                        Point3 neighbourPeak = foundPeaks.Find(p => PointOps.Distance(x, y, p.X, p.Y) < minPatternSize);
+                        if (neighbourPeak == null && hough[z, y, x] > max) {
+                            max = hough[z, y, x];
+                            maxX = x;
+                            maxY = y;
+                            maxZ = z;
+                        }
+                    }
+                }
+            }
+            foundPeaks.Add(new Point3(maxX, maxY, maxZ));
+            if (patternCount == 1) {
+                return foundPeaks;
+            } else {
+                return LocatePeaks(hough, patternCount - 1, foundPeaks, minPatternSize);
+            }
+        }
+
+        /*
+         * Draw Hough transform array as grayscale image.
+         */
+        public static Bitmap HoughTransformImage(int[, ,] hough) {
             int max = int.MinValue;
             int min = int.MaxValue;
             foreach (int h in hough) {
@@ -187,71 +265,5 @@ namespace ARCode {
             return res;
         }
 
-        public static List<Point3> LocatePeaks(int[,,] hough, int patternCount, int minPatternSize) {
-            return LocatePeaks(hough, patternCount, new List<Point3>(), minPatternSize);
-        }
-
-        public static Point3 LocatePeak(int[,,] hough) {
-            int max = int.MinValue;
-            int maxX = 0;
-            int maxY = 0;
-            int maxZ = 0;
-            for (int z = 0; z < hough.GetLength(0); z++) {
-                for (int y = 0; y < hough.GetLength(1); y++) {
-                    for (int x = 0; x < hough.GetLength(2); x++) {
-                        if (hough[z, y, x] > max) {
-                            max = hough[z, y, x];
-                            maxX = x;
-                            maxY = y;
-                            maxZ = z;
-                        }
-                    }
-                }
-            }
-            return new Point3(maxX, maxY, maxZ);
-        }
-
-        public static List<Point3> LocatePeaks(int[,,] hough, int patternCount, List<Point3> foundPeaks, int minPatternSize) {
-            int max = int.MinValue;
-            int maxX = 0;
-            int maxY = 0;
-            int maxZ = 0;
-            for (int z = 0; z < hough.GetLength(0); z++) {
-                for (int y = 0; y < hough.GetLength(1); y++) {
-                    for (int x = 0; x < hough.GetLength(2); x++) {
-                        Point3 neighbourPeak = foundPeaks.Find(p => PointOps.Distance(x, y, p.X, p.Y) < minPatternSize);
-                        if (neighbourPeak == null && hough[z, y, x] > max) {
-                            max = hough[z, y, x];
-                            maxX = x;
-                            maxY = y;
-                            maxZ = z;
-                        }
-                    }
-                }
-            }
-            foundPeaks.Add(new Point3(maxX, maxY, maxZ));
-            if (patternCount == 1) {
-                return foundPeaks;
-            } else {
-                return LocatePeaks(hough, patternCount - 1, foundPeaks, minPatternSize);
-            }
-        }
-
-        public static void DrawPeaks(Bitmap src, List<Point3> peaks, Color c) {
-            unsafe {
-                BitmapData bd = src.LockBits(ImageLockMode.WriteOnly);
-                byte* ptr = (byte*) bd.Scan0.ToPointer();
-
-                foreach (var pt in peaks) {
-                    byte* p = ptr + 4 * (pt.Y * src.Width + pt.X);
-                    *p = c.B;
-                    *(p + 1) = c.G;
-                    *(p + 2) = c.R;
-                    *(p + 3) = c.A;
-                }
-
-                src.UnlockBits(bd);
-            }
-        }
     }
 }

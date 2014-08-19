@@ -34,7 +34,7 @@ namespace ARCode {
             g.RotateTransform(-15);
             g.TranslateTransform(-sourceImage.Width / 2, -sourceImage.Height / 2);
 
-            Bitmap codeImage = ARCodeBuilder.BuildCode(value, patternRadius);
+            Bitmap codeImage = ARCode.BuildCode(value, patternRadius);
 
             g.DrawImage(codeImage, new Point(150, 400));
 
@@ -47,7 +47,6 @@ namespace ARCode {
         }
 
         public static NoiseFilter GetTestNoiseFilter() {
-            //return new EmptyFilter();
             return new FilterSeq(
                         new RandomBlots(0.2),
                         new RandomNoise(0.2),
@@ -69,7 +68,7 @@ namespace ARCode {
             double time = 0;
             for (int q = 0; q < N; q++) {
                 uint codeValue = (uint) r.Next();
-                Bitmap codeImage = ARCodeBuilder.BuildCode(codeValue, patternRadius);
+                Bitmap codeImage = ARCode.BuildCode(codeValue, patternRadius);
 
                 int diag = (int) PointOps.Distance(0, 0, codeImage.Width, codeImage.Height);
                 Point codeLocation = new Point(
@@ -94,7 +93,7 @@ namespace ARCode {
                 Bitmap noisedImage = GetTestNoiseFilter().Apply(sourceImage);
 
                 DateTime stt = DateTime.Now;
-                uint extractedValue = ARCodeExtractor.ExtractCode(noisedImage, minPatternRadius, maxPatternRadius);
+                uint extractedValue = ARCode.ExtractCode(noisedImage, minPatternRadius, maxPatternRadius);
                 DateTime end = DateTime.Now;
                 time += (end - stt).TotalMilliseconds;
 

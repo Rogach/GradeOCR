@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using OCRUtil;
 using LibUtil;
+using System.Drawing.Imaging;
 
 namespace ARCode {
     public partial class FinderCircleDebugView : Form {
@@ -45,34 +46,34 @@ namespace ARCode {
             Bitmap grayImage = ImageUtil.ToGrayscale(sourceImage);
             this.inputImagePV.Image = grayImage;
 
-            Bitmap noiseImage = Program.GetTestNoiseFilter().Apply(sourceImage);
+            Bitmap noiseImage = sourceImage;
             this.noiseImagePV.Image = noiseImage;
 
-            int scaleFactor = CircleHoughTransform.GetScaleFactor(minPatternRadius);
+            int scaleFactor = FinderCircleHoughTransform.GetScaleFactor(minPatternRadius);
             Console.WriteLine("scaleFactor = " + scaleFactor);
             Bitmap downscaledImage = ImageScaling.ScaleDown(noiseImage, scaleFactor);
 
             int[,,] hough = Util.Timed("hough transform", () => 
-                CircleHoughTransform.HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor));
-            Bitmap houghTransformImage = CircleHoughTransform.HoughTransformImage(hough);
+                FinderCircleHoughTransform.HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor));
+            Bitmap houghTransformImage = FinderCircleHoughTransform.HoughTransformImage(hough);
             this.houghImagePV.Image = houghTransformImage;
-            List<Point3> peaks = CircleHoughTransform.LocatePeaks(hough, 2, minPatternRadius / scaleFactor);
+            List<Point3> peaks = FinderCircleHoughTransform.LocatePeaks(hough, 2, minPatternRadius / scaleFactor);
             List<Point3> descaledPeaks = peaks.ConvertAll(p => new Point3(p.X * scaleFactor, p.Y * scaleFactor, p.Z * scaleFactor + minPatternRadius));
             foreach (var p in descaledPeaks) {
                 Console.WriteLine("Raw peak at {0}x{1}x{2}", p.X, p.Y, p.Z);
             }
             List<Point3> tunedPeaks = Util.Timed("tune peaks", () =>
-                descaledPeaks.ConvertAll(peak => CircleHoughTransform.TunePeak(noiseImage, minPatternRadius, maxPatternRadius, peak)));
+                descaledPeaks.ConvertAll(peak => FinderCircleHoughTransform.TunePeak(noiseImage, minPatternRadius, maxPatternRadius, peak)));
             foreach (var p in tunedPeaks) {
                 Console.WriteLine("Tuned peak at {0}x{1}x{2}", p.X, p.Y, p.Z);
             }
             Bitmap houghPeaksImage = new Bitmap(houghTransformImage);
-            CircleHoughTransform.DrawPeaks(houghPeaksImage, peaks, Color.Red);
+            DrawPeaks(houghPeaksImage, peaks, Color.Red);
             this.houghPeakImagePV.Image = houghPeaksImage;
 
             Bitmap resultPeaksImage = new Bitmap(noiseImage);
-            CircleHoughTransform.DrawPeaks(resultPeaksImage, descaledPeaks, Color.Red);
-            CircleHoughTransform.DrawPeaks(resultPeaksImage, tunedPeaks, Color.Green);
+            DrawPeaks(resultPeaksImage, descaledPeaks, Color.Red);
+            DrawPeaks(resultPeaksImage, tunedPeaks, Color.Green);
             this.peakResultImagePV.Image = resultPeaksImage;
 
             FinderPatternPair fpp = new FinderPatternPair();
@@ -88,5 +89,22 @@ namespace ARCode {
             outputDataLabel.Text = DataMarshaller.UnMarshallInt(dme.extractedData).ToString();
         }
 
+
+        public static void DrawPeaks(Bitmap src, List<Point3> peaks, Color c) {
+            unsafe {
+                BitmapData bd = src.LockBits(ImageLockMode.WriteOnly);
+                byte* ptr = (byte*) bd.Scan0.ToPointer();
+
+                foreach (var pt in peaks) {
+                    byte* p = ptr + 4 * (pt.Y * src.Width + pt.X);
+                    *p = c.B;
+                    *(p + 1) = c.G;
+                    *(p + 2) = c.R;
+                    *(p + 3) = c.A;
+                }
+
+                src.UnlockBits(bd);
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace ARCode {
         public static FinderPatternPair LocateFinderPatternPair(Bitmap sourceImage, int patternRadius) {
             int minPatternRadius = (int) Math.Floor((double) patternRadius * 0.9);
             int maxPatternRadius = (int) Math.Ceiling((double) patternRadius * 1.1);
-            List<Point3> finderPatterns = CircleHoughTransform.LocateFinderCircles(
+            List<Point3> finderPatterns = FinderCircleHoughTransform.LocateFinderCircles(
                 sourceImage, minPatternRadius, maxPatternRadius, 2);
             FinderPatternPair fp = new FinderPatternPair();
             fp.p1 = new Point(finderPatterns[0].X, finderPatterns[0].Y);

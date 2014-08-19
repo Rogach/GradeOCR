@@ -8,10 +8,14 @@ using OCRUtil;
 using LibUtil;
 
 namespace ARCode {
+
     public static class DataMatrixDrawer {
         public static readonly int rowCount = 8;
         public static readonly int columnCount = 32;
 
+        /*
+         * Draw bit data as a black/white matrix image.
+         */
         public static Bitmap DataMatrix(bool[] data, int width, int height) {
             if (data.Length != rowCount * columnCount)
                 throw new ArgumentException(String.Format(
