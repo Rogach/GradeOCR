@@ -74,7 +74,7 @@ namespace Grader.gui {
 
             ColumnHeader ch = new ColumnHeader();
             ch.Text = "register name";
-            ch.Width = registerList.Size.Width - 10;
+            ch.Width = registerList.Size.Width - 25;
             registerList.Columns.Add(ch);
 
             registerList.DoubleClick += new EventHandler(delegate {
