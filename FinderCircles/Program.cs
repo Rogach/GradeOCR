@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using LibUtil;
 using OCRUtil;
+using ZXing.Common.ReedSolomon;
 
 namespace ARCode {
     class Program {
@@ -49,7 +50,8 @@ namespace ARCode {
             //return new EmptyFilter();
             return new FilterSeq(
                         new RandomBlots(0.2),
-                        new RandomNoise(0.2)
+                        new RandomNoise(0.2),
+                        new RandomStripes(0.05, 20)
                     );
         }
 
