@@ -6,6 +6,7 @@ using System.Drawing;
 using OCRUtil;
 using LibUtil;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace ARCode {
     public class DataMatrixExtraction {
@@ -87,6 +88,31 @@ namespace ARCode {
             g.DrawLine(gp, bottomLeft, bottomRight);
             g.DrawLine(gp, bottomRight, topRight);
             g.DrawLine(gp, topRight, topLeft);
+            g.Dispose();
+
+            return res;
+        }
+
+        public Bitmap RecognitionDebugImage() {
+            Bitmap res = new Bitmap(rotatedMatrix);
+
+            float cellWidth = (float) res.Width / DataMatrixDrawer.columnCount;
+            float cellHeight = (float) res.Height / DataMatrixDrawer.rowCount;
+
+            Graphics g = Graphics.FromImage(res);
+            for (int y = 0; y < DataMatrixDrawer.rowCount; y++) {
+                for (int x = 0; x < DataMatrixDrawer.columnCount; x++) {
+                    var gp = new GraphicsPath();
+                    gp.AddPolygon(new PointF[] { 
+                        new PointF(cellWidth * x, cellHeight * y),
+                        new PointF(cellWidth * (x + 1), cellHeight * y),
+                        new PointF(cellWidth * (x + 1), cellHeight * (y + 1)),
+                        new PointF(cellWidth * x, cellHeight * (y + 1))
+                    });
+                    Color cellColor = extractedData[x * DataMatrixDrawer.rowCount + y] ? Color.Blue : Color.Red;
+                    g.FillPath(new SolidBrush(Color.FromArgb(50, cellColor)), gp);
+                }
+            }
             g.Dispose();
 
             return res;

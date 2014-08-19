@@ -20,6 +20,7 @@ namespace ARCode {
         private PictureView dataMatrixLocationPV;
         private PictureView rotatedDataMatrixPV;
         private PictureView cellValuesImagePV;
+        private PictureView recognizedDataMatrixPV;
 
         public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue) {
             InitializeComponent();
@@ -32,6 +33,7 @@ namespace ARCode {
             this.tunedResultImagePV = PictureView.InsertIntoPanel(tunedResultImagePanel);
             this.dataMatrixLocationPV = PictureView.InsertIntoPanel(dataMatrixLocationPanel);
             this.rotatedDataMatrixPV = PictureView.InsertIntoPanel(rotatedDataMatrixPanel);
+            this.recognizedDataMatrixPV = PictureView.InsertIntoPanel(recognizedDataMatrixPanel);
 
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
@@ -80,6 +82,7 @@ namespace ARCode {
             DataMatrixExtraction dme = new DataMatrixExtraction(noiseImage, fpp);
             dataMatrixLocationPV.Image = dme.PositioningDebugImage();
             rotatedDataMatrixPV.Image = dme.rotatedMatrix;
+            recognizedDataMatrixPV.Image = dme.RecognitionDebugImage();
             outputDataLabel.Text = DataMarshaller.UnMarshallInt(dme.extractedData).ToString();
         }
     }

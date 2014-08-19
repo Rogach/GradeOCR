@@ -43,6 +43,8 @@
             this.label10 = new System.Windows.Forms.Label();
             this.inputDataLabel = new System.Windows.Forms.Label();
             this.outputDataLabel = new System.Windows.Forms.Label();
+            this.recognizedDataMatrixPanel = new System.Windows.Forms.Panel();
+            this.label20 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // inputImagePanel
@@ -213,11 +215,29 @@
             this.outputDataLabel.Text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 " +
                 "00 00 00 00 00";
             // 
+            // recognizedDataMatrixPanel
+            // 
+            this.recognizedDataMatrixPanel.Location = new System.Drawing.Point(930, 504);
+            this.recognizedDataMatrixPanel.Name = "recognizedDataMatrixPanel";
+            this.recognizedDataMatrixPanel.Size = new System.Drawing.Size(300, 140);
+            this.recognizedDataMatrixPanel.TabIndex = 6;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(927, 487);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(118, 13);
+            this.label20.TabIndex = 13;
+            this.label20.Text = "Recognized data matrix";
+            // 
             // FinderCircleDebugView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1240, 696);
+            this.Controls.Add(this.label20);
+            this.Controls.Add(this.recognizedDataMatrixPanel);
             this.Controls.Add(this.outputDataLabel);
             this.Controls.Add(this.inputDataLabel);
             this.Controls.Add(this.label10);
@@ -267,5 +287,7 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label inputDataLabel;
         private System.Windows.Forms.Label outputDataLabel;
+        private System.Windows.Forms.Panel recognizedDataMatrixPanel;
+        private System.Windows.Forms.Label label20;
     }
 }
