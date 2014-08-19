@@ -63,12 +63,20 @@ namespace Grader.gui {
             this.Controls.Add(newRegisterButton);
 
             registerList = new ListView();
-            registerList.View = View.List;
+            registerList.View = View.Details;
+            
+            registerList.HeaderStyle = ColumnHeaderStyle.None;
             registerList.MultiSelect = false;
             registerList.FullRowSelect = true;
             registerList.Location = new Point(3, 30);
             registerList.Size = new Size(200, 770);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
+
+            ColumnHeader ch = new ColumnHeader();
+            ch.Text = "register name";
+            ch.Width = registerList.Size.Width - 10;
+            registerList.Columns.Add(ch);
+
             registerList.DoubleClick += new EventHandler(delegate {
                 if (registerList.SelectedIndices.Count > 0) {
                     ListViewItem item = registerList.Items[registerList.SelectedIndices[0]];
