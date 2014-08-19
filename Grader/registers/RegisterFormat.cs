@@ -26,8 +26,60 @@ namespace Grader.registers {
     }
 
     public abstract class RegisterSpec {
+        public string specName;
         public string templateName;
         public abstract void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings);
+
+        public static RegisterSpec FromSpecName(string specName) {
+            switch (specName) {
+                case "сводная": return new СводнаяВедомость();
+                case "сводная (невыносимые)": return new СводнаяНевыносимыеПредметыВедомость();
+                case "сверка": return new СверочнаяВедомость();
+                case "ОГН": return new ВедомостьОГН();
+                case "ОВУ": return new GenericRegister("ОВУ");
+                case "СП": return new ВедомостьСП();
+                case "СТР": return new ВедомостьСТР();
+                case "ТП": return new ВедомостьТП();
+                case "ФП": return new ВедомостьФП();
+                case "РХБЗ": return new ВедомостьФП();
+                case "АВТ": return new GenericRegister("АВТ");
+                case "ОБВС": return new GenericRegister("ОБВС");
+                case "ОЗГТ": return new GenericRegister("ОЗГТ");
+                case "ЭО": return new GenericRegister("ЭО");
+                case "ОГП": return new GenericRegister("ОГП");
+                case "ИНЖ": return new GenericRegister("ИНЖ");
+                case "ВМП": return new GenericRegister("ВМП");
+                case "ТСП": return new GenericRegister("ТСП");
+                case "ТОП": return new GenericRegister("ТОП");
+                case "МП": return new GenericRegister("МП");
+                case "ТАК": return new GenericRegister("ТАК");
+                default: throw new ArgumentException("Unknown register spec: " + specName);
+            }
+        }
+
+        public static RegisterSpec[] registerSpecs = {
+            new СводнаяВедомость(),
+            new СводнаяНевыносимыеПредметыВедомость(),
+            new СверочнаяВедомость(),
+            new ВедомостьОГН(),
+            new GenericRegister("ОВУ"),
+            new ВедомостьСП(),
+            new ВедомостьСТР(),
+            new ВедомостьТП(),
+            new ВедомостьФП(),
+            new ВедомостьРХБЗ(),
+            new GenericRegister("АВТ"),
+            new GenericRegister("ОБВС"),
+            new GenericRegister("ОЗГТ"),
+            new GenericRegister("ЭО"),
+            new GenericRegister("ОГП"),
+            new GenericRegister("ИНЖ"),
+            new GenericRegister("ВМП"),
+            new GenericRegister("ТСП"),
+            new GenericRegister("ТОП"),
+            new GenericRegister("МП"),
+            new GenericRegister("ТАК")
+        };
     }
 
     public abstract class GeneralRegister : RegisterSpec {
@@ -96,7 +148,7 @@ namespace Grader.registers {
             }
 
             if (settings.forOCR)
-                InsertRegisterCode(sh, settings);
+                InsertRegisterCode(et, sh, settings);
         }
 
         public virtual void InsertSoldiers(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
@@ -111,9 +163,19 @@ namespace Grader.registers {
             );
         }
 
-        public static void InsertRegisterCode(ExcelWorksheet sh, RegisterSettings settings) {
-            Random r = new Random();
-            uint codeValue = (uint) r.Next();
+        public void InsertRegisterCode(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
+            var regEntry = new ВедомостьДляРаспознавания {
+                ДатаПечати = DateTime.Now,
+                ДатаВнесения = null,
+                СписокВоеннослужащих = settings.soldiers.Select(v => v.Код).MkString(),
+                ТипВедомости = specName
+            };
+
+            et.ВедомостьДляРаспознавания.AddObject(regEntry);
+            et.SaveChanges();
+
+            uint codeValue = (uint) regEntry.Код;
+
             Bitmap codeImage = ARCodeUtil.BuildCode(codeValue, 60);
             string tempFileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
             codeImage.Save(tempFileName);
@@ -135,6 +197,7 @@ namespace Grader.registers {
     }
 
     public abstract class ВедомостьОВП : GeneralRegister {
+
         public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             base.Format(et, sh, settings);
             ExcelTemplates.ReplaceRange(sh, "Заголовок", "$registerType$", GetRegisterHeader(settings.registerType));
@@ -162,6 +225,7 @@ namespace Grader.registers {
     public class GenericRegister : ВедомостьОВП {
         string subject;
         public GenericRegister(string subject) {
+            specName = subject;
             templateName = "ведомость_курсанты_стд.xlsx";
             columnCount = 10;
             this.subject = subject;
@@ -194,6 +258,7 @@ namespace Grader.registers {
 
     public class ВедомостьОГН : GeneralRegister {
         public ВедомостьОГН() {
+            specName = "ОГН";
             templateName = "ведомость_курсанты_ОГН.xlsx";
             columnCount = 13;
         }
@@ -214,6 +279,7 @@ namespace Grader.registers {
     }
     public class СводнаяВедомость : ВедомостьПолныеИмена {
         public СводнаяВедомость() {
+            specName = "сводная";
             templateName = "ведомость_курсанты_сводная.xlsx";
             columnCount = 9;
         }
@@ -221,6 +287,7 @@ namespace Grader.registers {
     }
     public class СводнаяНевыносимыеПредметыВедомость : ВедомостьПолныеИмена {
         public СводнаяНевыносимыеПредметыВедомость() {
+            specName = "сводная (невыносимые)";
             templateName = "ведомость_курсанты_сводная_невыносимые_предметы.xlsx";
             columnCount = 6;
         }
@@ -240,6 +307,7 @@ namespace Grader.registers {
 
     public class ВедомостьСП : ВедомостьОВПиВУС {
         public ВедомостьСП() {
+            specName = "СП";
             templateName = "ведомость_курсанты_СП.xlsx";
             columnCount = 10;
         }
@@ -247,6 +315,7 @@ namespace Grader.registers {
     }
     public class ВедомостьСТР : ВедомостьОВП {
         public ВедомостьСТР() {
+            specName = "СТР";
             templateName = "ведомость_курсанты_СТР.xlsx";
             columnCount = 14;
         }
@@ -254,6 +323,7 @@ namespace Grader.registers {
     }
     public class ВедомостьТП : ВедомостьОВПиВУС {
         public ВедомостьТП() {
+            specName = "ТП";
             templateName = "ведомость_курсанты_ТП.xlsx";
             columnCount = 10;
         }
@@ -261,6 +331,7 @@ namespace Grader.registers {
     }
     public class ВедомостьФП : ВедомостьОВП {
         public ВедомостьФП() {
+            specName = "ФП";
             templateName = "ведомость_курсанты_ФП.xlsx";
             columnCount = 17;
         }
@@ -268,6 +339,7 @@ namespace Grader.registers {
     }
     public class ВедомостьРХБЗ : ВедомостьОВП {
         public ВедомостьРХБЗ() {
+            specName = "РХБЗ";
             templateName = "ведомость_курсанты_РХБЗ.xlsx";
             columnCount = 10;
         }
@@ -275,6 +347,7 @@ namespace Grader.registers {
     }
     public class СверочнаяВедомость : ВедомостьПолныеИмена {
         public СверочнаяВедомость() {
+            specName = "сверка";
             templateName = "ведомость_курсанты_сверка.xlsx";
             columnCount = 2;
         }

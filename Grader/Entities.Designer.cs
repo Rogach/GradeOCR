@@ -278,6 +278,22 @@ namespace Grader
             }
         }
         private ObjectSet<Предмет> _Предмет;
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        public ObjectSet<ВедомостьДляРаспознавания> ВедомостьДляРаспознавания
+        {
+            get
+            {
+                if ((_ВедомостьДляРаспознавания == null))
+                {
+                    _ВедомостьДляРаспознавания = base.CreateObjectSet<ВедомостьДляРаспознавания>("ВедомостьДляРаспознавания");
+                }
+                return _ВедомостьДляРаспознавания;
+            }
+        }
+        private ObjectSet<ВедомостьДляРаспознавания> _ВедомостьДляРаспознавания;
 
         #endregion
         #region Методы AddTo
@@ -376,6 +392,14 @@ namespace Grader
         public void AddToПредмет(Предмет предмет)
         {
             base.AddObject("Предмет", предмет);
+        }
+    
+        /// <summary>
+        /// Устаревший метод для добавления новых объектов в набор EntitySet ВедомостьДляРаспознавания. Взамен можно использовать метод .Add связанного свойства ObjectSet&lt;T&gt;.
+        /// </summary>
+        public void AddToВедомостьДляРаспознавания(ВедомостьДляРаспознавания ведомостьДляРаспознавания)
+        {
+            base.AddObject("ВедомостьДляРаспознавания", ведомостьДляРаспознавания);
         }
 
         #endregion
@@ -686,6 +710,163 @@ namespace Grader
         }
 
         #endregion
+    }
+    
+    /// <summary>
+    /// Нет доступной документации по метаданным.
+    /// </summary>
+    [EdmEntityTypeAttribute(NamespaceName="graderModel", Name="ВедомостьДляРаспознавания")]
+    [Serializable()]
+    [DataContractAttribute(IsReference=true)]
+    public partial class ВедомостьДляРаспознавания : EntityObject
+    {
+        #region Фабричный метод
+    
+        /// <summary>
+        /// Создание нового объекта ВедомостьДляРаспознавания.
+        /// </summary>
+        /// <param name="код">Исходное значение свойства Код.</param>
+        /// <param name="датаПечати">Исходное значение свойства ДатаПечати.</param>
+        /// <param name="списокВоеннослужащих">Исходное значение свойства СписокВоеннослужащих.</param>
+        /// <param name="типВедомости">Исходное значение свойства ТипВедомости.</param>
+        public static ВедомостьДляРаспознавания CreateВедомостьДляРаспознавания(global::System.Int32 код, global::System.DateTime датаПечати, global::System.String списокВоеннослужащих, global::System.String типВедомости)
+        {
+            ВедомостьДляРаспознавания ведомостьДляРаспознавания = new ВедомостьДляРаспознавания();
+            ведомостьДляРаспознавания.Код = код;
+            ведомостьДляРаспознавания.ДатаПечати = датаПечати;
+            ведомостьДляРаспознавания.СписокВоеннослужащих = списокВоеннослужащих;
+            ведомостьДляРаспознавания.ТипВедомости = типВедомости;
+            return ведомостьДляРаспознавания;
+        }
+
+        #endregion
+        #region Свойства-примитивы
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=true, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.Int32 Код
+        {
+            get
+            {
+                return _Код;
+            }
+            set
+            {
+                if (_Код != value)
+                {
+                    OnКодChanging(value);
+                    ReportPropertyChanging("Код");
+                    _Код = StructuralObject.SetValidValue(value);
+                    ReportPropertyChanged("Код");
+                    OnКодChanged();
+                }
+            }
+        }
+        private global::System.Int32 _Код;
+        partial void OnКодChanging(global::System.Int32 value);
+        partial void OnКодChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.DateTime ДатаПечати
+        {
+            get
+            {
+                return _ДатаПечати;
+            }
+            set
+            {
+                OnДатаПечатиChanging(value);
+                ReportPropertyChanging("ДатаПечати");
+                _ДатаПечати = StructuralObject.SetValidValue(value);
+                ReportPropertyChanged("ДатаПечати");
+                OnДатаПечатиChanged();
+            }
+        }
+        private global::System.DateTime _ДатаПечати;
+        partial void OnДатаПечатиChanging(global::System.DateTime value);
+        partial void OnДатаПечатиChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=true)]
+        [DataMemberAttribute()]
+        public Nullable<global::System.DateTime> ДатаВнесения
+        {
+            get
+            {
+                return _ДатаВнесения;
+            }
+            set
+            {
+                OnДатаВнесенияChanging(value);
+                ReportPropertyChanging("ДатаВнесения");
+                _ДатаВнесения = StructuralObject.SetValidValue(value);
+                ReportPropertyChanged("ДатаВнесения");
+                OnДатаВнесенияChanged();
+            }
+        }
+        private Nullable<global::System.DateTime> _ДатаВнесения;
+        partial void OnДатаВнесенияChanging(Nullable<global::System.DateTime> value);
+        partial void OnДатаВнесенияChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String СписокВоеннослужащих
+        {
+            get
+            {
+                return _СписокВоеннослужащих;
+            }
+            set
+            {
+                OnСписокВоеннослужащихChanging(value);
+                ReportPropertyChanging("СписокВоеннослужащих");
+                _СписокВоеннослужащих = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("СписокВоеннослужащих");
+                OnСписокВоеннослужащихChanged();
+            }
+        }
+        private global::System.String _СписокВоеннослужащих;
+        partial void OnСписокВоеннослужащихChanging(global::System.String value);
+        partial void OnСписокВоеннослужащихChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String ТипВедомости
+        {
+            get
+            {
+                return _ТипВедомости;
+            }
+            set
+            {
+                OnТипВедомостиChanging(value);
+                ReportPropertyChanging("ТипВедомости");
+                _ТипВедомости = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("ТипВедомости");
+                OnТипВедомостиChanged();
+            }
+        }
+        private global::System.String _ТипВедомости;
+        partial void OnТипВедомостиChanging(global::System.String value);
+        partial void OnТипВедомостиChanged();
+
+        #endregion
+    
     }
     
     /// <summary>

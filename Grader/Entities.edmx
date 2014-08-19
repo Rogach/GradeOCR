@@ -4,9 +4,10 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="graderModel.Store" Alias="Self" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.6" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+    <Schema Namespace="graderModel.Store" Alias="Self" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.6" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
         <EntityContainer Name="graderModelStoreContainer">
           <EntitySet Name="Ведомость" EntityType="graderModel.Store.Ведомость" store:Type="Tables" Schema="grader" />
+          <EntitySet Name="ВедомостьДляРаспознавания" EntityType="graderModel.Store.ВедомостьДляРаспознавания" store:Type="Tables" Schema="grader" />
           <EntitySet Name="ВедомостьЗапись" EntityType="graderModel.Store.ВедомостьЗапись" store:Type="Tables" Schema="grader" />
           <EntitySet Name="ВедомостьПредмет" EntityType="graderModel.Store.ВедомостьПредмет" store:Type="Tables" Schema="grader" />
           <EntitySet Name="ВедомостьТег" EntityType="graderModel.Store.ВедомостьТег" store:Type="Tables" Schema="grader" />
@@ -102,6 +103,16 @@
           <Property Name="ДатаИзменения" Type="datetime" Nullable="false" />
           <Property Name="Виртуальная" Type="bit" Nullable="false" />
           <Property Name="Включена" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ВедомостьДляРаспознавания">
+          <Key>
+            <PropertyRef Name="Код" />
+          </Key>
+          <Property Name="Код" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="ДатаПечати" Type="datetime" Nullable="false" />
+          <Property Name="ДатаВнесения" Type="datetime" />
+          <Property Name="СписокВоеннослужащих" Type="longtext" Nullable="false" />
+          <Property Name="ТипВедомости" Type="varchar" Nullable="false" MaxLength="45" />
         </EntityType>
         <EntityType Name="ВедомостьЗапись">
           <Key>
@@ -454,8 +465,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="graderModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
@@ -544,6 +554,7 @@
             <End Role="Подразделение" EntitySet="Подразделение" />
             <End Role="ПодразделениеПодчинение" EntitySet="ПодразделениеПодчинение" />
           </AssociationSet>
+          <EntitySet Name="ВедомостьДляРаспознавания" EntityType="graderModel.ВедомостьДляРаспознавания" />
         </EntityContainer>
         <EntityType Name="Ведомость">
           <Key>
@@ -944,6 +955,16 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="ВедомостьДляРаспознавания">
+          <Key>
+            <PropertyRef Name="Код" />
+          </Key>
+          <Property Type="Int32" Name="Код" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="DateTime" Name="ДатаПечати" Nullable="false" />
+          <Property Type="DateTime" Name="ДатаВнесения" />
+          <Property Type="String" Name="СписокВоеннослужащих" Nullable="false" MaxLength="1073741823" FixedLength="false" Unicode="false" />
+          <Property Type="String" Name="ТипВедомости" Nullable="false" MaxLength="45" FixedLength="false" Unicode="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1043,6 +1064,17 @@
             <ScalarProperty Name="НазваниеДательный" ColumnName="НазваниеДательный" />
             <ScalarProperty Name="ДЗД" ColumnName="ДЗД" />
           </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="ВедомостьДляРаспознавания">
+            <EntityTypeMapping TypeName="graderModel.ВедомостьДляРаспознавания">
+              <MappingFragment StoreEntitySet="ВедомостьДляРаспознавания">
+                <ScalarProperty Name="ТипВедомости" ColumnName="ТипВедомости" />
+                <ScalarProperty Name="СписокВоеннослужащих" ColumnName="СписокВоеннослужащих" />
+                <ScalarProperty Name="ДатаВнесения" ColumnName="ДатаВнесения" />
+                <ScalarProperty Name="ДатаПечати" ColumnName="ДатаПечати" />
+                <ScalarProperty Name="Код" ColumnName="Код" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
@@ -1167,6 +1199,7 @@
           <ConnectorPoint PointX="6.9375" PointY="17.287903645833339" />
           <ConnectorPoint PointX="6.9375" PointY="18.375" />
         </AssociationConnector>
+        <EntityTypeShape EntityType="graderModel.ВедомостьДляРаспознавания" Width="1.5" PointX="1.75" PointY="3" Height="1.9802864583333388" />
       </Diagram>
     </Diagrams>
   </Designer>

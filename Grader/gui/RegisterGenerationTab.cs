@@ -23,30 +23,6 @@ namespace Grader.gui {
             this.InitializeComponent();
         }
 
-        private RegisterSpec[] registerSpecs = {
-            new СводнаяВедомость(),
-            new СводнаяНевыносимыеПредметыВедомость(),
-            new СверочнаяВедомость(),
-            new ВедомостьОГН(),
-            new GenericRegister("ОВУ"),
-            new ВедомостьСП(),
-            new ВедомостьСТР(),
-            new ВедомостьТП(),
-            new ВедомостьФП(),
-            new ВедомостьРХБЗ(),
-            new GenericRegister("АВТ"),
-            new GenericRegister("ОБВС"),
-            new GenericRegister("ОЗГТ"),
-            new GenericRegister("ЭО"),
-            new GenericRegister("ОГП"),
-            new GenericRegister("ИНЖ"),
-            new GenericRegister("ВМП"),
-            new GenericRegister("ТСП"),
-            new GenericRegister("ТОП"),
-            new GenericRegister("МП"),
-            new GenericRegister("ТАК")
-        };
-
         private PersonSelector personSelector;
         private RadioButton groupingNone;
         private RadioButton groupingByPlatoon;
@@ -86,7 +62,7 @@ namespace Grader.gui {
             registerDate.Value = DateTime.Now;
 
             registerSubjectSelect = layout.Add("ведомость:", new ComboBox());
-            registerSubjectSelect.Items.AddRange(registerSpecs);
+            registerSubjectSelect.Items.AddRange(RegisterSpec.registerSpecs);
             registerSubjectSelect.SelectedIndex = 0;
             registerSubjectSelect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             registerSubjectSelect.AutoCompleteSource = AutoCompleteSource.ListItems;
