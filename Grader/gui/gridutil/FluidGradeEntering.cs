@@ -24,13 +24,23 @@ namespace Grader.gui.gridutil {
                         minY = Math.Min(minY, sc.RowIndex);
                     }
                     if (isEditingAllowed(minX)) {
-                        dataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
-                        if (minY + 2 < dataGridView.Rows.Count) {
-                            dataGridView.ClearSelection();
-                            dataGridView.Rows[minY + 1].Cells[minX].Selected = true;
-                            dataGridView.CurrentCell = dataGridView.Rows[minY + 1].Cells[minX];
+                        if (dataGridView.AllowUserToAddRows) {
+                            dataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
+                            if (minY + 2 < dataGridView.Rows.Count) {
+                                dataGridView.ClearSelection();
+                                dataGridView.Rows[minY + 1].Cells[minX].Selected = true;
+                                dataGridView.CurrentCell = dataGridView.Rows[minY + 1].Cells[minX];
+                            }
+                            afterGradeType = true;
+                        } else {
+                            dataGridView.Rows[minY].Cells[minX].Value = quickKeys[args.KeyCode];
+                            if (minY + 1 < dataGridView.Rows.Count) {
+                                dataGridView.ClearSelection();
+                                dataGridView.Rows[minY + 1].Cells[minX].Selected = true;
+                                dataGridView.CurrentCell = dataGridView.Rows[minY + 1].Cells[minX];
+                            }
+                            afterGradeType = true;
                         }
-                        afterGradeType = true;
                     }
                 }
             });
