@@ -186,44 +186,53 @@ namespace Grader.gui {
             DateTime dtFrom = dateFrom.Value.Date;
             DateTime dtTo = dateTo.Value.Date.AddDays(1);
 
-            IQueryable<GradeDesc> gradeQuery =
-                from g in personSelector.GetGradeQuery()
-
-                join v in et.Военнослужащий on g.КодПроверяемого equals v.Код
-
-                join rank in et.Звание on g.КодЗвания equals rank.Код
-
-                join r in et.Ведомость on g.КодВедомости equals r.Код
-
-                where r.Включена
-                where !dateFrom.Checked || r.ДатаЗаполнения >= dtFrom
-                where !dateTo.Checked || r.ДатаЗаполнения <= dtTo
-
-                where selectedTags.Count == 0 ||
-                    (from t in et.ВедомостьТег
-                     where t.КодВедомости == r.Код
-                     where selectedTags.Contains(t.Тег)
-                     select t).FirstOrDefault() != default(ВедомостьТег)
-                
-                orderby rank.order descending, v.Фамилия, v.Имя, v.Отчество, r.ДатаЗаполнения
-                select new GradeDesc { 
-                    grade = g, 
+            List<SoldierDesc> soldiers = personSelector.GetPersonList().ConvertAll(v => 
+                new SoldierDesc { 
+                    rank = et.rankIdToName[v.КодЗвания], 
                     soldierId = v.Код, 
-                    ФИО = v.Фамилия + " " + (v.Имя.Length > 0 ? v.Имя.Substring(0,1) : " ") + "." + (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + ".", 
-                    rank = rank.Название, 
-                    virt = r.Виртуальная 
+                    ФИО = 
+                        v.Фамилия + " " + 
+                        (v.Имя.Length > 0 ? v.Имя.Substring(0,1) : " ") + "." + 
+                        (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + "."
+                });
+            soldierIds = soldiers.Select(v => v.soldierId).ToList();
+            Dictionary<int, SoldierDesc> idToSoldierDesc = soldiers.ToDictionary(sd => sd.soldierId, sd => sd);
+
+            IQueryable<int> registerIdQuery =
+                (from t in et.ВедомостьТег
+                 join r in et.Ведомость on t.КодВедомости equals r.Код
+                 where r.Включена
+                 where !dateFrom.Checked || r.ДатаЗаполнения >= dtFrom
+                 where !dateTo.Checked || r.ДатаЗаполнения <= dtTo
+                 where selectedTags.Contains(t.Тег)
+                 select r.Код).Distinct();
+            List<int> registerIds = registerIdQuery.ToList();
+
+            IQueryable<GradeDesc> gradeQuery =
+                from g in et.Оценка
+                join r in et.Ведомость on g.КодВедомости equals r.Код
+                where registerIds.Contains(r.Код)
+                where soldierIds.Contains(g.КодПроверяемого)
+                orderby r.ДатаЗаполнения
+                select new GradeDesc {
+                    grade = g,
+                    registerId = r.Код,
+                    virt = r.Виртуальная
                 };
 
             originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
 
-            List<GradeDesc> grades = gradeQuery.ToList();
+            List<GradeDesc> grades = gradeQuery.ToList()
+            foreach (var gd in grades) {
+                gd.soldier = idToSoldierDesc[gd.grade.КодПроверяемого];
+            }
 
             foreach (GradeDesc gd in grades) {
                 if (gd.grade.ЭтоКомментарий && gd.grade.Текст == "_") {
                     // found marker for grade deletion
-                    originalGrades.Remove(new Tuple<int, int>(gd.soldierId, gd.grade.КодПредмета));
+                    originalGrades.Remove(new Tuple<int, int>(gd.grade.КодПроверяемого, gd.grade.КодПредмета));
                 } else {
-                    originalGrades.AddOrReplace(new Tuple<int, int>(gd.soldierId, gd.grade.КодПредмета), gd);
+                    originalGrades.AddOrReplace(new Tuple<int, int>(gd.grade.КодПроверяемого, gd.grade.КодПредмета), gd);
                 }
             }
 
@@ -247,15 +256,13 @@ namespace Grader.gui {
 
             gradeViewDataTable.Columns.Add(new DataColumn("ОБЩ"));
 
-            soldierIds = grades.Select(gd => gd.soldierId).Distinct().ToList();
             int c = 1;
             foreach (var soldierId in soldierIds) {
                 List<string> cells = new List<string>();
                 cells.Add((c++).ToString());
                 cells.Add(soldierId.ToString());
-                GradeDesc someGradeDesc = grades.Find(gd => gd.soldierId == soldierId);
-                cells.Add(someGradeDesc.rank);
-                cells.Add(someGradeDesc.ФИО);
+                cells.Add(idToSoldierDesc[soldierId].rank);
+                cells.Add(idToSoldierDesc[soldierId].ФИО);
 
                 foreach (int subjectId in subjectIds) {
                     Option<GradeDesc> gradeOpt = originalGrades.GetOption(new Tuple<int, int>(soldierId, subjectId));
@@ -308,30 +315,39 @@ namespace Grader.gui {
                 });
             }
 
-            GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierIds[rowIndex]).First().Value;
-
-            GradeSet gs = new GradeSet() { grades = grades, subunit = et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
-
-            Option<int> summaryGrade =
-                GradeCalcIndividual.ОценкаОБЩ(
-                    gs,
-                    et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
-                    someGradeDesc.grade.ТипВоеннослужащего
-                );
-            summaryGrade.ForEach(sg => {
-                gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
-            });
-            if (summaryGrade.IsEmpty()) {
+            if (grades.Count == 0) {
                 gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = "";
+            } else {
+                GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierIds[rowIndex]).First().Value;
+
+                GradeSet gs = new GradeSet() { grades = grades, subunit = et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
+
+                Option<int> summaryGrade =
+                    GradeCalcIndividual.ОценкаОБЩ(
+                        gs,
+                        et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
+                        someGradeDesc.grade.ТипВоеннослужащего
+                    );
+                summaryGrade.ForEach(sg => {
+                    gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
+                });
+                if (summaryGrade.IsEmpty()) {
+                    gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = "";
+                }
             }
+        }
+
+        private class SoldierDesc {
+            public int soldierId { get; set; }
+            public string rank { get; set; }
+            public string ФИО { get; set; }
         }
 
         private class GradeDesc {
             public Оценка grade { get; set; }
             public bool virt { get; set; }
-            public int soldierId { get; set; }
-            public string rank { get; set; }
-            public string ФИО { get; set; }
+            public SoldierDesc soldier { get; set; }
+            public int registerId { get; set; }
         }
 
         public bool CheckForUnsavedChanges() {
