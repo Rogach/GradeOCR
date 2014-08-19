@@ -6,8 +6,6 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Data.EntityClient;
 using Grader.model;
-using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace Grader.gui {
     public class MainForm : Form {
@@ -117,20 +115,6 @@ namespace Grader.gui {
             menu_import.DropDownItems.Add(menu_import_permanents);
 
             menuStrip.Items.Add(menu_import);
-
-            string version;
-            Regex versionRegex = new Regex(@"Version=([\.0-9]+)");
-            Match versionMatch = versionRegex.Match(Assembly.GetEntryAssembly().FullName);
-            if (versionMatch.Success) {
-                version = versionMatch.Groups[1].Value;
-            } else {
-                version = "no version :(";
-            }
-            ToolStripMenuItem versionItem = new ToolStripMenuItem(version);
-            versionItem.ForeColor = Color.Gray;
-            versionItem.Enabled = false;
-            menuStrip.Items.Add(versionItem);
-
 
             this.Controls.Add(menuStrip);
             this.MainMenuStrip = menuStrip;
