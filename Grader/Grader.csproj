@@ -299,6 +299,12 @@
       <FileType>Assembly</FileType>
     </PublishFile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FinderCircles\AR-Code.csproj">
+      <Project>{C15B0676-F887-482C-999D-87494F197B7D}</Project>
+      <Name>AR-Code</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -13,7 +13,7 @@ namespace ARCode {
      * Utility class to handle AR-code operations - creating code image for given value
      * and extracting value from image.
      */
-    public static class ARCode {
+    public static class ARCodeUtil {
         
         /* 
          * Create code image, that carries provided value. Unit size is

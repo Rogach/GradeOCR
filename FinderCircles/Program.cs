@@ -34,16 +34,16 @@ namespace ARCode {
             g.RotateTransform(-15);
             g.TranslateTransform(-sourceImage.Width / 2, -sourceImage.Height / 2);
 
-            Bitmap codeImage = ARCode.BuildCode(value, patternRadius);
+            Bitmap codeImage = ARCodeUtil.BuildCode(value, patternRadius);
 
             g.DrawImage(codeImage, new Point(150, 400));
 
             g.Dispose();
 
-            //Bitmap sourceImage = ImageUtil.LoadImage("E:/arcode-scan10.jpg");
+            //Bitmap sourceImage = ImageUtil.LoadImage("E:/arcode-scan2.jpg");
             //sourceImage.Save("E:/arcodeScan.png");
 
-            Application.Run(new FinderCircleDebugView(sourceImage, 55, 65, value));
+            Application.Run(new FinderCircleDebugView(sourceImage, 50, 70, value));
         }
 
         public static NoiseFilter GetTestNoiseFilter() {
@@ -68,7 +68,7 @@ namespace ARCode {
             double time = 0;
             for (int q = 0; q < N; q++) {
                 uint codeValue = (uint) r.Next();
-                Bitmap codeImage = ARCode.BuildCode(codeValue, patternRadius);
+                Bitmap codeImage = ARCodeUtil.BuildCode(codeValue, patternRadius);
 
                 int diag = (int) PointOps.Distance(0, 0, codeImage.Width, codeImage.Height);
                 Point codeLocation = new Point(
@@ -93,7 +93,7 @@ namespace ARCode {
                 Bitmap noisedImage = GetTestNoiseFilter().Apply(sourceImage);
 
                 DateTime stt = DateTime.Now;
-                uint extractedValue = ARCode.ExtractCode(noisedImage, minPatternRadius, maxPatternRadius);
+                uint extractedValue = ARCodeUtil.ExtractCode(noisedImage, minPatternRadius, maxPatternRadius);
                 DateTime end = DateTime.Now;
                 time += (end - stt).TotalMilliseconds;
 

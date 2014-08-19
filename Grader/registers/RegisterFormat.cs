@@ -8,6 +8,9 @@ using Grader.util;
 using LibUtil.wrapper.excel;
 using LibUtil;
 using Grader.enums;
+using ARCode;
+using System.Drawing;
+using System.IO;
 
 namespace Grader.registers {
 
@@ -19,6 +22,7 @@ namespace Grader.registers {
         public bool onlyKMN { get; set; }
         public bool strikeKMN { get; set; }
         public List<Военнослужащий> soldiers { get; set; }
+        public bool forOCR { get; set; }
     }
 
     public abstract class RegisterSpec {
@@ -90,6 +94,9 @@ namespace Grader.registers {
             if (settings.registerType == RegisterType.экзамен || settings.registerType == RegisterType.зачет) {
                 sh.GetRange("EmptyRows").GetResize(5, 1).EntireRow.Delete();
             }
+
+            if (settings.forOCR)
+                InsertRegisterCode(sh, settings);
         }
 
         public virtual void InsertSoldiers(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
@@ -102,6 +109,28 @@ namespace Grader.registers {
                 strikeKMN: settings.strikeKMN, 
                 strikeLen: columnCount
             );
+        }
+
+        public static void InsertRegisterCode(ExcelWorksheet sh, RegisterSettings settings) {
+            Random r = new Random();
+            uint codeValue = (uint) r.Next();
+            Bitmap codeImage = ARCodeUtil.BuildCode(codeValue, 60);
+            string tempFileName = Path.GetTempPath() + Guid.NewGuid().ToString() + ".png";
+            codeImage.Save(tempFileName);
+
+            var codeRange = sh.GetRange("OCRCode");
+
+            float imageWidth = 168;
+            float imageHeight = 28 * 1.1f;
+
+            sh.AddPicture(
+                tempFileName, 
+                (float) (codeRange.Left + codeRange.Width - imageWidth), 
+                (float) (codeRange.Top), 
+                imageWidth, 
+                imageHeight);
+
+            File.Delete(tempFileName);
         }
     }
 

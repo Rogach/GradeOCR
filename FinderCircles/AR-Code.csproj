@@ -52,7 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ARCode.cs" />
+    <Compile Include="ARCodeUtil.cs" />
     <Compile Include="FinderCircleDrawer.cs" />
     <Compile Include="FinderCircleHoughTransform.cs" />
     <Compile Include="DataMarshaller.cs" />

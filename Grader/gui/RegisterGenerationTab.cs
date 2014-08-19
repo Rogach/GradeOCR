@@ -57,6 +57,7 @@ namespace Grader.gui {
         private ComboBox registerSubjectSelect;
         private ComboBox registerTypeSelect;
         private Button generateRegisterButton;
+        private CheckBox forOCR;
 
         private void InitializeComponent() {
             this.Text = "Печать ведомостей";
@@ -95,6 +96,8 @@ namespace Grader.gui {
             registerTypeSelect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             registerTypeSelect.AutoCompleteSource = AutoCompleteSource.ListItems;
 
+            forOCR = layout.Add("Для распознавания?", new CheckBox());
+            
             generateRegisterButton = layout.AddFullRow(new Button());
             generateRegisterButton.Text = "создать ведомость";
             generateRegisterButton.Click += new EventHandler(delegate {
@@ -163,7 +166,8 @@ namespace Grader.gui {
                 registerType = registerTypeSelect.GetComboBoxEnumValue<RegisterType>(),
                 onlyKMN = onlyKMN.Checked,
                 strikeKMN = strikeKMN.Checked,
-                registerDate = registerDate.Value
+                registerDate = registerDate.Value,
+                forOCR = forOCR.Checked
             };
             List<Военнослужащий> soldiers =
                 personSelector.GetPersonList();
