@@ -183,6 +183,8 @@ namespace Grader.registers {
             var codeRange = sh.GetRange("OCRCode");
 
             float imageWidth = 168;
+
+            // 1.1f is a fix for known Office bug, where image heights are scaled when printing
             float imageHeight = 28 * 1.1f;
 
             sh.AddPicture(
