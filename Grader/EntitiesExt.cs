@@ -2,9 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.EntityClient;
 
 namespace Grader {
     public partial class Entities {
+        public static Entities CreateEntities(Settings settings) {
+            EntityConnectionStringBuilder ecsb = new EntityConnectionStringBuilder();
+            ecsb.Provider = "MySql.Data.MySqlClient";
+            ecsb.ProviderConnectionString = settings.dbConnectionString.GetValue();
+            ecsb.Metadata = @"res://*/Entities.csdl|res://*/Entities.ssdl|res://*/Entities.msl";
+            Entities et = new Entities(ecsb.ConnectionString);
+            et.Connection.Open();
+            et.initCache();
+            return et;
+        }
+
         public List<ПодразделениеПодчинение> subunitRelCache;
         public List<Звание> rankCache;
         public List<Подразделение> subunitCache;
@@ -27,7 +39,7 @@ namespace Grader {
         public Dictionary<int, string> soldierIdToName;
         public Dictionary<string, int> soldierNameToId;
 
-        public void initCache() {
+        private void initCache() {
             subunitRelCache = ПодразделениеПодчинение.ToList();
             rankCache = Звание.ToList();
             subunitCache = Подразделение.ToList();

@@ -16,14 +16,7 @@ namespace Grader.gui {
 
         public MainForm(Settings settings, ApplicationContext context) {
             this.settings = settings;
-            
-            EntityConnectionStringBuilder ecsb = new EntityConnectionStringBuilder();
-            ecsb.Provider = "MySql.Data.MySqlClient";
-            ecsb.ProviderConnectionString = settings.dbConnectionString.GetValue();
-            ecsb.Metadata = @"res://*/Entities.csdl|res://*/Entities.ssdl|res://*/Entities.msl";
-            this.et = new Entities(ecsb.ConnectionString);
-            this.et.Connection.Open();
-            this.et.initCache();
+            this.et = Entities.CreateEntities(settings);
             this.context = context;
             this.InitializeComponent();
         }
