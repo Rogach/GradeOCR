@@ -57,9 +57,9 @@ namespace ARCode {
 
         static void StressTest() {
             int patternRadius = 60;
-            int minPatternRadius = 55;
-            int maxPatternRadius = 65;
-            int imgSize = 1000;
+            int minPatternRadius = 50;
+            int maxPatternRadius = 70;
+            int imgSize = 3000;
 
             int N = 100;
             int success = 0;
@@ -99,9 +99,11 @@ namespace ARCode {
                 time += (end - stt).TotalMilliseconds;
 
                 if (extractedValue == codeValue) {
+                    success++;
                     Console.WriteLine("({0}/{1}) Success.", q + 1, N);
                 } else {
-                    Console.WriteLine("({0}/{1}) Success.", q + 1, N);
+                    failure++;
+                    Console.WriteLine("({0}/{1}) Failure.", q + 1, N);
                 }
             }
             Console.WriteLine("successes/failures: {0}/{1}", success, failure);
