@@ -113,6 +113,24 @@ namespace Grader.gui {
                         new ColumnDefinition("ТипОбучения", 100, typeof(string), true, obj => ((Подразделение) obj).ТипОбучения,
                             (obj, value) => ((Подразделение) obj).ТипОбучения = (string) value,
                             et.Подразделение.Select(s => s.ТипОбучения).Distinct().ToList()),
+                        new ColumnDefinition("Командир", 250, typeof(string), true, 
+                            obj => {
+                                int? commanderCode = ((Подразделение) obj).КодКомандира;
+                                if (commanderCode.HasValue && commanderCode.Value != 0) {
+                                    return et.soldierIdToName[commanderCode.Value];
+                                } else {
+                                    return "";
+                                }
+                            },
+                            (obj, value) => {
+                                string name = ((string) value).Trim();
+                                if (name.Length != 0 && et.soldierNameToId.ContainsKey(name)) {
+                                    ((Подразделение) obj).КодКомандира = et.soldierNameToId[name];
+                                } else {
+                                    ((Подразделение) obj).КодКомандира = null;
+                                }
+                            },
+                            et.soldierNameCache),
                         new ColumnDefinition("Актив", 50, typeof(bool), true, obj => ((Подразделение) obj).Актив,
                             (obj, value) => ((Подразделение) obj).Актив = (bool) value, null),
                         new ColumnDefinition("ИмяРодительный", 150, typeof(string), true, obj => ((Подразделение) obj).ИмяРодительный,
