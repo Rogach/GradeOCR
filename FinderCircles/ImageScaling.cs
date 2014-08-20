@@ -16,35 +16,13 @@ namespace ARCode {
         public static Bitmap ScaleDown(Bitmap src, int factor, Rectangle bounds) {
             Bitmap res = new Bitmap(bounds.Width / factor, bounds.Height / factor, PixelFormat.Format32bppArgb);
 
-            unsafe {
-                BitmapData srcBD = src.LockBits(ImageLockMode.ReadOnly);
-                BitmapData resBD = res.LockBits(ImageLockMode.ReadWrite);
-                byte* srcPtr = (byte*) srcBD.Scan0.ToPointer();
-                byte* resPtr = (byte*) resBD.Scan0.ToPointer();
-
-                int resWidth = res.Width;
-                int resHeight = res.Height;
-
-                for (int y = 0; y < resHeight; y++) {
-                    for (int x = 0; x < resWidth; x++) {
-                        int sum = 0;
-                        for (int dy = 0; dy < factor; dy++) {
-                            for (int dx = 0; dx < factor; dx++) {
-                                sum += *(srcPtr + 4 * ((bounds.Y + y * factor + dy) * src.Width + bounds.X + x * factor + dx));
-                            }
-                        }
-                        byte v = (byte) (sum / (factor * factor));
-                        byte* outPtr = resPtr + 4 * (y * resWidth + x);
-                        *outPtr = v;
-                        *(outPtr + 1) = v;
-                        *(outPtr + 2) = v;
-                        *(outPtr + 3) = 255;
-                    }
-                }
-
-                res.UnlockBits(resBD);
-                src.UnlockBits(srcBD);
-            }
+            Graphics g = Graphics.FromImage(res);
+            g.DrawImage(
+                src,
+                new Rectangle(0, 0, bounds.Width / factor, bounds.Height / factor),
+                new Rectangle(bounds.X, bounds.Y, bounds.Width - (bounds.Width & factor), bounds.Height - (bounds.Height % factor)),
+                GraphicsUnit.Pixel);
+            g.Dispose();
 
             return res;
         }
