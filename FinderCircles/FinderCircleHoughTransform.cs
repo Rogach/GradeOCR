@@ -76,7 +76,7 @@ namespace ARCode {
          * Get image downscale factor for peak tuning stage.
          */
         public static int GetTuneScaleFactor(int minPatterRadius) {
-            return (int) Math.Floor((double) minPatterRadius / 40);
+            return (int) Math.Floor((double) minPatterRadius / 20);
         }
 
         /*
