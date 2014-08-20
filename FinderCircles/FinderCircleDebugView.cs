@@ -88,7 +88,8 @@ namespace ARCode {
             dataMatrixLocationPV.Image = dme.PositioningDebugImage();
             rotatedDataMatrixPV.Image = dme.rotatedMatrix;
             recognizedDataMatrixPV.Image = dme.RecognitionDebugImage();
-            outputDataLabel.Text = DataMarshaller.UnMarshallInt(dme.extractedData).ToString();
+            Option<uint> extractedCode = DataMarshaller.UnMarshallInt(dme.extractedData);
+            outputDataLabel.Text = extractedCode.Map(c => c.ToString()).GetOrElse("none");
         }
 
 
