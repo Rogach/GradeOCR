@@ -81,6 +81,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
@@ -178,6 +179,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="util\Common.cs" />
     <Compile Include="util\Querying.cs" />
+    <Compile Include="util\UsbUtil.cs" />
     <EmbeddedResource Include="gui\DbConnectionDialog.resx">
       <DependentUpon>DbConnectionDialog.cs</DependentUpon>
     </EmbeddedResource>

@@ -8,6 +8,7 @@ using LibUtil;
 using System.Windows.Forms;
 using Grader.gui;
 using MySql.Data.MySqlClient;
+using Grader.util;
 
 namespace Grader {
     
@@ -130,18 +131,30 @@ namespace Grader {
         string userSetting;
         string passwordSetting;
 
+        
+
         public DbConnectionStringSetting() { }
         public bool read(XmlDocument doc) {
             Option<string> serverSettingOpt = Settings.XmlValue(doc, "/settings/connection/server");
             Option<string> portSettingOpt = Settings.XmlValue(doc, "/settings/connection/port");
             Option<string> userSettingOpt = Settings.XmlValue(doc, "/settings/connection/user");
+
             if (serverSettingOpt.NonEmpty() && portSettingOpt.NonEmpty() && userSettingOpt.NonEmpty()) {
                 DbConnectionDialog dcd = new DbConnectionDialog();
                 dcd.Server = serverSettingOpt.Get();
                 dcd.Port = portSettingOpt.Get();
                 dcd.User = userSettingOpt.Get();
-                dcd.FocusOnPassword = true;
-                return ShowDbConnectionDialog(dcd);
+                if (TryExternalDevice(dcd)) {
+                    settingValue = dcd.ConnectionString;
+                    serverSetting = dcd.Server;
+                    portSetting = dcd.Port;
+                    userSetting = dcd.User;
+                    passwordSetting = dcd.Password;
+                    return true;
+                } else {
+                    dcd.FocusOnPassword = true;
+                    return ShowDbConnectionDialog(dcd);
+                }
             } else {
                 return init();
             }
@@ -171,15 +184,42 @@ namespace Grader {
         }
 
         public bool TestConnection(DbConnectionDialog dcd) {
+            if (!ProbeConnection(dcd)) {
+                MessageBox.Show("Не удалось подключиться к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        public bool ProbeConnection(DbConnectionDialog dcd) {
             var conn = new MySqlConnection(dcd.ConnectionString);
             try {
                 conn.Open();
                 conn.Close();
                 return true;
             } catch (Exception) {
-                MessageBox.Show("Не удалось подключиться к базе данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
+        }
+
+        private bool TryExternalDevice(DbConnectionDialog dcd) {
+            List<string> usbSerials = UsbUtil.GetUsbSerialNumbers();
+            foreach (string serial in usbSerials) {
+                dcd.Password = Shake(serial);
+                if (ProbeConnection(dcd)) return true;
+            }
+            return false;
+        }
+
+        private static string Shake(string input) {
+            string pc = new string(new byte[] { 54, 50, 57, 52, 19, 66, 66, 4, 22, 43, 57, 61, 18, 55, 54 }.Select(b => (char) b).ToArray());
+            int len = Math.Min(pc.Length, input.Length);
+            char[] res = new char[len];
+            for (int q = 0; q < len; q++) {
+                res[q] = (char) ((byte) pc[q] + input[q]);
+            }
+            return new string(res);
         }
 
         public void save(XmlDocument doc, XmlElement settings) {
