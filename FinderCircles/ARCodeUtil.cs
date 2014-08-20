@@ -36,7 +36,7 @@ namespace ARCode {
         /*
         * Extract code from given image. Requires bounds for expected finder pattern radius.
         */
-        public static uint ExtractCode(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius) {
+        public static Option<uint> ExtractCode(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius) {
             List<Point3> finderCircles = FinderCircleHoughTransform.LocateFinderCircles(sourceImage, minPatternRadius, maxPatternRadius, 2);
 
             var fpp = new FinderPatternPair();

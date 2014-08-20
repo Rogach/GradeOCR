@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ZXing.Common.ReedSolomon;
+using LibUtil;
 
 namespace ARCode {
 
@@ -26,22 +27,22 @@ namespace ARCode {
             return UnpackByteArray(byteArray);
         }
 
-        public static uint UnMarshallInt(bool[] bitData) {
+        public static Option<uint> UnMarshallInt(bool[] bitData) {
             int[] byteArray = PackByteArray(bitData);
 
             ReedSolomonDecoder rsd = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
             if (!rsd.decode(byteArray, 28)) {
-                Console.WriteLine("decoding failed");
-                //throw new ArgumentException("Reed-Solomon decoding failed when extracting AR-code");
+                Console.WriteLine("Reed-Solomon decoding failed when extracting AR-code");
+                return new None<uint>();
+            } else {
+                uint value = 0;
+                value += (uint) byteArray[0];
+                value += (uint) (byteArray[1]) << 8;
+                value += (uint) (byteArray[2]) << 16;
+                value += (uint) (byteArray[3]) << 24;
+
+                return new Some<uint>(value);
             }
-
-            uint value = 0;
-            value += (uint) byteArray[0];
-            value += (uint) (byteArray[1]) << 8;
-            value += (uint) (byteArray[2]) << 16;
-            value += (uint) (byteArray[3]) << 24;
-
-            return value;
         }
 
         private static bool[] UnpackByteArray(int[] byteArray) {

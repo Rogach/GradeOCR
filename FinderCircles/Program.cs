@@ -94,11 +94,11 @@ namespace ARCode {
                 Bitmap noisedImage = GetTestNoiseFilter().Apply(sourceImage);
 
                 DateTime stt = DateTime.Now;
-                uint extractedValue = ARCodeUtil.ExtractCode(noisedImage, minPatternRadius, maxPatternRadius);
+                Option<uint> extractedValue = ARCodeUtil.ExtractCode(noisedImage, minPatternRadius, maxPatternRadius);
                 DateTime end = DateTime.Now;
                 time += (end - stt).TotalMilliseconds;
 
-                if (extractedValue == codeValue) {
+                if (extractedValue.NonEmpty() && extractedValue.Get() == codeValue) {
                     success++;
                     Console.WriteLine("({0}/{1}) Success.", q + 1, N);
                 } else {
