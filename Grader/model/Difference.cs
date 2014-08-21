@@ -51,16 +51,15 @@ namespace Grader.model {
                             output.GetOffset(0, 1).Value = cadet.Имя;
                             output.GetOffset(0, 2).Value = cadet.Отчество;
                             output.GetOffset(0, 3).Value = et.subunitIdToShortName[optSubunitId.Get()];
-                            output.GetOffset(0, 3).BackgroundColor = ExcelEnums.Color.Blue;
+                            output.GetOffset(0, 3).BackgroundColor = ExcelEnums.Color.Azure;
                             output = output.GetOffset(1, 0);
                         }
                     } else {
-                        // cadet was deleted
                         output.Value = cadet.Фамилия;
                         output.GetOffset(0, 1).Value = cadet.Имя;
                         output.GetOffset(0, 2).Value = cadet.Отчество;
                         output.GetOffset(0, 3).Value = et.subunitIdToShortName[dataMap[fio]];
-                        output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.Red;
+                        output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.PaleVioletRed;
                         output = output.GetOffset(1, 0);
                     }
 
@@ -73,7 +72,7 @@ namespace Grader.model {
                         output.GetOffset(0, 1).Value = fio.Item2;
                         output.GetOffset(0, 2).Value = fio.Item3;
                         output.GetOffset(0, 3).Value = et.subunitIdToShortName[inputMap[fio]];
-                        output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.Green;
+                        output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.PaleGreen;
                         output = output.GetOffset(1, 0);
                     }
                 };
