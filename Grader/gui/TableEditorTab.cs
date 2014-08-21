@@ -67,6 +67,10 @@ namespace Grader.gui {
                             (obj, value) => ((Военнослужащий) obj).sortWeight = (int) value, null),
                         new ColumnDefinition("Нет допуска на экзамен", 150, typeof(bool), true, obj => ((Военнослужащий) obj).НетДопускаНаЭкзамен,
                             (obj, value) => ((Военнослужащий) obj).НетДопускаНаЭкзамен = (bool) value, null)
+                    },
+                    getAdditionalSearchValues: (obj) => {
+                        Военнослужащий v = (Военнослужащий) obj;
+                        return new List<string> { v.Фамилия + " " + v.Имя + " " + v.Отчество };
                     }
                 ),
                 new TableDefinition(
@@ -94,7 +98,8 @@ namespace Grader.gui {
                         new ColumnDefinition("Военнослужащий", 250, typeof(string), true, obj => et.soldierIdToName[((Должность) obj).КодВоеннослужащего],
                             (obj, value) => ((Должность) obj).КодВоеннослужащего = et.soldierNameToId[(string) value],
                             et.soldierNameCache)
-                    }
+                    },
+                    getAdditionalSearchValues: (obj) => new List<string>()
                 ),
                 new TableDefinition(
                     name: "Подразделение",
@@ -141,7 +146,8 @@ namespace Grader.gui {
                             (obj, value) => ((Подразделение) obj).ИмяКраткое = (string) value, null),
                         new ColumnDefinition("ПодразделениеОхраны", 50, typeof(bool), true, obj => ((Подразделение) obj).ПодразделениеОхраны,
                             (obj, value) => ((Подразделение) obj).ПодразделениеОхраны = (bool) value, null)
-                    }
+                    },
+                    getAdditionalSearchValues: (obj) => new List<string>()
                 ),
                 new TableDefinition(
                     name: "ВусНаЦикле",
@@ -164,7 +170,8 @@ namespace Grader.gui {
                             et.subunitCache.Select(s => s.Имя).ToList()),
                         new ColumnDefinition("ВУС", 50, typeof(int), true, obj => ((ВусНаЦикле) obj).ВУС,
                             (obj, value) => ((ВусНаЦикле) obj).ВУС = (int) value, null)
-                    }
+                    },
+                    getAdditionalSearchValues: (obj) => new List<string>()
                 )
             };
             this.InitializeComponent();
@@ -178,7 +185,8 @@ namespace Grader.gui {
             public Func<object> newObject;
             public Action<object> deleteObject;
             public List<ColumnDefinition> Columns;
-            
+            public Func<object, List<string>> getAdditionalSearchValues;
+
             public TableDefinition(
                 string name, 
                 bool allowToAddRows, 
@@ -186,7 +194,8 @@ namespace Grader.gui {
                 Func<List<object>> getObjects,
                 Func<object> newObject,
                 Action<object> deleteObject,
-                List<ColumnDefinition> Columns) {
+                List<ColumnDefinition> Columns,
+                Func<object, List<string>> getAdditionalSearchValues) {
                     this.name = name;
                     this.allowToAddRows = allowToAddRows;
                     this.allowToRemoveRows = allowToRemoveRows;
@@ -194,6 +203,7 @@ namespace Grader.gui {
                     this.getObjects = getObjects;
                     this.newObject = newObject;
                     this.deleteObject = deleteObject;
+                    this.getAdditionalSearchValues = getAdditionalSearchValues;
             }
 
             public override string ToString() {
@@ -396,6 +406,9 @@ namespace Grader.gui {
                     foreach (var col in tdef.Columns) {
                         object value = col.GetValue(obj);
                         if (value.ToString().ToLower().Contains(filter.ToLower())) return true;
+                    }
+                    foreach (string sortValue in tdef.getAdditionalSearchValues(obj)) {
+                        if (sortValue.ToString().ToLower().Contains(filter.ToLower())) return true;
                     }
                     return false;
                 })
