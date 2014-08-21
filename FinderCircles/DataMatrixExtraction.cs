@@ -80,17 +80,21 @@ namespace ARCode {
             }
         }
 
-        public Bitmap PositioningDebugImage() {
-            Bitmap res = new Bitmap(sourceImage);
-
-            Graphics g = Graphics.FromImage(res);
-            Pen gp = new Pen(Color.Green, 1);
+        public void DrawPositioningDebug(Bitmap img) {
+            Graphics g = Graphics.FromImage(img);
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            Pen gp = new Pen(Color.Green, 2);
             g.DrawLine(gp, topLeft, bottomLeft);
             g.DrawLine(gp, bottomLeft, bottomRight);
             g.DrawLine(gp, bottomRight, topRight);
             g.DrawLine(gp, topRight, topLeft);
             g.Dispose();
 
+        }
+
+        public Bitmap PositioningDebugImage() {
+            Bitmap res = new Bitmap(sourceImage);
+            DrawPositioningDebug(res);
             return res;
         }
 

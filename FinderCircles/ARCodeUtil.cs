@@ -37,6 +37,10 @@ namespace ARCode {
         * Extract code from given image. Requires bounds for expected finder pattern radius.
         */
         public static Option<uint> ExtractCode(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius) {
+            return ExtractCodeExt(sourceImage, minPatternRadius, maxPatternRadius).Map(t => t.Item1);
+        }
+
+        public static Option<Tuple<uint, DataMatrixExtraction>> ExtractCodeExt(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius) {
             List<Point3> finderCircles = FinderCircleHoughTransform.LocateFinderCircles(sourceImage, minPatternRadius, maxPatternRadius, 2);
 
             var fpp = new FinderPatternPair();
@@ -47,7 +51,12 @@ namespace ARCode {
 
             var dme = new DataMatrixExtraction(sourceImage, fpp);
 
-            return DataMarshaller.UnMarshallInt(dme.extractedData);
+            Option<uint> extractedCode = DataMarshaller.UnMarshallInt(dme.extractedData);
+            if (extractedCode.NonEmpty()) {
+                return new Some<Tuple<uint, DataMatrixExtraction>>(new Tuple<uint, DataMatrixExtraction>(extractedCode.Get(), dme));
+            } else {
+                return new None<Tuple<uint, DataMatrixExtraction>>();
+            }
         }
 
     }

@@ -24,7 +24,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>11</ApplicationRevision>
+    <ApplicationRevision>12</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -163,6 +163,13 @@
     <Compile Include="gui\RegisterImportTab.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ocr\RegisterRecognition.cs" />
+    <Compile Include="ocr\RegisterRecognitionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ocr\RegisterRecognitionForm.Designer.cs">
+      <DependentUpon>RegisterRecognitionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="gui\Separator.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -188,6 +195,9 @@
     <EmbeddedResource Include="gui\InputDialog.resx">
       <DependentUpon>InputDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ocr\RegisterRecognitionForm.resx">
+      <DependentUpon>RegisterRecognitionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -201,7 +211,6 @@
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Entities.Designer.cs</LastGenOutput>
     </EntityDeploy>
-    <None Include="App.Config" />
     <None Include="Grader_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -308,6 +317,18 @@
     <ProjectReference Include="..\FinderCircles\AR-Code.csproj">
       <Project>{C15B0676-F887-482C-999D-87494F197B7D}</Project>
       <Name>AR-Code</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GradeOCR\GradeOCR.csproj">
+      <Project>{510CB01C-1284-4535-9312-798760B6C55E}</Project>
+      <Name>GradeOCR</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">
+      <Project>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</Project>
+      <Name>OCRUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TableOCR\TableOCR.csproj">
+      <Project>{F1213444-68AD-4C9C-A0A9-22E571412CCD}</Project>
+      <Name>TableOCR</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
