@@ -52,10 +52,12 @@ namespace Grader.ocr {
                         table.DrawTable(g, new Pen(Brushes.Red, 4));
                         g.Dispose();
 
+                        Bitmap bwImage = ImageUtil.ToBlackAndWhite(formOpts.sourceImage);
+
                         this.ocrImagePV.AddDoubleClickListener((pt, e) => {
                             Option<Point> cellOpt = table.GetCellAtPoint(pt.X, pt.Y);
                             cellOpt.ForEach(cell => {
-                                Bitmap cellImage = table.GetCellImage(formOpts.sourceImage, cell.X, cell.Y);
+                                Bitmap cellImage = table.GetCellImage(bwImage, cell.X, cell.Y);
                                 new GradeRecognitionDebugView(cellImage, "<>", digestSet).ShowDialog();
                             });
                         });

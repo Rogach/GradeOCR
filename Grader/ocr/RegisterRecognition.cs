@@ -11,6 +11,7 @@ using TableOCR;
 using Grader.model;
 using Grader.gui;
 using GradeOCR;
+using OCRUtil;
 
 namespace Grader.ocr {
     public static class RegisterRecognition {

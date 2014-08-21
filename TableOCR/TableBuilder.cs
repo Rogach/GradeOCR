@@ -80,7 +80,7 @@ namespace TableOCR {
 
             // convert incoming lines into table space
             horizLines = horizLines.ConvertAll(ln => new LineF(ToTable(ln.p1), ToTable(ln.p2)));
-            vertLines = vertLines.ConvertAll(ln => new LineF(ToTable(ln.p1), ToTable(ln.p2)));
+            vertLines = vertLines.ConvertAll(ln => new LineF(ToTable(ln.p1), ToTable(ln.p2))).OrderBy(ln => ln.p1.X).ToList();
 
             BuildTable(horizLines, vertLines);
         }
