@@ -34,6 +34,8 @@ namespace Grader.gui {
         private ComboBox registerTypeSelect;
         private Button generateRegisterButton;
         private CheckBox forOCR;
+        private TextBox registerNamePrefix;
+        private TextBox registerTags;
 
         private void InitializeComponent() {
             this.Text = "Печать ведомостей";
@@ -62,7 +64,7 @@ namespace Grader.gui {
             registerDate.Value = DateTime.Now;
 
             registerSubjectSelect = layout.Add("ведомость:", new ComboBox());
-            registerSubjectSelect.Items.AddRange(RegisterSpec.registerSpecs);
+            registerSubjectSelect.Items.AddRange(RegisterSpecs.registerSpecs);
             registerSubjectSelect.SelectedIndex = 0;
             registerSubjectSelect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             registerSubjectSelect.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -72,8 +74,6 @@ namespace Grader.gui {
             registerTypeSelect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             registerTypeSelect.AutoCompleteSource = AutoCompleteSource.ListItems;
 
-            forOCR = layout.Add("Для распознавания?", new CheckBox());
-            
             generateRegisterButton = layout.AddFullRow(new Button());
             generateRegisterButton.Text = "создать ведомость";
             generateRegisterButton.Click += new EventHandler(delegate {
@@ -81,6 +81,25 @@ namespace Grader.gui {
             });
 
             layout.PerformLayout();
+
+            FormLayout ocrLayout = new FormLayout(this, maxLabelWidth: 90, x: 270, y: 6);
+
+            Action updateOcrFields = () => {
+                registerNamePrefix.Enabled = forOCR.Checked;
+                registerTags.Enabled = forOCR.Checked;
+            };
+            forOCR = ocrLayout.Add("Для распознавания?", new CheckBox());
+            forOCR.CheckedChanged += new EventHandler(delegate {
+                updateOcrFields();
+            });
+
+            registerNamePrefix = ocrLayout.Add("Префикс имени ведомости", new TextBox());
+
+            registerTags = ocrLayout.Add("Тэг ведомости", new TextBox());
+
+            updateOcrFields();
+
+            ocrLayout.PerformLayout();
         }
 
         private class SoldierGrouping {
@@ -137,13 +156,15 @@ namespace Grader.gui {
         }
 
         private void GenerateRegister() {
-            RegisterSpec spec = (RegisterSpec) registerSubjectSelect.SelectedItem;
+            RegisterSpecs spec = (RegisterSpecs) registerSubjectSelect.SelectedItem;
             RegisterSettings settings = new RegisterSettings {
                 registerType = registerTypeSelect.GetComboBoxEnumValue<RegisterType>(),
                 onlyKMN = onlyKMN.Checked,
                 strikeKMN = strikeKMN.Checked,
                 registerDate = registerDate.Value,
-                forOCR = forOCR.Checked
+                forOCR = forOCR.Checked,
+                registerNamePrefix = registerNamePrefix.Text,
+                registerTags = registerTags.Text
             };
             List<Военнослужащий> soldiers =
                 personSelector.GetPersonList();

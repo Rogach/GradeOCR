@@ -729,13 +729,17 @@ namespace Grader
         /// <param name="датаПечати">Исходное значение свойства ДатаПечати.</param>
         /// <param name="списокВоеннослужащих">Исходное значение свойства СписокВоеннослужащих.</param>
         /// <param name="типВедомости">Исходное значение свойства ТипВедомости.</param>
-        public static ВедомостьДляРаспознавания CreateВедомостьДляРаспознавания(global::System.Int32 код, global::System.DateTime датаПечати, global::System.String списокВоеннослужащих, global::System.String типВедомости)
+        /// <param name="имяВедомости">Исходное значение свойства ИмяВедомости.</param>
+        /// <param name="теги">Исходное значение свойства Теги.</param>
+        public static ВедомостьДляРаспознавания CreateВедомостьДляРаспознавания(global::System.Int32 код, global::System.DateTime датаПечати, global::System.String списокВоеннослужащих, global::System.String типВедомости, global::System.String имяВедомости, global::System.String теги)
         {
             ВедомостьДляРаспознавания ведомостьДляРаспознавания = new ВедомостьДляРаспознавания();
             ведомостьДляРаспознавания.Код = код;
             ведомостьДляРаспознавания.ДатаПечати = датаПечати;
             ведомостьДляРаспознавания.СписокВоеннослужащих = списокВоеннослужащих;
             ведомостьДляРаспознавания.ТипВедомости = типВедомости;
+            ведомостьДляРаспознавания.ИмяВедомости = имяВедомости;
+            ведомостьДляРаспознавания.Теги = теги;
             return ведомостьДляРаспознавания;
         }
 
@@ -864,6 +868,54 @@ namespace Grader
         private global::System.String _ТипВедомости;
         partial void OnТипВедомостиChanging(global::System.String value);
         partial void OnТипВедомостиChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String ИмяВедомости
+        {
+            get
+            {
+                return _ИмяВедомости;
+            }
+            set
+            {
+                OnИмяВедомостиChanging(value);
+                ReportPropertyChanging("ИмяВедомости");
+                _ИмяВедомости = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("ИмяВедомости");
+                OnИмяВедомостиChanged();
+            }
+        }
+        private global::System.String _ИмяВедомости;
+        partial void OnИмяВедомостиChanging(global::System.String value);
+        partial void OnИмяВедомостиChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String Теги
+        {
+            get
+            {
+                return _Теги;
+            }
+            set
+            {
+                OnТегиChanging(value);
+                ReportPropertyChanging("Теги");
+                _Теги = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("Теги");
+                OnТегиChanged();
+            }
+        }
+        private global::System.String _Теги;
+        partial void OnТегиChanging(global::System.String value);
+        partial void OnТегиChanged();
 
         #endregion
     
