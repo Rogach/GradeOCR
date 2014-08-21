@@ -31,7 +31,9 @@ namespace GradeOCR {
                     image.UnlockBits(bd);
                 }
 
-                return (whiteCount * 100 / imageArea > 97);
+                int blackCount = imageArea - whiteCount;
+
+                return (whiteCount * 100 / imageArea > 97 || blackCount < 40);
             }
         }
     }

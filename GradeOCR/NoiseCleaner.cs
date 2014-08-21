@@ -10,6 +10,7 @@ namespace GradeOCR {
         public static readonly double cutoffRatio = 0.2;
         public static readonly double secondaryCutoffRatio = 0.33;
         public static readonly int noiseCrop = 2;
+        public static readonly int thresholdIslandSize = 20;
 
         public static Bitmap RemoveNoise(Bitmap b) {
             List<List<Point>> islands = new List<List<Point>>();
@@ -68,35 +69,37 @@ namespace GradeOCR {
             if (islands.Count > 0) {
                 int maxIslandSize = islands.Select(i => i.Count).Max();
 
-                List<List<Point>> bigIslands = 
-                    islands
-                    .Where(i => i.Count > maxIslandSize * cutoffRatio)
-                    .Where(i => {
-                        // remove circular islands less than secondary cutoff
-                        if (i.Count > maxIslandSize * secondaryCutoffRatio) { 
-                            return true;
-                        } else {
-                            int dx = i.Select(p => p.X).Max() - i.Select(p => p.X).Min();
-                            int dy = i.Select(p => p.Y).Max() - i.Select(p => p.Y).Min();
-                            return dx * dy > i.Count * 3;
-                        }
-                    })
-                    .ToList();
+                if (maxIslandSize > thresholdIslandSize) {
+                    List<List<Point>> bigIslands =
+                        islands
+                        .Where(i => i.Count > maxIslandSize * cutoffRatio)
+                        .Where(i => {
+                            // remove circular islands less than secondary cutoff
+                            if (i.Count > maxIslandSize * secondaryCutoffRatio) {
+                                return true;
+                            } else {
+                                int dx = i.Select(p => p.X).Max() - i.Select(p => p.X).Min();
+                                int dy = i.Select(p => p.Y).Max() - i.Select(p => p.Y).Min();
+                                return dx * dy > i.Count * 3;
+                            }
+                        })
+                        .ToList();
 
-                unsafe {
-                    BitmapData rbd = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                    byte* rptr = (byte*) rbd.Scan0.ToPointer();
+                    unsafe {
+                        BitmapData rbd = result.LockBits(new Rectangle(0, 0, result.Width, result.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                        byte* rptr = (byte*) rbd.Scan0.ToPointer();
 
-                    foreach (var island in bigIslands) {
-                        foreach (Point pt in island) {
-                            byte* iptr = rptr + 4 * (pt.Y * result.Width + pt.X);
-                            *iptr = 0;
-                            *(iptr + 1) = 0;
-                            *(iptr + 2) = 0;
+                        foreach (var island in bigIslands) {
+                            foreach (Point pt in island) {
+                                byte* iptr = rptr + 4 * (pt.Y * result.Width + pt.X);
+                                *iptr = 0;
+                                *(iptr + 1) = 0;
+                                *(iptr + 2) = 0;
+                            }
                         }
+
+                        result.UnlockBits(rbd);
                     }
-
-                    result.UnlockBits(rbd);
                 }
             }
 

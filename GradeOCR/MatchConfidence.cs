@@ -6,9 +6,13 @@ using System.Drawing;
 
 namespace GradeOCR {
     public static class MatchConfidence {
-        public static readonly int cutoffConfidenceScore = 250;
+        public static readonly int cutoffConfidenceScore = 500;
 
-        public static int GetConfidenceScore(GradeDigest gd1, GradeDigest gd2) {
+        public static int GetConfidenceScoreSymmetric(GradeDigest gd1, GradeDigest gd2) {
+            return GetConfidenceScoreOneWay(gd1, gd2) + GetConfidenceScoreOneWay(gd2, gd1);
+        }
+
+        public static int GetConfidenceScoreOneWay(GradeDigest gd1, GradeDigest gd2) {
             int?[] distance = new int?[GradeDigest.dataSize];
             Queue<Tuple<Point, int>> floodQueue = new Queue<Tuple<Point, int>>();
             bool[] bits2 = GradeDigest.UnpackBits(gd2.data);

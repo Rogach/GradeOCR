@@ -31,7 +31,7 @@ namespace GradeOCR {
                     bestDigest = gd;
                 }
             }
-            return new RecognitionResult(bestDigest, MatchConfidence.GetConfidenceScore(digest, bestDigest));
+            return new RecognitionResult(bestDigest, MatchConfidence.GetConfidenceScoreSymmetric(digest, bestDigest));
         }
 
         public double MatchDigests(GradeDigest gd1, GradeDigest gd2) {
