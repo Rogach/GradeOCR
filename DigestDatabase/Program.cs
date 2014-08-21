@@ -36,12 +36,10 @@ namespace DigestDatabase {
                 foreach (var input in inputImages) {
                     if (c % 100 == 0) Console.WriteLine("Processed {0}/{1} images...", c, inputImages.Count);
 
-                    GradeDigest gd =
-                        GradeDigest.FromImage(
-                            GradeOCR.Program.NormalizeImage(
-                                ImageUtil.LoadImage(input.Item1)));
-                    gd.grade = input.Item2;
-                    gradeDigests.Add(gd);
+                    GradeOCR.Program.GetGradeDigest(ImageUtil.LoadImage(input.Item1)).ForEach(gd => {
+                        gd.grade = input.Item2;
+                        gradeDigests.Add(gd);
+                    });
 
                     c++;
                 }

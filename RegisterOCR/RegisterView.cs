@@ -169,17 +169,23 @@ namespace RegisterOCR {
                     table.DrawTable(g, new Pen(Color.Red, 2));
                     Brush recognitionBrush = new SolidBrush(Color.FromArgb(50, Color.Green));
                     Brush unsureBrush = new SolidBrush(Color.FromArgb(50, Color.Yellow));
+                    Brush noneBrush = new SolidBrush(Color.FromArgb(50, Color.Red));
 
                     int cellCount = (maxY - minY + 1) * (maxX - minX + 1);
                     ProgressDialogs.WithProgress(cellCount, ph => {
                         for (int y = minY; y <= maxY; y++) {
                             for (int x = minX; x <= maxX; x++) {
-                                GradeDigest gd = GradeDigest.FromImage(GradeOCR.Program.NormalizeImage(table.GetCellImage(originalImage, x, y)));
-                                RecognitionResult res = GradeDigestSet.staticInstance.FindBestMatch(gd);
-                                str += res.Digest.grade;
-                                if (MatchConfidence.Sure(res.ConfidenceScore)) {
-                                    g.FillPath(recognitionBrush, table.GetCellContour(x, y));
-                                } else {
+                                Option<GradeDigest> digestOpt = GradeOCR.Program.GetGradeDigest(table.GetCellImage(originalImage, x, y));
+                                digestOpt.ForEach(gd => {
+                                    RecognitionResult res = GradeDigestSet.staticInstance.FindBestMatch(gd);
+                                    str += res.Digest.grade;
+                                    if (MatchConfidence.Sure(res.ConfidenceScore)) {
+                                        g.FillPath(recognitionBrush, table.GetCellContour(x, y));
+                                    } else {
+                                        g.FillPath(unsureBrush, table.GetCellContour(x, y));
+                                    }
+                                });
+                                if (digestOpt.IsEmpty()) {
                                     g.FillPath(unsureBrush, table.GetCellContour(x, y));
                                 }
                                 str += "\t";

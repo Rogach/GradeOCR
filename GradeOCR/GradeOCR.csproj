@@ -82,6 +82,7 @@
     <Compile Include="ByteUtils.cs" />
     <Compile Include="DigestDifference.cs" />
     <Compile Include="DigestExtractor.cs" />
+    <Compile Include="EmptyImageDetector.cs" />
     <Compile Include="GradeDigest.cs" />
     <Compile Include="GradeDigestSet.cs" />
     <Compile Include="MatchConfidence.cs" />

@@ -97,24 +97,30 @@ namespace Grader.ocr {
                                     int cellX = gradeLocation.gradesLocation.X;
                                     int cellY = gradeLocation.gradesLocation.Y + row;
                                     Bitmap cellImage = table.GetCellImage(bwImage, cellX, cellY);
-                                    GradeDigest digest = GradeDigest.FromImage(GradeOCR.Program.NormalizeImage(cellImage));
-                                    var recogResult = GradeDigestSet.staticInstance.FindBestMatch(digest);
-                                    Color cellColor = MatchConfidence.Sure(recogResult.ConfidenceScore) ? Color.Green : Color.Yellow;
-                                    g.FillPath(new SolidBrush(Color.FromArgb(100, cellColor)), table.GetCellContour(cellX, cellY));
+                                    Option<GradeDigest> digestOpt = GradeOCR.Program.GetGradeDigest(cellImage);
 
-                                    record.marks.Add(new Оценка {
-                                        Код = -1,
-                                        КодПроверяемого = record.soldierId,
-                                        КодПредмета = subjectId,
-                                        ЭтоКомментарий = false,
-                                        Значение = (sbyte) recogResult.Digest.grade,
-                                        Текст = "",
-                                        КодПодразделения = record.soldier.КодПодразделения,
-                                        ВУС = record.soldier.ВУС,
-                                        ТипВоеннослужащего = record.soldier.ТипВоеннослужащего,
-                                        КодЗвания = record.soldier.КодЗвания,
-                                        КодВедомости = -1
-                                    });
+                                    Color cellColor;
+                                    if (digestOpt.IsEmpty()) {
+                                        cellColor = Color.Red;
+                                    } else {
+                                        var recogResult = GradeDigestSet.staticInstance.FindBestMatch(digestOpt.Get());
+                                        cellColor = MatchConfidence.Sure(recogResult.ConfidenceScore) ? Color.Green : Color.Yellow;
+                                        
+                                        record.marks.Add(new Оценка {
+                                            Код = -1,
+                                            КодПроверяемого = record.soldierId,
+                                            КодПредмета = subjectId,
+                                            ЭтоКомментарий = false,
+                                            Значение = (sbyte) recogResult.Digest.grade,
+                                            Текст = "",
+                                            КодПодразделения = record.soldier.КодПодразделения,
+                                            ВУС = record.soldier.ВУС,
+                                            ТипВоеннослужащего = record.soldier.ТипВоеннослужащего,
+                                            КодЗвания = record.soldier.КодЗвания,
+                                            КодВедомости = -1
+                                        });
+                                    }
+                                    g.FillPath(new SolidBrush(Color.FromArgb(50, cellColor)), table.GetCellContour(cellX, cellY));
 
                                     row++;
                                 });

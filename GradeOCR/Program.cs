@@ -37,5 +37,19 @@ namespace GradeOCR {
                             BorderRemoval.RemoveBorder(img))));
         }
 
+        public static Option<GradeDigest> GetGradeDigest(Bitmap img) {
+            Bitmap croppedImage =
+                WhitespaceCropper.CropWhitespace(
+                    NoiseCleaner.RemoveNoiseWithBorder(
+                        BorderRemoval.RemoveBorder(img)));
+            if (EmptyImageDetector.IsImageEmpty(croppedImage)) {
+                return new None<GradeDigest>();
+            } else {
+                return new Some<GradeDigest>(
+                    GradeDigest.FromImage(
+                        DigestExtractor.ExtractDigestImage(croppedImage)));
+            }
+        }
+
     }
 }

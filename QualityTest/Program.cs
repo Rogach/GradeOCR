@@ -130,12 +130,10 @@ namespace QualityTest {
                 foreach (var input in inputImages) {
                     if (c % 100 == 0) Console.WriteLine("Processed {0}/{1} images...", c, inputImages.Count);
 
-                    GradeDigest gd =
-                        GradeDigest.FromImage(
-                            GradeOCR.Program.NormalizeImage(
-                                ImageUtil.LoadImage(input.Item1)));
-                    gd.grade = input.Item2;
-                    gradeDigests.Add(new Tuple<string, GradeDigest>(input.Item1, gd));
+                    GradeOCR.Program.GetGradeDigest(ImageUtil.LoadImage(input.Item1)).ForEach(gd => {
+                        gd.grade = input.Item2;
+                        gradeDigests.Add(new Tuple<string, GradeDigest>(input.Item1, gd));
+                    });
 
                     c++;
                 }
