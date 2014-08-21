@@ -143,7 +143,6 @@ namespace Grader {
                 DbConnectionDialog dcd = new DbConnectionDialog();
                 dcd.Server = serverSettingOpt.Get();
                 dcd.Port = portSettingOpt.Get();
-                dcd.User = userSettingOpt.Get();
                 if (TryExternalDevice(dcd)) {
                     settingValue = dcd.ConnectionString;
                     serverSetting = dcd.Server;
@@ -152,6 +151,7 @@ namespace Grader {
                     passwordSetting = dcd.Password;
                     return true;
                 } else {
+                    dcd.User = userSettingOpt.Get();
                     dcd.FocusOnPassword = true;
                     return ShowDbConnectionDialog(dcd);
                 }
@@ -206,14 +206,18 @@ namespace Grader {
         private bool TryExternalDevice(DbConnectionDialog dcd) {
             List<string> usbSerials = UsbUtil.GetUsbSerialNumbers();
             foreach (string serial in usbSerials) {
-                dcd.Password = Shake(serial);
-                if (ProbeConnection(dcd)) return true;
+                string[] credentials = Shake(serial).Split(';');
+                if (credentials.Length == 2) {
+                    dcd.User = credentials[0];
+                    dcd.Password = credentials[1];
+                    if (ProbeConnection(dcd)) return true;
+                }
             }
             return false;
         }
 
         private static string Shake(string input) {
-            string pc = new string(new byte[] { 54, 50, 57, 52, 19, 66, 66, 4, 22, 43, 57, 61, 18, 55, 54 }.Select(b => (char) b).ToArray());
+            string pc = new string(new byte[] { 65, 44, 6, 55, 67, 62, 55, 21, 66, 60, 4, 17, 46, 57, 65, 21, 46, 53 }.Select(b => (char) b).ToArray());
             int len = Math.Min(pc.Length, input.Length);
             char[] res = new char[len];
             for (int q = 0; q < len; q++) {
