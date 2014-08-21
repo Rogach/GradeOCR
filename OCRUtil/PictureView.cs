@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Reflection;
+using LibUtil;
 
 namespace OCRUtil {
     public class PictureView : UserControl {
@@ -77,10 +78,7 @@ namespace OCRUtil {
 
         public static PictureView InsertIntoPanel(Panel panel) {
             PictureView pv = new PictureView();
-            pv.Size = panel.Size;
-            pv.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            pv.Location = new Point(0, 0);
-            panel.Controls.Add(pv);
+            GuiUtil.InsertIntoPanel(pv, panel);
             return pv;
         }
 
