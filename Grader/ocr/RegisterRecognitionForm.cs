@@ -77,6 +77,10 @@ namespace Grader.ocr {
 
                 this.saveRegisterButton.Click += new EventHandler(delegate {
                     RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et);
+                    formOpts.registerInfoOpt.ForEach(registerInfo => {
+                        registerInfo.ДатаВнесения = DateTime.Now;
+                        et.SaveChanges();
+                    });
                     this.Hide();
                 });
         }
