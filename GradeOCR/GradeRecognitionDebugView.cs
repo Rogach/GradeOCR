@@ -20,10 +20,7 @@ namespace GradeOCR {
         public PictureView bestMatchPV;
         public PictureView differencePV;
 
-        private GradeDigestSet digestSet;
-
-        public GradeRecognitionDebugView(Bitmap inputImage, string imageName, GradeDigestSet digestSet) {
-            this.digestSet = digestSet;
+        public GradeRecognitionDebugView(Bitmap inputImage, string imageName) {
             InitializeComponent();
 
             this.Text = imageName;
@@ -59,7 +56,7 @@ namespace GradeOCR {
             digestPV.Image = digestImage;
 
             GradeDigest digest = GradeDigest.FromImage(digestImage);
-            RecognitionResult recognitionResult = Util.Timed("digest matching", () => digestSet.FindBestMatch(digest));
+            RecognitionResult recognitionResult = Util.Timed("digest matching", () => GradeDigestSet.staticInstance.FindBestMatch(digest));
             Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
             bestMatchPV.Image = bestMatchImage;
             recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();

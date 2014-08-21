@@ -43,8 +43,6 @@ namespace GradeOCR {
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
-                    var digestSet = GradeDigestSet.ReadDefault();
-
                     List<string> images = new List<string>();
                     images.AddRange(Directory.GetFiles(OcrData + "/grade-unsort"));
                     images.AddRange(Directory.GetFiles(OcrData + "/grade-2"));
@@ -61,7 +59,7 @@ namespace GradeOCR {
                         Bitmap img = ImageUtil.LoadImage(imageFile);
                         pvs[q].Image = converter(img);
                         pvs[q].DoubleClick += new EventHandler(delegate {
-                            new GradeRecognitionDebugView(img, imageFile, digestSet).ShowDialog();
+                            new GradeRecognitionDebugView(img, imageFile).ShowDialog();
                         });
                     }
                 }));

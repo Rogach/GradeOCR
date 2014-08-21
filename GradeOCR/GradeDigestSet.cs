@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace GradeOCR {
 
     public class GradeDigestSet {
+        public static readonly GradeDigestSet staticInstance = ReadDefault();
+
         private List<GradeDigest> digestList;
 
         public List<GradeDigest> GetDigestList() {
@@ -57,9 +60,14 @@ namespace GradeOCR {
         }
 
         public static GradeDigestSet Read(string fileName) {
+            using (Stream inStream = File.OpenRead(fileName)) {
+                return Read(inStream);
+            }
+        }
+
+        public static GradeDigestSet Read(Stream inStream) {
             List<GradeDigest> digests = new List<GradeDigest>();
 
-            Stream inStream = File.OpenRead(fileName);
             uint digestCount = ByteUtils.ReadUInt(inStream);
             for (int q = 0; q < digestCount; q++) {
                 GradeDigest gd = new GradeDigest();
@@ -73,18 +81,9 @@ namespace GradeOCR {
             return new GradeDigestSet(digests);
         }
 
-        public static GradeDigestSet ReadDefault() {
-            string defaultPath = "E:/Pronko/prj/Grader/ocr-data/grade-digests.db";
-            if (File.Exists(defaultPath)) {
-                return GradeDigestSet.Read(defaultPath);
-            } else {
-                OpenFileDialog ofd = new OpenFileDialog();
-                ofd.Title = "Выберите базу с оценками";
-                if (ofd.ShowDialog() == DialogResult.OK) {
-                    return GradeDigestSet.Read(ofd.FileName);
-                } else {
-                    throw new Exception("Can't load grade digests database");
-                }
+        private static GradeDigestSet ReadDefault() {
+            using (Stream inStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("GradeOCR.grade-digests.db")) {
+                return Read(inStream);
             }
         }
         

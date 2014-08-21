@@ -13,8 +13,6 @@ namespace QualityTest {
         public static readonly string TestOcrData = "E:/Pronko/prj/Grader/ocr-data/test-data";
 
         static void Main(string[] args) {
-            var digestSet = GradeDigestSet.ReadDefault();
-
             List<Tuple<string, GradeDigest>> testDigests = LoadTestDigests();
             var gradePairs = new List<Tuple<GradeDigest, RecognitionResult>>();
             Util.Timed("compare with database", () => {
@@ -22,7 +20,7 @@ namespace QualityTest {
                 foreach (var gd in testDigests) {
                     if (c % 100 == 0) Console.WriteLine("Processed {0}/{1} digests...", c, testDigests.Count);
 
-                    gradePairs.Add(new Tuple<GradeDigest, RecognitionResult>(gd.Item2, digestSet.FindBestMatch(gd.Item2)));
+                    gradePairs.Add(new Tuple<GradeDigest, RecognitionResult>(gd.Item2, GradeDigestSet.staticInstance.FindBestMatch(gd.Item2)));
 
                     c++;
                 }

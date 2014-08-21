@@ -18,6 +18,7 @@ namespace Grader.ocr {
     public partial class RegisterRecognitionForm : Form {
         public class Options {
             public Bitmap sourceImage;
+            public Bitmap debugImage;
             public Option<ВедомостьДляРаспознавания> registerInfoOpt = new None<ВедомостьДляРаспознавания>();
             public Option<Register> registerOpt = new None<Register>();
             public Option<Table> recognizedTable = new None<Table>();
@@ -29,7 +30,7 @@ namespace Grader.ocr {
         private PictureView ocrImagePV;
         private RegisterEditor registerEditor;
 
-        public RegisterRecognitionForm(Entities et, GradeDigestSet digestSet, Options formOpts) {
+        public RegisterRecognitionForm(Entities et, Options formOpts) {
                 InitializeComponent();
             
                 ocrImagePV = PictureView.InsertIntoPanel(ocrImagePanel);
@@ -42,27 +43,20 @@ namespace Grader.ocr {
                     registerEditor.SetRegister(registerEditor.GetEmptyRegister());
                 }
 
-                this.Shown += new EventHandler(delegate {
-                    Bitmap debugImage = new Bitmap(formOpts.sourceImage);
-                    formOpts.dmeOpt.ForEach(dme => {
-                        dme.DrawPositioningDebug(debugImage);
-                    });
-                    formOpts.recognizedTable.ForEach(table => {
-                        Graphics g = Graphics.FromImage(debugImage);
-                        table.DrawTable(g, new Pen(Brushes.Red, 4));
-                        g.Dispose();
+                this.Shown += new EventHandler(delegate { 
+                    ocrImagePV.Image = formOpts.debugImage;
+                });
 
-                        Bitmap bwImage = ImageUtil.ToBlackAndWhite(formOpts.sourceImage);
+                formOpts.recognizedTable.ForEach(table => {
+                    Bitmap bwImage = ImageUtil.ToBlackAndWhite(formOpts.sourceImage);
 
-                        this.ocrImagePV.AddDoubleClickListener((pt, e) => {
-                            Option<Point> cellOpt = table.GetCellAtPoint(pt.X, pt.Y);
-                            cellOpt.ForEach(cell => {
-                                Bitmap cellImage = table.GetCellImage(bwImage, cell.X, cell.Y);
-                                new GradeRecognitionDebugView(cellImage, "<>", digestSet).ShowDialog();
-                            });
+                    this.ocrImagePV.AddDoubleClickListener((pt, e) => {
+                        Option<Point> cellOpt = table.GetCellAtPoint(pt.X, pt.Y);
+                        cellOpt.ForEach(cell => {
+                            Bitmap cellImage = table.GetCellImage(bwImage, cell.X, cell.Y);
+                            new GradeRecognitionDebugView(cellImage, "<>").ShowDialog();
                         });
                     });
-                    ocrImagePV.Image = debugImage;
                 });
 
                 this.debugARCodeOCRbutton.Click += new EventHandler(delegate {
@@ -75,6 +69,15 @@ namespace Grader.ocr {
 
                 this.debugTableOCRbutton.Click += new EventHandler(delegate {
                     new TableRecognitionDebugView(formOpts.sourceImage).ShowDialog();
+                });
+
+                this.cancelButton.Click += new EventHandler(delegate {
+                    this.Hide();
+                });
+
+                this.saveRegisterButton.Click += new EventHandler(delegate {
+                    RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et);
+                    this.Hide();
                 });
         }
 

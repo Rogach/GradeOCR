@@ -7,7 +7,9 @@ using System.Drawing;
 using Grader.model;
 using LibUtil;
 using System.Data.Linq;
+using Grader.ocr;
 using Grader.util;
+using OCRUtil;
 
 namespace Grader.gui {
     class RegisterImportTab : TabPage {
@@ -23,6 +25,7 @@ namespace Grader.gui {
         private ListView registerList;
         private RegisterEditor registerEditor;
         private Button newRegisterButton;
+        private Button recognizeRegisterButton;
         private Button saveRegister;
         private Button cancelRegister;
         public EventManager RegisterSaved = new EventManager();
@@ -62,14 +65,32 @@ namespace Grader.gui {
             });
             this.Controls.Add(newRegisterButton);
 
+            recognizeRegisterButton = new Button();
+            recognizeRegisterButton.Text = "Распознать ведомость";
+            recognizeRegisterButton.Location = new Point(3, 30);
+            recognizeRegisterButton.Size = new Size(200, 25);
+            recognizeRegisterButton.Click += new EventHandler(delegate {
+                if (CheckForUnsavedChanges()) {
+                    OpenFileDialog ofd = new OpenFileDialog();
+                    ofd.Title = "Выберите изображение ведомости";
+                    ofd.Multiselect = false;
+                    ofd.Filter = "Файлы изображений|*.jpg;*.png;*.bmp";
+                    if (ofd.ShowDialog() == DialogResult.OK) {
+                        RegisterRecognition.RecognizeRegisterImage(et, ImageUtil.LoadImage(ofd.FileName));
+                        UpdateRegisterList();
+                    }
+                }
+            });
+            this.Controls.Add(recognizeRegisterButton);
+
             registerList = new ListView();
             registerList.View = View.Details;
             
             registerList.HeaderStyle = ColumnHeaderStyle.None;
             registerList.MultiSelect = false;
             registerList.FullRowSelect = true;
-            registerList.Location = new Point(3, 30);
-            registerList.Size = new Size(200, 770);
+            registerList.Location = new Point(3, 57);
+            registerList.Size = new Size(200, 743);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
 
             ColumnHeader ch = new ColumnHeader();

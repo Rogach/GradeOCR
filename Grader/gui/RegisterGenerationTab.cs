@@ -64,7 +64,7 @@ namespace Grader.gui {
             registerDate.Value = DateTime.Now;
 
             registerSubjectSelect = layout.Add("ведомость:", new ComboBox());
-            registerSubjectSelect.Items.AddRange(RegisterSpecs.registerSpecs);
+            registerSubjectSelect.Items.AddRange(RegisterSpec.registerSpecs);
             registerSubjectSelect.SelectedIndex = 0;
             registerSubjectSelect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             registerSubjectSelect.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -156,7 +156,7 @@ namespace Grader.gui {
         }
 
         private void GenerateRegister() {
-            RegisterSpecs spec = (RegisterSpecs) registerSubjectSelect.SelectedItem;
+            RegisterSpec spec = (RegisterSpec) registerSubjectSelect.SelectedItem;
             RegisterSettings settings = new RegisterSettings {
                 registerType = registerTypeSelect.GetComboBoxEnumValue<RegisterType>(),
                 onlyKMN = onlyKMN.Checked,

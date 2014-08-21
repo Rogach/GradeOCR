@@ -24,8 +24,6 @@ namespace RegisterOCR {
         private Point? cell1 = null;
         private Point? cell2 = null;
 
-        GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
-
         public RegisterView() {
             InitializeComponent();
 
@@ -177,7 +175,7 @@ namespace RegisterOCR {
                         for (int y = minY; y <= maxY; y++) {
                             for (int x = minX; x <= maxX; x++) {
                                 GradeDigest gd = GradeDigest.FromImage(GradeOCR.Program.NormalizeImage(table.GetCellImage(originalImage, x, y)));
-                                RecognitionResult res = digestSet.FindBestMatch(gd);
+                                RecognitionResult res = GradeDigestSet.staticInstance.FindBestMatch(gd);
                                 str += res.Digest.grade;
                                 if (MatchConfidence.Sure(res.ConfidenceScore)) {
                                     g.FillPath(recognitionBrush, table.GetCellContour(x, y));

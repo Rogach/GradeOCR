@@ -14,12 +14,22 @@ using System.IO;
 
 namespace Grader.registers {
 
-    public abstract class RegisterSpecs {
+    public class GradeLocation {
+        public string subjectName { get; set; }
+        public Point gradesLocation { get; set; }
+        public GradeLocation(string subjectName, Point gradesLocation) {
+            this.subjectName = subjectName;
+            this.gradesLocation = gradesLocation;
+        }
+    }
+
+    public abstract class RegisterSpec {
         public string specName;
         public string templateName;
+        public List<GradeLocation> gradeLocations;
         public abstract void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings);
 
-        public static RegisterSpecs FromSpecName(string specName) {
+        public static RegisterSpec FromSpecName(string specName) {
             switch (specName) {
                 case "сводная": return new СводнаяВедомость();
                 case "сводная (невыносимые)": return new СводнаяНевыносимыеПредметыВедомость();
@@ -46,7 +56,7 @@ namespace Grader.registers {
             }
         }
 
-        public static RegisterSpecs[] registerSpecs = {
+        public static RegisterSpec[] registerSpecs = {
             new СводнаяВедомость(),
             new СводнаяНевыносимыеПредметыВедомость(),
             new СверочнаяВедомость(),
@@ -71,7 +81,7 @@ namespace Grader.registers {
         };
     }
 
-    public abstract class GeneralRegister : RegisterSpecs {
+    public abstract class GeneralRegister : RegisterSpec {
         public int columnCount;
         public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             if (settings.onlyKMN) {
@@ -186,6 +196,9 @@ namespace Grader.registers {
             specName = subject;
             templateName = "ведомость_курсанты_стд.xlsx";
             columnCount = 10;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation(subject, new Point(12, 1))
+            };
             this.subject = subject;
         }
         public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
@@ -219,6 +232,9 @@ namespace Grader.registers {
             specName = "ОГН";
             templateName = "ведомость_курсанты_ОГН.xlsx";
             columnCount = 13;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("ОГН", new Point(11, 1))
+            };
         }
         public override string ToString() { return "ОГН"; }
     }
@@ -240,6 +256,14 @@ namespace Grader.registers {
             specName = "сводная";
             templateName = "ведомость_курсанты_сводная.xlsx";
             columnCount = 9;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("СП", new Point(3, 0)),
+                new GradeLocation("ТП", new Point(4, 0)),
+                new GradeLocation("СТР", new Point(5, 0)),
+                new GradeLocation("ФП", new Point(6, 0)),
+                new GradeLocation("ОВУ", new Point(7, 0)),
+                new GradeLocation("ОГН", new Point(8, 0))
+            };
         }
         public override string ToString() { return "сводная"; }
     }
@@ -248,6 +272,11 @@ namespace Grader.registers {
             specName = "сводная (невыносимые)";
             templateName = "ведомость_курсанты_сводная_невыносимые_предметы.xlsx";
             columnCount = 6;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("ОГП", new Point(3, 0)),
+                new GradeLocation("РХБЗ", new Point(4, 0)),
+                new GradeLocation("ВМП", new Point(5, 0))
+            };
         }
         public override string ToString() { return "сводная (невыносимые)"; }
     }
@@ -268,6 +297,9 @@ namespace Grader.registers {
             specName = "СП";
             templateName = "ведомость_курсанты_СП.xlsx";
             columnCount = 10;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("СП", new Point(12, 1))
+            };
         }
         public override string ToString() { return "СП"; }
     }
@@ -276,6 +308,9 @@ namespace Grader.registers {
             specName = "СТР";
             templateName = "ведомость_курсанты_СТР.xlsx";
             columnCount = 14;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("СТР", new Point(16, 1))
+            };
         }
         public override string ToString() { return "СТР"; }
     }
@@ -284,6 +319,9 @@ namespace Grader.registers {
             specName = "ТП";
             templateName = "ведомость_курсанты_ТП.xlsx";
             columnCount = 10;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("ТП", new Point(12, 1))
+            };
         }
         public override string ToString() { return "ТП"; }
     }
@@ -292,6 +330,9 @@ namespace Grader.registers {
             specName = "ФП";
             templateName = "ведомость_курсанты_ФП.xlsx";
             columnCount = 17;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("ФП", new Point(19, 1))
+            };
         }
         public override string ToString() { return "ФП"; }
     }
@@ -300,6 +341,9 @@ namespace Grader.registers {
             specName = "РХБЗ";
             templateName = "ведомость_курсанты_РХБЗ.xlsx";
             columnCount = 10;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("РХБЗ", new Point(12, 1))
+            };
         }
         public override string ToString() { return "РХБЗ"; }
     }

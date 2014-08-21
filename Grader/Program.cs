@@ -18,17 +18,12 @@ namespace Grader {
             Application.SetCompatibleTextRenderingDefault(false);
 
             Settings.Load().ForEach(settings => {
-                Entities et = Entities.CreateEntities(settings);
-                RegisterRecognition.RecognizeRegisterImage(et, ImageUtil.LoadImage("E:/arcode-scan.jpg"));
+                ApplicationContext ctx = new ApplicationContext();
+                MainForm mainForm = new MainForm(settings, ctx);
+                ctx.MainForm = mainForm;
+                Application.Run(ctx);
+                settings.Save();
             });
-
-            //Settings.Load().ForEach(settings => {
-            //    ApplicationContext ctx = new ApplicationContext();
-            //    MainForm mainForm = new MainForm(settings, ctx);
-            //    ctx.MainForm = mainForm;
-            //    Application.Run(ctx);
-            //    settings.Save();
-            //});
         }
 
     }

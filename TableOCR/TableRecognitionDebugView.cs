@@ -115,11 +115,10 @@ namespace TableOCR {
                 Console.WriteLine("no table was recognized");
             }
 
-            GradeDigestSet digestSet = GradeDigestSet.ReadDefault();
             this.recognizedTablePV.AddDoubleClickListener((pt, e) => {
                 recognizedTable.ForEach(table => {
                     table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                        var gradeRecognition = new GradeRecognitionDebugView(table.GetCellImage(bw, cell.X, cell.Y), "<gen>", digestSet);
+                        var gradeRecognition = new GradeRecognitionDebugView(table.GetCellImage(bw, cell.X, cell.Y), "<gen>");
                         gradeRecognition.ShowDialog();
                     });
                 });
