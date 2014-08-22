@@ -731,7 +731,8 @@ namespace Grader
         /// <param name="типВедомости">Исходное значение свойства ТипВедомости.</param>
         /// <param name="имяВедомости">Исходное значение свойства ИмяВедомости.</param>
         /// <param name="теги">Исходное значение свойства Теги.</param>
-        public static ВедомостьДляРаспознавания CreateВедомостьДляРаспознавания(global::System.Int32 код, global::System.DateTime датаПечати, global::System.String списокВоеннослужащих, global::System.String типВедомости, global::System.String имяВедомости, global::System.String теги)
+        /// <param name="списокНенужныхВоеннослужащих">Исходное значение свойства СписокНенужныхВоеннослужащих.</param>
+        public static ВедомостьДляРаспознавания CreateВедомостьДляРаспознавания(global::System.Int32 код, global::System.DateTime датаПечати, global::System.String списокВоеннослужащих, global::System.String типВедомости, global::System.String имяВедомости, global::System.String теги, global::System.String списокНенужныхВоеннослужащих)
         {
             ВедомостьДляРаспознавания ведомостьДляРаспознавания = new ВедомостьДляРаспознавания();
             ведомостьДляРаспознавания.Код = код;
@@ -740,6 +741,7 @@ namespace Grader
             ведомостьДляРаспознавания.ТипВедомости = типВедомости;
             ведомостьДляРаспознавания.ИмяВедомости = имяВедомости;
             ведомостьДляРаспознавания.Теги = теги;
+            ведомостьДляРаспознавания.СписокНенужныхВоеннослужащих = списокНенужныхВоеннослужащих;
             return ведомостьДляРаспознавания;
         }
 
@@ -916,6 +918,30 @@ namespace Grader
         private global::System.String _Теги;
         partial void OnТегиChanging(global::System.String value);
         partial void OnТегиChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String СписокНенужныхВоеннослужащих
+        {
+            get
+            {
+                return _СписокНенужныхВоеннослужащих;
+            }
+            set
+            {
+                OnСписокНенужныхВоеннослужащихChanging(value);
+                ReportPropertyChanging("СписокНенужныхВоеннослужащих");
+                _СписокНенужныхВоеннослужащих = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("СписокНенужныхВоеннослужащих");
+                OnСписокНенужныхВоеннослужащихChanged();
+            }
+        }
+        private global::System.String _СписокНенужныхВоеннослужащих;
+        partial void OnСписокНенужныхВоеннослужащихChanging(global::System.String value);
+        partial void OnСписокНенужныхВоеннослужащихChanged();
 
         #endregion
     

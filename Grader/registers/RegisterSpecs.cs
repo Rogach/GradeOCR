@@ -154,10 +154,8 @@ namespace Grader.registers {
             RegisterFormat.InsertSoldierList(
                 et,
                 sh,
-                settings.soldiers,
-                isExam: settings.registerType == RegisterType.экзамен,
+                settings,
                 useShortNames: true,
-                strikeKMN: settings.strikeKMN,
                 strikeLen: columnCount
             );
         }
@@ -243,10 +241,8 @@ namespace Grader.registers {
             RegisterFormat.InsertSoldierList(
                 et,
                 sh,
-                settings.soldiers,
-                isExam: settings.registerType == RegisterType.экзамен,
+                settings,
                 useShortNames: false,
-                strikeKMN: settings.strikeKMN,
                 strikeLen: columnCount
             );
         }
@@ -360,8 +356,8 @@ namespace Grader.registers {
             ExcelTemplates.AppendRange(sh, "Преподаватели", Querying.GetPostsForSubunit(et, settings.subunit.Код, "преподаватель").ToList().Select(c => c.GetFullName(et)).MkString());
         }
         public override void InsertSoldiers(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
-            RegisterFormat.InsertSoldierList(et, sh, settings.soldiers,
-                isExam: settings.registerType == RegisterType.экзамен, useShortNames: false, strikeKMN: settings.strikeKMN, strikeLen: columnCount,
+            RegisterFormat.InsertSoldierList(et, sh, settings,
+                useShortNames: false, strikeLen: columnCount,
                 additionalFormatting: (rng, soldier) => {
                     if (soldier.ВУС != 0) {
                         rng.GetOffset(0, 3).Value = "'" + soldier.ВУС.ToString().PadLeft(3, '0');

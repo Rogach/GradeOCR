@@ -24,5 +24,11 @@ namespace Grader.registers {
         public bool forOCR { get; set; }
         public string registerNamePrefix { get; set; }
         public string registerTags { get; set; }
+
+        public bool isExam {
+            get {
+                return registerType == RegisterType.экзамен;
+            }
+        }
     }
 }

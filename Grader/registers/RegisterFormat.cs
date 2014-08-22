@@ -15,16 +15,16 @@ using System.IO;
 namespace Grader.registers {
 
     public static class RegisterFormat {
-        public static void InsertSoldierList(Entities et, ExcelWorksheet sh, List<Военнослужащий> soldiers, 
-                bool isExam = false, bool useShortNames = false, bool strikeKMN = false, int strikeLen = 1, 
-                Action<ExcelRange, Военнослужащий> additionalFormatting = null) {
+        public static void InsertSoldierList(Entities et, ExcelWorksheet sh, RegisterSettings settings, 
+                bool useShortNames = false, int strikeLen = 1, Action<ExcelRange, Военнослужащий> additionalFormatting = null) {
+
             sh.GetRange("SoldierList").EntireRow.Copy();
-            for (int i = 0; i < soldiers.Count - 1; i++) {
+            for (int i = 0; i < settings.soldiers.Count - 1; i++) {
                 sh.GetRange("SoldierList").GetOffset(1, 0).EntireRow.Insert(ExcelEnums.Direction.Down);
             }
             ExcelRange c = sh.GetRange("SoldierList");
             int r = 1;
-            ProgressDialogs.ForEach(soldiers, soldier => {
+            ProgressDialogs.ForEach(settings.soldiers, soldier => {
                 c.Value = r++;
                 c.GetOffset(0, 1).Value = et.rankIdToName[soldier.КодЗвания];
                 if (useShortNames) {
@@ -35,7 +35,7 @@ namespace Grader.registers {
                 if (additionalFormatting != null) {
                     additionalFormatting(c, soldier);
                 }
-                if ((strikeKMN && soldier.КМН) || (isExam && soldier.НетДопускаНаЭкзамен)) {
+                if ((settings.strikeKMN && soldier.КМН) || (settings.isExam && soldier.НетДопускаНаЭкзамен)) {
                     ExcelRange strike = c.GetOffset(0, 3).GetResize(1, strikeLen);
                     if (strikeLen > 1) {
                         strike.Merge();
@@ -68,10 +68,17 @@ namespace Grader.registers {
                 settings.subunit == null ? settings.subunitName : settings.subunit.ИмяКраткое,
                 specName);
 
+            string soldierList = settings.soldiers.Select(v => v.Код).MkString();
+            string skipSoldierList =
+                settings.soldiers
+                .Where(soldier => (settings.strikeKMN && soldier.КМН) || (settings.isExam && soldier.НетДопускаНаЭкзамен))
+                .Select(v => v.Код).MkString();
+
             var regEntry = new ВедомостьДляРаспознавания {
                 ДатаПечати = DateTime.Now,
                 ДатаВнесения = null,
-                СписокВоеннослужащих = settings.soldiers.Select(v => v.Код).MkString(),
+                СписокВоеннослужащих = soldierList,
+                СписокНенужныхВоеннослужащих = skipSoldierList,
                 ТипВедомости = specName,
                 ИмяВедомости = registerName,
                 Теги = settings.registerTags
