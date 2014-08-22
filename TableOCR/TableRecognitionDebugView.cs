@@ -99,7 +99,7 @@ namespace TableOCR {
             var lnorm = new LineNormalization(horizLines, vertLines, sourceImage);
             Bitmap normalizedLinesImage = DrawLines(bw, lnorm.normHorizLines, lnorm.normVertLines, 2);
             this.normalizedLinesPV.Image = normalizedLinesImage;
-            var tb = TableBuilder.NewBuilder(lnorm);
+            var tb = TableBuilder.NewBuilder(lnorm, new None<List<double>>());
             Bitmap tableRecognitionImage = tb.DebugImage(bw);
             this.tableRecognitionPV.Image = tableRecognitionImage;
             Option<Table> recognizedTable = tb.table;

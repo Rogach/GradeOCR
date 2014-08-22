@@ -27,7 +27,7 @@ namespace TableOCR {
         /*
          * Convenience function to recognize table in an image.
          */
-        public static Option<Table> RecognizeTable(Bitmap sourceImage) {
+        public static Option<Table> RecognizeTable(Bitmap sourceImage, List<double> columnWidthsHintOrNull = null) {
             Bitmap bw = ImageUtil.ToBlackAndWhite(sourceImage);
             Bitmap rotBw = ImageUtil.RotateCounterClockwise(bw);
 
@@ -46,7 +46,7 @@ namespace TableOCR {
                 return new None<Table>();
             } else {
                 var lnorm = new LineNormalization(horizLines, vertLines, sourceImage);
-                return TableBuilder.NewBuilder(lnorm).table;
+                return TableBuilder.NewBuilder(lnorm, Options.Create(columnWidthsHintOrNull)).table;
             }
         }
 

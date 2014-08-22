@@ -36,12 +36,12 @@ namespace TableOCR {
      */
     public class TableBuilder {
 
-        public static Option<Table> ExtractTable(LineNormalization lnorm) {
-            return NewBuilder(lnorm).table;
+        public static Option<Table> ExtractTable(LineNormalization lnorm, Option<List<double>> columnWidthsHint) {
+            return NewBuilder(lnorm, columnWidthsHint).table;
         }
 
-        public static TableBuilder NewBuilder(LineNormalization lnorm) {
-            return new TableBuilder(lnorm.angle, lnorm.normHorizLines, lnorm.normRotVertLines);
+        public static TableBuilder NewBuilder(LineNormalization lnorm, Option<List<double>> columnWidthsHint) {
+            return new TableBuilder(lnorm.angle, lnorm.normHorizLines, lnorm.normRotVertLines, columnWidthsHint);
         }
 
         /* Threshold for distance of line end point to table edge.
@@ -72,7 +72,7 @@ namespace TableOCR {
 
         public Option<Table> table = new None<Table>();
 
-        public TableBuilder(double tableAngle, List<LineF> horizLines, List<LineF> vertLines) {
+        public TableBuilder(double tableAngle, List<LineF> horizLines, List<LineF> vertLines, Option<List<double>> columnWidthsHint) {
             horizNormal = new PointF((float) Math.Cos(tableAngle), (float) Math.Sin(tableAngle));
             vertNormal = new PointF((float) -Math.Sin(tableAngle), (float) Math.Cos(tableAngle));
             invHorizNormal = new PointF((float) Math.Cos(tableAngle), (float) -Math.Sin(tableAngle));
@@ -82,10 +82,10 @@ namespace TableOCR {
             horizLines = horizLines.ConvertAll(ln => new LineF(ToTable(ln.p1), ToTable(ln.p2)));
             vertLines = vertLines.ConvertAll(ln => new LineF(ToTable(ln.p1), ToTable(ln.p2))).OrderBy(ln => ln.p1.X).ToList();
 
-            BuildTable(horizLines, vertLines);
+            BuildTable(horizLines, vertLines, columnWidthsHint);
         }
 
-        private void BuildTable(List<LineF> horizLines, List<LineF> vertLines) {
+        private void BuildTable(List<LineF> horizLines, List<LineF> vertLines, Option<List<double>> columnWidthsHint) {
             rowLines = ExtractTableRowLines(horizLines);
             if (rowLines.Count < 2) return;
 
@@ -151,7 +151,13 @@ namespace TableOCR {
 
                 table.columnWidths = new List<float>();
                 float prevColumn = leftEdgeX;
-                foreach (float d in RowClusterCenter(bestCluster).dividers) {
+
+                List<float> dividers = RowClusterCenter(bestCluster).dividers;
+                columnWidthsHint.ForEach(columnHint => {
+                    dividers = HealColumnsViaWidthHints(dividers, columnHint);
+                });
+
+                foreach (float d in dividers) {
                     table.columnWidths.Add(d - prevColumn);
                     prevColumn = d;
                 }
@@ -302,6 +308,30 @@ namespace TableOCR {
                     return new List<RowInfo> { row };
                 }
             }).ToList();
+        }
+
+        /* 
+         * Removes extra columns that do not appear close to hint lines
+         */
+        public List<float> HealColumnsViaWidthHints(List<float> dividers, List<double> columnWidthHints) {
+            if (columnWidthHints.Count - 1 >= dividers.Count) {
+                return dividers;
+            } else {
+                List<float> hintOffsets = new List<float>();
+                float totalHintWidth = 0;
+                foreach (var cw in columnWidthHints) {
+                    totalHintWidth += (float) cw;
+                    hintOffsets.Add(totalHintWidth);
+                }
+                hintOffsets.Remove(hintOffsets.Last());
+                float hintCoeff = (rightEdgeX - leftEdgeX) / totalHintWidth;
+
+                return dividers.OrderBy(div => {
+                    float offset = div - leftEdgeX;
+                    float closestHint = hintOffsets.MinBy(hint => Math.Abs(hint * hintCoeff - offset));
+                    return Math.Abs(offset - closestHint * hintCoeff);
+                }).Take(columnWidthHints.Count - 1).OrderBy(x => x).ToList();
+            }
         }
 
         public float TableX(PointF p) {

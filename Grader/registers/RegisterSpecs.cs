@@ -27,6 +27,7 @@ namespace Grader.registers {
         public string specName;
         public string templateName;
         public List<GradeLocation> gradeLocations;
+        public int tableLastColumn;
         public abstract void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings);
 
         public static RegisterSpec FromSpecName(string specName) {
@@ -82,7 +83,7 @@ namespace Grader.registers {
     }
 
     public abstract class GeneralRegister : RegisterSpec {
-        public int columnCount;
+        public int gradeColumnCount;
         public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             if (settings.onlyKMN) {
                 ExcelTemplates.SetRange(sh, "ИмяПодразделения", "кандидатов на замещение вакантных должностей");
@@ -147,7 +148,7 @@ namespace Grader.registers {
             }
 
             if (settings.forOCR)
-                RegisterFormat.InsertRegisterCode(et, sh, settings, specName);
+                RegisterFormat.InsertRegisterCode(et, sh, settings, this);
         }
 
         public virtual void InsertSoldiers(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
@@ -156,7 +157,7 @@ namespace Grader.registers {
                 sh,
                 settings,
                 useShortNames: true,
-                strikeLen: columnCount
+                strikeLen: gradeColumnCount
             );
         }
 
@@ -193,7 +194,8 @@ namespace Grader.registers {
         public GenericRegister(string subject) {
             specName = subject;
             templateName = "ведомость_курсанты_стд.xlsx";
-            columnCount = 10;
+            gradeColumnCount = 10;
+            tableLastColumn = 12;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation(subject, new Point(12, 1))
             };
@@ -229,9 +231,10 @@ namespace Grader.registers {
         public ВедомостьОГН() {
             specName = "ОГН";
             templateName = "ведомость_курсанты_ОГН.xlsx";
-            columnCount = 13;
+            gradeColumnCount = 13;
+            tableLastColumn = 15;
             gradeLocations = new List<GradeLocation> {
-                new GradeLocation("ОГН", new Point(11, 1))
+                new GradeLocation("ОГН", new Point(12, 1))
             };
         }
         public override string ToString() { return "ОГН"; }
@@ -243,7 +246,7 @@ namespace Grader.registers {
                 sh,
                 settings,
                 useShortNames: false,
-                strikeLen: columnCount
+                strikeLen: gradeColumnCount
             );
         }
     }
@@ -251,7 +254,8 @@ namespace Grader.registers {
         public СводнаяВедомость() {
             specName = "сводная";
             templateName = "ведомость_курсанты_сводная.xlsx";
-            columnCount = 9;
+            gradeColumnCount = 9;
+            tableLastColumn = 11;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("СП", new Point(3, 0)),
                 new GradeLocation("ТП", new Point(4, 0)),
@@ -267,7 +271,8 @@ namespace Grader.registers {
         public СводнаяНевыносимыеПредметыВедомость() {
             specName = "сводная (невыносимые)";
             templateName = "ведомость_курсанты_сводная_невыносимые_предметы.xlsx";
-            columnCount = 6;
+            gradeColumnCount = 6;
+            tableLastColumn = 8;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("ОГП", new Point(3, 0)),
                 new GradeLocation("РХБЗ", new Point(4, 0)),
@@ -292,7 +297,8 @@ namespace Grader.registers {
         public ВедомостьСП() {
             specName = "СП";
             templateName = "ведомость_курсанты_СП.xlsx";
-            columnCount = 10;
+            gradeColumnCount = 10;
+            tableLastColumn = 12;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("СП", new Point(12, 1))
             };
@@ -303,7 +309,8 @@ namespace Grader.registers {
         public ВедомостьСТР() {
             specName = "СТР";
             templateName = "ведомость_курсанты_СТР.xlsx";
-            columnCount = 14;
+            gradeColumnCount = 14;
+            tableLastColumn = 16;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("СТР", new Point(16, 1))
             };
@@ -314,7 +321,8 @@ namespace Grader.registers {
         public ВедомостьТП() {
             specName = "ТП";
             templateName = "ведомость_курсанты_ТП.xlsx";
-            columnCount = 10;
+            gradeColumnCount = 10;
+            tableLastColumn = 12;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("ТП", new Point(12, 1))
             };
@@ -325,7 +333,8 @@ namespace Grader.registers {
         public ВедомостьФП() {
             specName = "ФП";
             templateName = "ведомость_курсанты_ФП.xlsx";
-            columnCount = 17;
+            gradeColumnCount = 17;
+            tableLastColumn = 19;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("ФП", new Point(19, 1))
             };
@@ -336,7 +345,8 @@ namespace Grader.registers {
         public ВедомостьРХБЗ() {
             specName = "РХБЗ";
             templateName = "ведомость_курсанты_РХБЗ.xlsx";
-            columnCount = 10;
+            gradeColumnCount = 10;
+            tableLastColumn = 12;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("РХБЗ", new Point(12, 1))
             };
@@ -347,7 +357,8 @@ namespace Grader.registers {
         public СверочнаяВедомость() {
             specName = "сверка";
             templateName = "ведомость_курсанты_сверка.xlsx";
-            columnCount = 2;
+            gradeColumnCount = 2;
+            tableLastColumn = 4;
         }
         public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             base.Format(et, sh, settings);
@@ -357,7 +368,7 @@ namespace Grader.registers {
         }
         public override void InsertSoldiers(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             RegisterFormat.InsertSoldierList(et, sh, settings,
-                useShortNames: false, strikeLen: columnCount,
+                useShortNames: false, strikeLen: gradeColumnCount,
                 additionalFormatting: (rng, soldier) => {
                     if (soldier.ВУС != 0) {
                         rng.GetOffset(0, 3).Value = "'" + soldier.ВУС.ToString().PadLeft(3, '0');

@@ -53,7 +53,7 @@ namespace Grader.registers {
             });
         }
 
-        public static void InsertRegisterCode(Entities et, ExcelWorksheet sh, RegisterSettings settings, string specName) {
+        public static void InsertRegisterCode(Entities et, ExcelWorksheet sh, RegisterSettings settings, RegisterSpec spec) {
             string registerTypeString;
             switch (settings.registerType) {
                 case RegisterType.зачет: registerTypeString = "ЗАЧ"; break;
@@ -66,22 +66,28 @@ namespace Grader.registers {
                 settings.registerNamePrefix.Length == 0 ? "" : settings.registerNamePrefix + " ",
                 registerTypeString,
                 settings.subunit == null ? settings.subunitName : settings.subunit.ИмяКраткое,
-                specName);
+                spec.specName);
 
-            string soldierList = settings.soldiers.Select(v => v.Код).MkString();
+            string soldierList = settings.soldiers.Select(v => v.Код).MkString(";");
             string skipSoldierList =
                 settings.soldiers
                 .Where(soldier => (settings.strikeKMN && soldier.КМН) || (settings.isExam && soldier.НетДопускаНаЭкзамен))
-                .Select(v => v.Код).MkString();
+                .Select(v => v.Код).MkString(";");
+
+            List<double> columnWidths = new List<Double>();
+            for (int col = 0; col <= spec.tableLastColumn; col++) {
+                columnWidths.Add(sh.GetRange("A:A").GetOffset(0, col).Width);
+            }
 
             var regEntry = new ВедомостьДляРаспознавания {
                 ДатаПечати = DateTime.Now,
                 ДатаВнесения = null,
                 СписокВоеннослужащих = soldierList,
                 СписокНенужныхВоеннослужащих = skipSoldierList,
-                ТипВедомости = specName,
+                ТипВедомости = spec.specName,
                 ИмяВедомости = registerName,
-                Теги = settings.registerTags
+                Теги = settings.registerTags,
+                ШириныСтолбцов = columnWidths.MkString(";")
             };
 
             et.ВедомостьДляРаспознавания.AddObject(regEntry);

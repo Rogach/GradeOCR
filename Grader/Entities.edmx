@@ -116,6 +116,7 @@
           <Property Name="ТипВедомости" Type="varchar" Nullable="false" MaxLength="45" />
           <Property Name="ИмяВедомости" Type="varchar" Nullable="false" MaxLength="300" />
           <Property Name="Теги" Type="varchar" Nullable="false" MaxLength="300" />
+          <Property Name="ШириныСтолбцов" Type="text" Nullable="false" />
         </EntityType>
         <EntityType Name="ВедомостьЗапись">
           <Key>
@@ -970,6 +971,7 @@
           <Property Type="String" Name="ИмяВедомости" Nullable="false" MaxLength="300" FixedLength="false" Unicode="false" />
           <Property Type="String" Name="Теги" Nullable="false" MaxLength="300" FixedLength="false" Unicode="false" />
           <Property Type="String" Name="СписокНенужныхВоеннослужащих" Nullable="false" MaxLength="1073741823" FixedLength="false" Unicode="false" />
+          <Property Type="String" Name="ШириныСтолбцов" Nullable="false" MaxLength="65535" FixedLength="false" Unicode="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -1073,6 +1075,7 @@
           <EntitySetMapping Name="ВедомостьДляРаспознавания">
             <EntityTypeMapping TypeName="graderModel.ВедомостьДляРаспознавания">
               <MappingFragment StoreEntitySet="ВедомостьДляРаспознавания">
+                <ScalarProperty Name="ШириныСтолбцов" ColumnName="ШириныСтолбцов" />
                 <ScalarProperty Name="СписокНенужныхВоеннослужащих" ColumnName="СписокНенужныхВоеннослужащих" />
                 <ScalarProperty Name="Теги" ColumnName="Теги" />
                 <ScalarProperty Name="ИмяВедомости" ColumnName="ИмяВедомости" />

@@ -732,7 +732,8 @@ namespace Grader
         /// <param name="имяВедомости">Исходное значение свойства ИмяВедомости.</param>
         /// <param name="теги">Исходное значение свойства Теги.</param>
         /// <param name="списокНенужныхВоеннослужащих">Исходное значение свойства СписокНенужныхВоеннослужащих.</param>
-        public static ВедомостьДляРаспознавания CreateВедомостьДляРаспознавания(global::System.Int32 код, global::System.DateTime датаПечати, global::System.String списокВоеннослужащих, global::System.String типВедомости, global::System.String имяВедомости, global::System.String теги, global::System.String списокНенужныхВоеннослужащих)
+        /// <param name="шириныСтолбцов">Исходное значение свойства ШириныСтолбцов.</param>
+        public static ВедомостьДляРаспознавания CreateВедомостьДляРаспознавания(global::System.Int32 код, global::System.DateTime датаПечати, global::System.String списокВоеннослужащих, global::System.String типВедомости, global::System.String имяВедомости, global::System.String теги, global::System.String списокНенужныхВоеннослужащих, global::System.String шириныСтолбцов)
         {
             ВедомостьДляРаспознавания ведомостьДляРаспознавания = new ВедомостьДляРаспознавания();
             ведомостьДляРаспознавания.Код = код;
@@ -742,6 +743,7 @@ namespace Grader
             ведомостьДляРаспознавания.ИмяВедомости = имяВедомости;
             ведомостьДляРаспознавания.Теги = теги;
             ведомостьДляРаспознавания.СписокНенужныхВоеннослужащих = списокНенужныхВоеннослужащих;
+            ведомостьДляРаспознавания.ШириныСтолбцов = шириныСтолбцов;
             return ведомостьДляРаспознавания;
         }
 
@@ -942,6 +944,30 @@ namespace Grader
         private global::System.String _СписокНенужныхВоеннослужащих;
         partial void OnСписокНенужныхВоеннослужащихChanging(global::System.String value);
         partial void OnСписокНенужныхВоеннослужащихChanged();
+    
+        /// <summary>
+        /// Нет доступной документации по метаданным.
+        /// </summary>
+        [EdmScalarPropertyAttribute(EntityKeyProperty=false, IsNullable=false)]
+        [DataMemberAttribute()]
+        public global::System.String ШириныСтолбцов
+        {
+            get
+            {
+                return _ШириныСтолбцов;
+            }
+            set
+            {
+                OnШириныСтолбцовChanging(value);
+                ReportPropertyChanging("ШириныСтолбцов");
+                _ШириныСтолбцов = StructuralObject.SetValidValue(value, false);
+                ReportPropertyChanged("ШириныСтолбцов");
+                OnШириныСтолбцовChanged();
+            }
+        }
+        private global::System.String _ШириныСтолбцов;
+        partial void OnШириныСтолбцовChanging(global::System.String value);
+        partial void OnШириныСтолбцовChanged();
 
         #endregion
     

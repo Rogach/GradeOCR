@@ -54,10 +54,10 @@ namespace Grader.ocr {
                     dme.DrawPositioningDebug(formOpts.debugImage);
 
                     List<int> subjectIds = registerInfo.СписокВоеннослужащих.Length > 0 ?
-                        registerInfo.СписокВоеннослужащих.Split(',').Select(sid => int.Parse(sid)).ToList() :
+                        registerInfo.СписокВоеннослужащих.Split(';').Select(sid => int.Parse(sid)).ToList() :
                         new List<int>();
                     List<int> skipSubjectIds = registerInfo.СписокНенужныхВоеннослужащих.Length > 0 ?
-                        registerInfo.СписокНенужныхВоеннослужащих.Split(',').Select(sid => int.Parse(sid)).ToList() :
+                        registerInfo.СписокНенужныхВоеннослужащих.Split(';').Select(sid => int.Parse(sid)).ToList() :
                         new List<int>();
 
                     List<RegisterRecord> records = subjectIds.Select(sid =>
@@ -81,9 +81,14 @@ namespace Grader.ocr {
                         };
                     formOpts.registerOpt = new Some<Register>(reg);
 
-                    Option<Table> tableOpt = TableOCR.Program.RecognizeTable(sourceImage);
+                    List<double> columnWidthsHint = registerInfo.ШириныСтолбцов.Length != 0 ?
+                        registerInfo.ШириныСтолбцов.Split(';').Select(w => double.Parse(w)).ToList() :
+                        new List<double>();
+
+                    Option<Table> tableOpt = TableOCR.Program.RecognizeTable(sourceImage, columnWidthsHint);
 
                     ph.Increment();
+
                     if (tableOpt.NonEmpty()) {
                         formOpts.recognizedTable = tableOpt;
 
