@@ -114,26 +114,24 @@ namespace TableOCR {
             HealRowDividers(bestCluster);
             rowClusters = ClusterRows();
             bestCluster = rowClusters[0];
+            RowInfo clusterCenter = RowClusterCenter(bestCluster);
 
-            int clusterStart = rows.IndexOf(bestCluster.First());
-            int clusterEnd = rows.IndexOf(bestCluster.Last());
-
-            // try extending cluster down
-            for (int r = clusterStart + 1; r < rows.Count; r++) {
-                if (RowDividerDifferenceScore(bestCluster.First(), rows[r]) > 0) {
-                    clusterEnd = r - 1;
+            // find cluster start row
+            int clusterStart = 0;
+            for (int r = 0; r < rows.Count; r++) {
+                if (RowDividerDifferenceScore(clusterCenter, rows[r]) == 0) {
+                    clusterStart = r;
                     break;
                 }
-                clusterEnd = r;
             }
 
-            // try extending cluster up
-            for (int r = clusterStart - 1; r >= 0; r--) {
-                if (RowDividerDifferenceScore(bestCluster.First(), rows[r]) > 0) {
-                    clusterStart = r + 1;
+            // find cluster end row
+            int clusterEnd = 0;
+            for (int r = rows.Count - 1; r >= 0; r--) {
+                if (RowDividerDifferenceScore(clusterCenter, rows[r]) == 0) {
+                    clusterEnd = r;
                     break;
                 }
-                clusterStart = r;
             }
 
             rows = rows.GetRange(clusterStart, clusterEnd - clusterStart + 1);
