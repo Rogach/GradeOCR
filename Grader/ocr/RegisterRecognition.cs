@@ -19,13 +19,14 @@ namespace Grader.ocr {
         public static readonly int minFinderCircleRadius = 50;
         public static readonly int maxFinderCircleRadius = 70;
 
-        public static void RecognizeRegisterImage(Entities et, Bitmap sourceImage) {
+        public static void RecognizeRegisterImage(Entities et, Bitmap sourceImage, Action onSave) {
             Bitmap bwImage = ImageUtil.ToBlackAndWhite(sourceImage);
             var formOpts = new RegisterRecognitionForm.Options {
                 sourceImage = sourceImage,
                 debugImage = new Bitmap(bwImage),
                 minFinderCircleRadius = minFinderCircleRadius,
-                maxFinderCircleRadius = maxFinderCircleRadius
+                maxFinderCircleRadius = maxFinderCircleRadius,
+                onSave = onSave
             };
             bool cancel = false;
 
@@ -157,7 +158,7 @@ namespace Grader.ocr {
             });
 
             if (!cancel)
-                new RegisterRecognitionForm(et, formOpts).ShowDialog();
+                new RegisterRecognitionForm(et, formOpts).Show();
         }
     }
 }

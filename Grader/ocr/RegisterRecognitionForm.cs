@@ -25,6 +25,7 @@ namespace Grader.ocr {
             public Option<DataMatrixExtraction> dmeOpt = new None<DataMatrixExtraction>();
             public int minFinderCircleRadius;
             public int maxFinderCircleRadius;
+            public Action onSave;
         }
 
         private PictureView ocrImagePV;
@@ -83,6 +84,7 @@ namespace Grader.ocr {
                         et.SaveChanges();
                     });
                     this.Hide();
+                    formOpts.onSave.Invoke();
                 });
         }
 

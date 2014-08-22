@@ -76,8 +76,7 @@ namespace Grader.gui {
                     ofd.Multiselect = false;
                     ofd.Filter = "Файлы изображений|*.jpg;*.png;*.bmp";
                     if (ofd.ShowDialog() == DialogResult.OK) {
-                        RegisterRecognition.RecognizeRegisterImage(et, ImageUtil.LoadImage(ofd.FileName));
-                        UpdateRegisterList();
+                        RegisterRecognition.RecognizeRegisterImage(et, ImageUtil.LoadImage(ofd.FileName), onSave: () => UpdateRegisterList());
                     }
                 }
             });
