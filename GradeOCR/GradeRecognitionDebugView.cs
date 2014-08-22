@@ -52,22 +52,27 @@ namespace GradeOCR {
             noiseRemovalPV.Image = removeNoiseImage;
             Bitmap croppedImage = WhitespaceCropper.CropWhitespace(removeNoiseImage);
             croppedPV.Image = croppedImage;
-            Bitmap digestImage = DigestExtractor.ExtractDigestImage(croppedImage);
-            digestPV.Image = digestImage;
-
-            GradeDigest digest = GradeDigest.FromImage(digestImage);
-            RecognitionResult recognitionResult = Util.Timed("digest matching", () => GradeDigestSet.staticInstance.FindBestMatch(digest));
-            Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
-            bestMatchPV.Image = bestMatchImage;
-            recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
-            if (MatchConfidence.Sure(recognitionResult.ConfidenceScore)) {
-                recognitionConfidenceLabel.Text = String.Format("sure, {0} pt", recognitionResult.ConfidenceScore);
+            if (EmptyImageDetector.IsImageEmpty(croppedImage)) {
+                recognizedGradeLabel.Text = "0";
+                recognitionConfidenceLabel.Text = "empty";
             } else {
-                recognitionConfidenceLabel.Text = String.Format("unsure, {0} pt", recognitionResult.ConfidenceScore);
-            }
+                Bitmap digestImage = DigestExtractor.ExtractDigestImage(croppedImage);
+                digestPV.Image = digestImage;
 
-            Bitmap differenceImage = DigestDifference.GenerateDifferenceImage(digest, recognitionResult.Digest);
-            differencePV.Image = differenceImage;
+                GradeDigest digest = GradeDigest.FromImage(digestImage);
+                RecognitionResult recognitionResult = Util.Timed("digest matching", () => GradeDigestSet.staticInstance.FindBestMatch(digest));
+                Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
+                bestMatchPV.Image = bestMatchImage;
+                recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
+                if (MatchConfidence.Sure(recognitionResult.ConfidenceScore)) {
+                    recognitionConfidenceLabel.Text = String.Format("sure, {0} pt", recognitionResult.ConfidenceScore);
+                } else {
+                    recognitionConfidenceLabel.Text = String.Format("unsure, {0} pt", recognitionResult.ConfidenceScore);
+                }
+
+                Bitmap differenceImage = DigestDifference.GenerateDifferenceImage(digest, recognitionResult.Digest);
+                differencePV.Image = differenceImage;
+            }
         }
     }
 }
