@@ -48,10 +48,14 @@ namespace TableOCR {
             }
         }
 
+        private bool HasCellAt(int x, int y) {
+            return x < columnWidths.Count && y < rowHeights.Count;
+        }
+
         /* 
          * Locates top-left cell corner at `x` column and `y` row.
          */
-        public PointF GetTopLeftCellCorner(int x, int y) {
+        private PointF GetTopLeftCellCorner(int x, int y) {
             PointF p = origin;
             for (int q = 0; q < x; q++) {
                 p = PointOps.Add(p, PointOps.Mult(horizontalNormal, columnWidths[q]));
@@ -65,17 +69,21 @@ namespace TableOCR {
         /*
          * Returns contour for cell at `x` column and `y` row.
          */ 
-        public GraphicsPath GetCellContour(int x, int y) {
-            var gp = new GraphicsPath();
-            gp.AddPolygon(
-                new PointF[] { 
-                    GetTopLeftCellCorner(x, y),
-                    GetTopLeftCellCorner(x + 1, y),
-                    GetTopLeftCellCorner(x + 1, y + 1),
-                    GetTopLeftCellCorner(x, y + 1)
-                }
-            );
-            return gp;
+        public Option<GraphicsPath> GetCellContour(int x, int y) {
+            if (HasCellAt(x, y)) {
+                var gp = new GraphicsPath();
+                gp.AddPolygon(
+                    new PointF[] { 
+                        GetTopLeftCellCorner(x, y),
+                        GetTopLeftCellCorner(x + 1, y),
+                        GetTopLeftCellCorner(x + 1, y + 1),
+                        GetTopLeftCellCorner(x, y + 1)
+                    }
+                );
+                return new Some<GraphicsPath>(gp);
+            } else {
+                return new None<GraphicsPath>();
+            }
         }
 
         /*
@@ -113,28 +121,32 @@ namespace TableOCR {
          * Extracts cell contents image from provided image in cell
          * of `x` column, `y` row.
          */
-        public Bitmap GetCellImage(Bitmap img, int x, int y) {
-            int padding = 1;
+        public Option<Bitmap> GetCellImage(Bitmap img, int x, int y) {
+            if (HasCellAt(x, y)) {
+                int padding = 1;
 
-            int w = (int) Math.Floor(columnWidths[x]);
-            int h = (int) Math.Floor(rowHeights[y]);
-            float ang = (float) (Math.Atan(horizontalNormal.Y / horizontalNormal.X) / Math.PI * 180);
-            
-            Bitmap cell = new Bitmap(w - padding * 2, h - padding * 2, PixelFormat.Format32bppArgb);
-            PointF pt = GetTopLeftCellCorner(x, y);
-            Graphics g = Graphics.FromImage(cell);
-            g.FillRectangle(Brushes.White, new Rectangle(0, 0, cell.Width, cell.Height));
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
-            g.RotateTransform(-ang);
-            g.TranslateTransform(0, -10);
-            g.DrawImage(
-                img,
-                new RectangleF(0, 0, w + 10, h + 20),
-                new RectangleF((float) Math.Floor(pt.X + padding), (float) Math.Floor(pt.Y - 10 + padding), w + 10, h + 20),
-                GraphicsUnit.Pixel);
-            g.Dispose();
-            return cell;
+                int w = (int) Math.Floor(columnWidths[x]);
+                int h = (int) Math.Floor(rowHeights[y]);
+                float ang = (float) (Math.Atan(horizontalNormal.Y / horizontalNormal.X) / Math.PI * 180);
+
+                Bitmap cell = new Bitmap(w - padding * 2, h - padding * 2, PixelFormat.Format32bppArgb);
+                PointF pt = GetTopLeftCellCorner(x, y);
+                Graphics g = Graphics.FromImage(cell);
+                g.FillRectangle(Brushes.White, new Rectangle(0, 0, cell.Width, cell.Height));
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+                g.RotateTransform(-ang);
+                g.TranslateTransform(0, -10);
+                g.DrawImage(
+                    img,
+                    new RectangleF(0, 0, w + 10, h + 20),
+                    new RectangleF((float) Math.Floor(pt.X + padding), (float) Math.Floor(pt.Y - 10 + padding), w + 10, h + 20),
+                    GraphicsUnit.Pixel);
+                g.Dispose();
+                return new Some<Bitmap>(cell);
+            } else {
+                return new None<Bitmap>();
+            }
         }
 
     }

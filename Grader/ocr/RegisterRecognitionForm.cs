@@ -53,8 +53,9 @@ namespace Grader.ocr {
                     this.ocrImagePV.AddDoubleClickListener((pt, e) => {
                         Option<Point> cellOpt = table.GetCellAtPoint(pt.X, pt.Y);
                         cellOpt.ForEach(cell => {
-                            Bitmap cellImage = table.GetCellImage(bwImage, cell.X, cell.Y);
-                            new GradeRecognitionDebugView(cellImage, "<>").ShowDialog();
+                            table.GetCellImage(bwImage, cell.X, cell.Y).ForEach(cellImage => {
+                                new GradeRecognitionDebugView(cellImage, "<>").ShowDialog();
+                            });
                         });
                     });
                 });

@@ -49,10 +49,11 @@ namespace RegisterProcessor {
                                 ProcessTableCell(cell.X, cell.Y);
 
                                 // color processed cell with green
-                                GraphicsPath cellPath = table.GetCellContour(cell.X, cell.Y);
-                                Graphics g = Graphics.FromImage(currentImage);
-                                g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
-                                g.Dispose();
+                                table.GetCellContour(cell.X, cell.Y).ForEach(cellPath => {
+                                    Graphics g = Graphics.FromImage(currentImage);
+                                    g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+                                    g.Dispose();
+                                });
                                 registerPV.SetImageKeepZoom(currentImage);
                             });
                         } else if (e.Button == MouseButtons.Right) {
@@ -70,8 +71,9 @@ namespace RegisterProcessor {
                                         for (int y = minY; y <= maxY; y++) {
                                             for (int x = minX; x <= maxX; x++) {
                                                 ProcessTableCell(x, y);
-                                                GraphicsPath cellPath = table.GetCellContour(x, y);
-                                                g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+                                                table.GetCellContour(x, y).ForEach(cellPath => {
+                                                    g.FillPath(new SolidBrush(Color.FromArgb(100, Color.Green)), cellPath);
+                                                });
                                                 pd.Increment();
                                             }
                                         }
@@ -119,8 +121,9 @@ namespace RegisterProcessor {
 
         private void ProcessTableCell(int x, int y) {
             currentTable.ForEach(table => {
-                Bitmap cellImage = table.GetCellImage(bwImage, x, y);
-                cellImage.Save(GetNextUnsortGradeImageName());
+                table.GetCellImage(bwImage, x, y).ForEach(cellImage => {
+                    cellImage.Save(GetNextUnsortGradeImageName());
+                });
             });
         }
 

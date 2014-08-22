@@ -144,7 +144,7 @@ namespace RegisterOCR {
                 table.DrawTable(g, new Pen(Color.Red, 2));
                 Brush fillBrush = new SolidBrush(Color.FromArgb(50, Color.Blue));
                 if (cell1.HasValue) {
-                    g.FillPath(fillBrush, table.GetCellContour(cell1.Value.X, cell1.Value.Y));
+                    table.GetCellContour(cell1.Value.X, cell1.Value.Y).ForEach(cellContour => g.FillPath(fillBrush, cellContour));
                 }
             });
             g.Dispose();
@@ -175,19 +175,22 @@ namespace RegisterOCR {
                     ProgressDialogs.WithProgress(cellCount, ph => {
                         for (int y = minY; y <= maxY; y++) {
                             for (int x = minX; x <= maxX; x++) {
-                                Option<GradeDigest> digestOpt = GradeOCR.Program.GetGradeDigest(table.GetCellImage(originalImage, x, y));
-                                digestOpt.ForEach(gd => {
-                                    RecognitionResult res = GradeDigestSet.staticInstance.FindBestMatch(gd);
-                                    str += res.Digest.grade;
-                                    if (MatchConfidence.Sure(res.ConfidenceScore)) {
-                                        g.FillPath(recognitionBrush, table.GetCellContour(x, y));
-                                    } else {
-                                        g.FillPath(unsureBrush, table.GetCellContour(x, y));
+                                table.GetCellImage(originalImage, x, y).ForEach(cellImage => {
+                                    Option<GradeDigest> digestOpt = GradeOCR.Program.GetGradeDigest(cellImage);
+                                    digestOpt.ForEach(gd => {
+                                        RecognitionResult res = GradeDigestSet.staticInstance.FindBestMatch(gd);
+                                        str += res.Digest.grade;
+                                        if (MatchConfidence.Sure(res.ConfidenceScore)) {
+                                            g.FillPath(recognitionBrush, table.GetCellContour(x, y).Get());
+                                        } else {
+                                            g.FillPath(unsureBrush, table.GetCellContour(x, y).Get());
+                                        }
+                                    });
+                                    if (digestOpt.IsEmpty()) {
+                                        g.FillPath(unsureBrush, table.GetCellContour(x, y).Get());
                                     }
                                 });
-                                if (digestOpt.IsEmpty()) {
-                                    g.FillPath(unsureBrush, table.GetCellContour(x, y));
-                                }
+                                
                                 str += "\t";
                                 ph.Increment();
                             }

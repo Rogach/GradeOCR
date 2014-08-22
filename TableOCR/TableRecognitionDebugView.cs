@@ -118,8 +118,9 @@ namespace TableOCR {
             this.recognizedTablePV.AddDoubleClickListener((pt, e) => {
                 recognizedTable.ForEach(table => {
                     table.GetCellAtPoint(pt.X, pt.Y).ForEach(cell => {
-                        var gradeRecognition = new GradeRecognitionDebugView(table.GetCellImage(bw, cell.X, cell.Y), "<gen>");
-                        gradeRecognition.ShowDialog();
+                        table.GetCellImage(bw, cell.X, cell.Y).ForEach(cellImage => {
+                            new GradeRecognitionDebugView(cellImage, "<gen>").ShowDialog();
+                        });
                     });
                 });
             });
