@@ -53,8 +53,13 @@ namespace Grader.ocr {
 
                     dme.DrawPositioningDebug(formOpts.debugImage);
 
-                    List<int> subjectIds = registerInfo.СписокВоеннослужащих.Split(',').Select(sid => int.Parse(sid)).ToList();
-                    List<int> skipSubjectIds = registerInfo.СписокНенужныхВоеннослужащих.Split(',').Select(sid => int.Parse(sid)).ToList();
+                    List<int> subjectIds = registerInfo.СписокВоеннослужащих.Length > 0 ?
+                        registerInfo.СписокВоеннослужащих.Split(',').Select(sid => int.Parse(sid)).ToList() :
+                        new List<int>();
+                    List<int> skipSubjectIds = registerInfo.СписокНенужныхВоеннослужащих.Length > 0 ?
+                        registerInfo.СписокНенужныхВоеннослужащих.Split(',').Select(sid => int.Parse(sid)).ToList() :
+                        new List<int>();
+
                     List<RegisterRecord> records = subjectIds.Select(sid =>
                         new RegisterRecord { 
                             soldierId = sid, 
