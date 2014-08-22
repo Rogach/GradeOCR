@@ -23,15 +23,21 @@ namespace GradeOCR {
 
         public RecognitionResult FindBestMatch(GradeDigest digest) {
             double maxMatch = 0;
+            int bestIndex = 0;
             GradeDigest bestDigest = digestList[0];
-            foreach (var gd in digestList) {
+            for (int q = 0; q < digestList.Count; q++) {
+                var gd = digestList[q];
                 double match = MatchDigests(digest, gd);
                 if (maxMatch < match && match < 0.9999) {
                     maxMatch = match;
                     bestDigest = gd;
+                    bestIndex = q;
                 }
             }
-            return new RecognitionResult(bestDigest, MatchConfidence.GetConfidenceScoreSymmetric(digest, bestDigest));
+            return new RecognitionResult(
+                bestDigest,
+                MatchConfidence.GetConfidenceScoreSymmetric(digest, bestDigest),
+                bestIndex);
         }
 
         public double MatchDigests(GradeDigest gd1, GradeDigest gd2) {

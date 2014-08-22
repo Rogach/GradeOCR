@@ -61,6 +61,7 @@ namespace GradeOCR {
 
                 GradeDigest digest = GradeDigest.FromImage(digestImage);
                 RecognitionResult recognitionResult = Util.Timed("digest matching", () => GradeDigestSet.staticInstance.FindBestMatch(digest));
+                Console.WriteLine("best-match digest index: {0}", recognitionResult.MatchIndex);
                 Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
                 bestMatchPV.Image = bestMatchImage;
                 recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
