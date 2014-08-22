@@ -109,6 +109,10 @@ namespace Grader.gui {
 
             menuStrip.Items.Add(menu_import);
 
+            ToolStripMenuItem version_item = new ToolStripMenuItem(Program.GetVersion());
+            version_item.Enabled = false;
+            menuStrip.Items.Add(version_item);
+
             this.Controls.Add(menuStrip);
             this.MainMenuStrip = menuStrip;
 

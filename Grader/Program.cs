@@ -9,6 +9,8 @@ using LibUtil;
 using System.Data.Linq;
 using Grader.ocr;
 using OCRUtil;
+using System.Deployment;
+using System.Reflection;
 
 namespace Grader {
     public static class Program {
@@ -24,6 +26,15 @@ namespace Grader {
                 Application.Run(ctx);
                 settings.Save();
             });
+        }
+
+        public static string GetVersion() {
+            try {
+                Version vers = System.Deployment.Application.ApplicationDeployment.CurrentDeployment.CurrentVersion;
+                return String.Format("{0}.{1}.{2}.{3}", vers.Major, vers.Minor, vers.Build, vers.Revision);
+            } catch (Exception) {
+                return "<dev>";
+            }
         }
 
     }
