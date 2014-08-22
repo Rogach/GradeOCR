@@ -43,16 +43,15 @@ namespace ARCode {
             //Bitmap sourceImage = ImageUtil.LoadImage("E:/arcode-scan3.jpg");
             //sourceImage.Save("E:/arcodeScan.png");
 
-            Application.Run(new FinderCircleDebugView(sourceImage, 50, 70, value));
+            Application.Run(new FinderCircleDebugView(sourceImage, 50, 70, value, applyNoise: true));
         }
 
         public static NoiseFilter GetTestNoiseFilter() {
-            return new EmptyFilter();
-            //return new FilterSeq(
-            //            new RandomBlots(0.2),
-            //            new RandomNoise(0.2),
-            //            new RandomStripes(0.05, 20)
-            //        );
+            return new FilterSeq(
+                        new RandomBlots(0.2),
+                        new RandomNoise(0.2),
+                        new RandomStripes(0.05, 20)
+                    );
         }
 
         static void StressTest() {

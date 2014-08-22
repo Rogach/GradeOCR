@@ -65,7 +65,7 @@ namespace Grader.ocr {
                         formOpts.sourceImage, 
                         formOpts.minFinderCircleRadius, 
                         formOpts.maxFinderCircleRadius, 
-                        0).ShowDialog();
+                        0, applyNoise: false).ShowDialog();
                 });
 
                 this.debugTableOCRbutton.Click += new EventHandler(delegate {
