@@ -8,16 +8,25 @@ using LibUtil;
 
 namespace Grader.model {
     public static class Difference {
+        private class SecondaryData {
+            public int subunitId { get; set; }
+            public int vus { get; set; }
+        }
+
         public static void CalculateCadetDifference(Entities et) {
             Import.WithExcelSheet("Выберите файл с данными курсантов", sh => {
-                var inputMap = new Dictionary<Tuple<string, string, string>, int>();
+                var inputMap = new Dictionary<Tuple<string, string, string>, SecondaryData>();
 
                 var field = Import.GetField(sh);
                 var r = sh.GetRange("A2");
                 while (r.Value != null) {
                     inputMap.Add(
-                        new Tuple<string, string, string>(field(r, "фамилия"), field(r, "имя"), field(r, "отчество")), 
-                        et.subunitShortNameToId[field(r, "подразделение")]);
+                        new Tuple<string, string, string>(field(r, "фамилия"), field(r, "имя"), field(r, "отчество")),
+                        new SecondaryData {
+                            subunitId = et.subunitShortNameToId[field(r, "подразделение")],
+                            vus = int.Parse(field(r, "вус"))
+                        }
+                    );
                     r = r.GetOffset(1, 0);
                 }
                 
@@ -43,18 +52,25 @@ namespace Grader.model {
                         Console.WriteLine("cadet " + fio + " has duplicates in database");
                     }
 
-                    Option<int> optSubunitId = inputMap.GetOption(fio);
-                    if (optSubunitId.NonEmpty()) {
-                        if (optSubunitId.Get() != cadet.КодПодразделения) {
-                            // cadet was moved between subunits
+                    Option<SecondaryData> optSecondaryData = inputMap.GetOption(fio);
+                    if (optSecondaryData.NonEmpty()) {
+                        bool subunitChanged = optSecondaryData.Get().subunitId != cadet.КодПодразделения;
+                        bool vusChanged = optSecondaryData.Get().vus != cadet.ВУС;
+                        if (subunitChanged || vusChanged) {
                             output.Value = cadet.Фамилия;
                             output.GetOffset(0, 1).Value = cadet.Имя;
                             output.GetOffset(0, 2).Value = cadet.Отчество;
-                            output.GetOffset(0, 3).Value = et.subunitIdToShortName[optSubunitId.Get()];
-                            output.GetOffset(0, 3).BackgroundColor = ExcelEnums.Color.Azure;
+
+                            output.GetOffset(0, 3).Value = et.subunitIdToShortName[optSecondaryData.Get().subunitId];
+                            if (subunitChanged) output.GetOffset(0, 3).BackgroundColor = ExcelEnums.Color.Azure;
+
+                            output.GetOffset(0, 4).Value = optSecondaryData.Get().vus;
+                            if (vusChanged) output.GetOffset(0, 4).BackgroundColor = ExcelEnums.Color.Azure;
+
                             output = output.GetOffset(1, 0);
                         }
                     } else {
+                        // cadet was deleted
                         output.Value = cadet.Фамилия;
                         output.GetOffset(0, 1).Value = cadet.Имя;
                         output.GetOffset(0, 2).Value = cadet.Отчество;
@@ -71,11 +87,18 @@ namespace Grader.model {
                         output.Value = fio.Item1;
                         output.GetOffset(0, 1).Value = fio.Item2;
                         output.GetOffset(0, 2).Value = fio.Item3;
-                        output.GetOffset(0, 3).Value = et.subunitIdToShortName[inputMap[fio]];
-                        output.GetResize(1, 4).BackgroundColor = ExcelEnums.Color.PaleGreen;
+                        output.GetOffset(0, 3).Value = et.subunitIdToShortName[inputMap[fio].subunitId];
+                        output.GetOffset(0, 4).Value = inputMap[fio].vus;
+                        output.GetResize(1, 5).BackgroundColor = ExcelEnums.Color.PaleGreen;
                         output = output.GetOffset(1, 0);
                     }
                 };
+
+                outputSheet.GetRange("A1").EntireColumn.AutoFit();
+                outputSheet.GetRange("A2").EntireColumn.AutoFit();
+                outputSheet.GetRange("A3").EntireColumn.AutoFit();
+                outputSheet.GetRange("A4").EntireColumn.AutoFit();
+                outputSheet.GetRange("A5").EntireColumn.AutoFit();
 
                 ExcelTemplates.ActivateExcel(outputSheet);
             });
