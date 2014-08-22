@@ -346,7 +346,7 @@ namespace Grader.gui {
 
                         Военнослужащий maybeSoldier = null;
                         if (record != null) {
-                            maybeSoldier = record.soldier;
+                            maybeSoldier = et.Военнослужащий.Where(v => v.Код == soldierId).First();
                         }
 
                         List<Оценка> previousMarks = new List<Оценка>();
