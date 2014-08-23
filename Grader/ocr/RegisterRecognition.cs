@@ -44,8 +44,9 @@ namespace Grader.ocr {
 
                 if (registerInfoOpt.NonEmpty() && registerInfoOpt.Get().Item1.ДатаВнесения.HasValue) {
                     MessageBox.Show("Данная ведомость уже была внесена!", "Ошибка в распознавании", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    cancel = true;
-                } else if (registerInfoOpt.NonEmpty()) {
+                }
+
+                if (registerInfoOpt.NonEmpty()) {
                     ВедомостьДляРаспознавания registerInfo = registerInfoOpt.Get().Item1;
                     DataMatrixExtraction dme = registerInfoOpt.Get().Item2;
                     formOpts.registerInfoOpt = new Some<ВедомостьДляРаспознавания>(registerInfo);
