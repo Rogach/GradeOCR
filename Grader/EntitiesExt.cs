@@ -36,8 +36,10 @@ namespace Grader {
         public Dictionary<int, string> subunitIdToShortName;
 
         public List<string> soldierNameCache;
+        public Dictionary<int, string> soldierIdToAugName;
         public Dictionary<int, string> soldierIdToName;
         public Dictionary<string, int> soldierNameToId;
+        public Dictionary<int, int> soldierIdToSortWeight;
 
         private void initCache() {
             subunitRelCache = ПодразделениеПодчинение.ToList();
@@ -56,7 +58,7 @@ namespace Grader {
             subunitShortNameToId = Подразделение.Select(s => new { id = s.Код, name = s.ИмяКраткое }).ToList().ToDictionary(s => s.name, s => s.id);
             subunitIdToShortName = Подразделение.Select(s => new { id = s.Код, name = s.ИмяКраткое }).ToList().ToDictionary(s => s.id, s => s.name);
 
-            soldierIdToName =
+            soldierIdToAugName =
                 (from v in Военнослужащий
                  join r in Звание on v.КодЗвания equals r.Код
                  select new {
@@ -67,8 +69,20 @@ namespace Grader {
                          (v.Имя.Length > 0 ? v.Имя.Substring(0, 1) : " ") + "." +
                          (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + "."
                  }).ToList().ToDictionary(v => v.id, v => v.name + " id" + v.id);
-            soldierNameToId = soldierIdToName.ToList().ToDictionary(kv => kv.Value, kv => kv.Key);
+            soldierIdToName =
+                (from v in Военнослужащий
+                 select new {
+                     id = v.Код,
+                     name =
+                         v.Фамилия + " " +
+                         (v.Имя.Length > 0 ? v.Имя.Substring(0, 1) : " ") + "." +
+                         (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + "."
+                 }).ToList().ToDictionary(v => v.id, v => v.name);
+            soldierNameToId = soldierIdToAugName.ToList().ToDictionary(kv => kv.Value, kv => kv.Key);
             soldierNameCache = soldierNameToId.Keys.ToList();
+            soldierIdToSortWeight =
+                Военнослужащий.Select(s => new { id = s.Код, sortWeight = s.sortWeight }).ToList()
+                .ToDictionary(s => s.id, s => s.sortWeight);
         }
 
     }

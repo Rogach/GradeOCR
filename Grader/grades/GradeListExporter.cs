@@ -78,27 +78,40 @@ namespace Grader.grades {
             ProgressDialogs.ForEach(exports, e => {
                 ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                 var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
-                var gradeSets = Grades.GradeSets(et, e.exactSubunit ?
+                List<Оценка> gradeList = (e.exactSubunit ?
                     Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
-                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId));
+                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId)).ToList();
 
+                var gradeSets = gradeList.GroupBy(g => g.КодПроверяемого)
+                    .OrderBy(gl => et.soldierIdToName[gl.Key])
+                    .OrderByDescending(gl => et.rankIdToOrder[gl.First().КодЗвания])
+                    .OrderByDescending(gl => et.soldierIdToSortWeight[gl.Key]);
+                
                 int c = 1;
-                ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), gradeSets, displayProgress: true, format: (gs, rng) => {
-                    var r = rng;
-                    r.GetOffset(0, -1).Value = c++;
-                    r.Value = gs.rank.Название;
-                    r.GetOffset(0, 1).Value = gs.soldier.ФИО();
-                    r = r.GetOffset(0, 2);
-                    foreach (string subj in subjects) {
-                        gs.grades.GetOption(subj).ForEach(v => {
-                            r.Value = v;
+                ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), gradeSets, displayProgress: true,
+                    format: (gl, rng) => {
+                        var r = rng;
+                        r.GetOffset(0, -1).Value = c++;
+                        r.Value = et.rankIdToName[gl.First().КодЗвания];
+                        r.GetOffset(0, 1).Value = et.soldierIdToName[gl.First().КодПроверяемого];
+                        r = r.GetOffset(0, 2);
+                        GradeSet gs = new GradeSet(null, null, et.subunitIdToInstance[gl.First().КодПодразделения], DateTime.Now);
+                        foreach (string subj in subjects) {
+                            gl.ToList().FindOption(g => g.КодПредмета == et.subjectNameToId[subj]).ForEach(g => {
+                                if (g.ЭтоКомментарий) {
+                                    r.Value = g.Текст;
+                                } else {
+                                    r.Value = g.Значение;
+                                    gs.AddGrade(subj, g.Значение);
+                                }
+                            });
+                            r = r.GetOffset(0, 1);
+                        }
+                        
+                        GradeCalcIndividual.ОценкаКонтрактникиОБЩ(gs).ForEach(summGrade => {
+                            r.Value = summGrade;
                         });
-                        r = r.GetOffset(0, 1); 
-                    }
-                    GradeCalcIndividual.ОценкаКонтрактникиОБЩ(gs).ForEach(summGrade => {
-                        r.Value = summGrade;
-                    });
-                    return true;
+                        return true;
                 });
             });
             ExcelTemplates.ActivateExcel(wb);

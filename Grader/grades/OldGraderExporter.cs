@@ -137,22 +137,26 @@ namespace Grader.grades {
                     ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                     ExcelRange c = sh.GetRange(e.rangeName);
                     var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
-                    var soldiers = e.exactSubunit ?
-                        Querying.GetSubunitSoldiersExact(et, subunitId, soldierQuery) :
-                        Querying.GetSubunitSoldiers(et, subunitId, soldierQuery);
-                    var gradeSets = Grades.GradeSets(et,
-                        e.exactSubunit ?
-                            Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
-                            Grades.GetGradesForSubunit(et, gradeQuery, subunitId));
+
+                    List<Оценка> gradeList = (e.exactSubunit ?
+                    Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
+                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId)).ToList();
+
+                    var gradeSets = gradeList.GroupBy(g => g.КодПроверяемого)
+                        .OrderBy(gl => et.soldierIdToName[gl.Key])
+                        .OrderByDescending(gl => et.rankIdToOrder[gl.First().КодЗвания])
+                        .OrderByDescending(gl => et.soldierIdToSortWeight[gl.Key]);
 
                     ProgressDialogs.ForEach(gradeSets, gs => {
                         var r = c;
-                        r.Value = gs.rank.Название;
-                        r.GetOffset(0, 1).Value = gs.soldier.ФИО();
+                        r.Value = et.rankIdToName[gs.First().КодЗвания];
+                        r.GetOffset(0, 1).Value = et.soldierIdToName[gs.Key];
                         r = r.GetOffset(0, 2);
                         foreach (string subj in subjects) {
-                            gs.grades.GetOption(subj).ForEach(v => {
-                                r.Value = v;
+                            gs.ToList().FindOption(g => g.КодПредмета == et.subjectNameToId[subj]).ForEach(g => {
+                                if (!g.ЭтоКомментарий) {
+                                    r.Value = g.Значение;
+                                }
                             });
                             r = r.GetOffset(0, 1);
                         }

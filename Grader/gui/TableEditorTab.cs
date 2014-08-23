@@ -81,7 +81,7 @@ namespace Grader.gui {
                     newObject: () => {
                         var d = et.Должность.CreateObject();
                         d.КодПодразделения = 1;
-                        d.КодВоеннослужащего = et.soldierIdToName.Keys.First();
+                        d.КодВоеннослужащего = et.soldierIdToAugName.Keys.First();
                         et.Должность.AddObject(d);
                         return d;
                     },
@@ -95,7 +95,7 @@ namespace Grader.gui {
                         new ColumnDefinition("Подразделение", 150, typeof(string), true, obj => et.subunitIdToName[((Должность) obj).КодПодразделения],
                             (obj, value) => ((Должность) obj).КодПодразделения = et.subunitNameToId[(string) value], 
                             et.subunitCache.Select(s => s.Имя).ToList()),
-                        new ColumnDefinition("Военнослужащий", 250, typeof(string), true, obj => et.soldierIdToName[((Должность) obj).КодВоеннослужащего],
+                        new ColumnDefinition("Военнослужащий", 250, typeof(string), true, obj => et.soldierIdToAugName[((Должность) obj).КодВоеннослужащего],
                             (obj, value) => ((Должность) obj).КодВоеннослужащего = et.soldierNameToId[(string) value],
                             et.soldierNameCache)
                     },
@@ -122,7 +122,7 @@ namespace Grader.gui {
                             obj => {
                                 int? commanderCode = ((Подразделение) obj).КодКомандира;
                                 if (commanderCode.HasValue && commanderCode.Value != 0) {
-                                    return et.soldierIdToName[commanderCode.Value];
+                                    return et.soldierIdToAugName[commanderCode.Value];
                                 } else {
                                     return "";
                                 }
