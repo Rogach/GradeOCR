@@ -140,27 +140,22 @@ namespace Grader.grades {
                     var soldiers = e.exactSubunit ?
                         Querying.GetSubunitSoldiersExact(et, subunitId, soldierQuery) :
                         Querying.GetSubunitSoldiers(et, subunitId, soldierQuery);
-                    var grades = Grades.GradeSets(et,
+                    var gradeSets = Grades.GradeSets(et,
                         e.exactSubunit ?
                             Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
-                            Grades.GetGradesForSubunit(et, gradeQuery, subunitId))
-                        .ToDictionary(g => g.soldier.Код);
+                            Grades.GetGradesForSubunit(et, gradeQuery, subunitId));
 
-                    int gpId = et.rankNameToId["ГП"];
-                    List<Военнослужащий> realSoldiers = soldiers.Where(s => s.КодЗвания != gpId).ToList();
-                    ProgressDialogs.ForEach(realSoldiers, s => {
+                    ProgressDialogs.ForEach(gradeSets, gs => {
                         var r = c;
-                        r.Value = et.rankCache.Find(rk => rk.Код == s.КодЗвания).Название;
-                        r.GetOffset(0, 1).Value = s.ФИО();
-                        grades.GetOption(s.Код).ForEach(g => {
-                            r = r.GetOffset(0, 2);
-                            foreach (string subj in subjects) {
-                                g.grades.GetOption(subj).ForEach(v => {
-                                    r.Value = v;
-                                });
-                                r = r.GetOffset(0, 1);
-                            }
-                        });
+                        r.Value = gs.rank.Название;
+                        r.GetOffset(0, 1).Value = gs.soldier.ФИО();
+                        r = r.GetOffset(0, 2);
+                        foreach (string subj in subjects) {
+                            gs.grades.GetOption(subj).ForEach(v => {
+                                r.Value = v;
+                            });
+                            r = r.GetOffset(0, 1);
+                        }
                         c = c.GetOffset(1, 0);
                     });
                 } catch (Exception ex) {
