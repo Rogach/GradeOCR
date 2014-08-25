@@ -8,6 +8,7 @@ using Grader.util;
 using LibUtil.templates;
 using LibUtil.wrapper.excel;
 using LibUtil;
+using Grader.enums;
 
 namespace Grader.grades {
     public static class OldGraderExporter {
@@ -89,15 +90,33 @@ namespace Grader.grades {
             new ExportUnit { subunitName = "РО", exactSubunit = true, sheetName = "БОУП", rangeName = "insert_РО" }
         };
 
+        static List<ExportUnit> ursExports = new List<ExportUnit> {
+            new ExportUnit { subunitName = "УРС", exactSubunit = false, sheetName = "УРС", rangeName = "insert_URS" }
+        };
+
         public static void ExportToOldGrader(
                 Entities et,
                 Settings settings,
                 IQueryable<Оценка> gradeQuery, 
                 IQueryable<Военнослужащий> soldierQuery, 
                 bool selectCadets, 
-                bool selectContract) {
+                bool selectContract,
+                StudyType studyType) {
 
-            if (selectCadets) {
+            if (selectCadets && (studyType == StudyType.урс_3мес || studyType == StudyType.урс_6мес)) {
+                DoExport(
+                    et,
+                    settings,
+                    gradeQuery,
+                    soldierQuery,
+                    "старая_учетка_УРС.xlsx",
+                    new List<string> { "СП", "ТП", "ФП", "РХБЗ", "МП", "ОГН", "СТР", "ОВУ", "ВМП", "ТАК", "ОБВС", "ОЗГТ", "ВЭ", "АВТ", "ТОП", "ИНЖ", "ОГП" },
+                    ursExports,
+                    additionalFormatting: (rng, gs) => {
+                        rng.GetOffset(0, -1).Value = gs.First().ВУС;
+                        rng.GetOffset(0, -2).Value = et.subunitIdToShortName[gs.First().КодПодразделения][3].ToString();
+                    });
+            } else if (selectCadets) {
                 DoExport(
                     et,
                     settings,
@@ -105,7 +124,8 @@ namespace Grader.grades {
                     soldierQuery,
                     "старая_учетка_курсанты.xlsm",
                     new List<string> { "СП", "СЭС", "ТП", "СТР", "ФП", "ОВУ", "ОГН", "РХБЗ", "ВМП", "ОГП", "ТАК" },
-                    cadetExports
+                    cadetExports,
+                    additionalFormatting: (rng, gs) => { }
                 );
             } else if (selectContract) {
                 DoExport(
@@ -115,7 +135,8 @@ namespace Grader.grades {
                     soldierQuery,
                     "старая_учетка_контрактники.xlsx",
                     new List<string> { "ТСП", "СП", "ТП", "ФП", "РХБЗ", "МП", "ОГН", "СТР", "ОВУ", "ОГП" },
-                    contractExports
+                    contractExports,
+                    additionalFormatting: (rng, gs) => { }
                 );
             } else {
                 throw new Exception("Unable to export this soldier type - no such old grader found");
@@ -129,7 +150,8 @@ namespace Grader.grades {
                 IQueryable<Военнослужащий> soldierQuery,
                 string templateName, 
                 List<string> subjects, 
-                List<ExportUnit> exports) {
+                List<ExportUnit> exports,
+                Action<ExcelRange, IGrouping<int, Оценка>> additionalFormatting) {
                 
             var wb = ExcelTemplates.LoadExcelTemplate(settings.GetTemplateLocation(templateName));
             ProgressDialogs.ForEach(exports, e => {
@@ -149,6 +171,7 @@ namespace Grader.grades {
 
                     ProgressDialogs.ForEach(gradeSets, gs => {
                         var r = c;
+                        additionalFormatting(r, gs);
                         r.Value = et.rankIdToName[gs.First().КодЗвания];
                         r.GetOffset(0, 1).Value = et.soldierIdToName[gs.Key];
                         r = r.GetOffset(0, 2);

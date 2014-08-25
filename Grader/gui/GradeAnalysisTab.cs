@@ -490,7 +490,8 @@ namespace Grader.gui {
                         GetGradeQuery(),
                         personFilter.GetPersonQuery(),
                         personFilter.selectCadets.Checked,
-                        personFilter.selectContract.Checked
+                        personFilter.selectContract.Checked,
+                        personFilter.studyType.GetComboBoxEnumValue<StudyType>()
                     );
                 });
             });
