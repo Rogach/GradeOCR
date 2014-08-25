@@ -113,7 +113,9 @@ namespace Grader.grades {
                     new List<string> { "СП", "ТП", "ФП", "РХБЗ", "МП", "ОГН", "СТР", "ОВУ", "ВМП", "ТАК", "ОБВС", "ОЗГТ", "ВЭ", "АВТ", "ТОП", "ИНЖ", "ОГП" },
                     ursExports,
                     additionalFormatting: (rng, gs) => {
-                        rng.GetOffset(0, -1).Value = gs.First().ВУС;
+                        if (gs.First().ВУС != 0) {
+                            rng.GetOffset(0, -1).Value = gs.First().ВУС;
+                        }
                         rng.GetOffset(0, -2).Value = et.subunitIdToShortName[gs.First().КодПодразделения][3].ToString();
                     });
             } else if (selectCadets) {
