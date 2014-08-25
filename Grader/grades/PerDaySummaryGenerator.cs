@@ -38,7 +38,7 @@ namespace Grader.grades {
                 where g.КодПредмета == subj.Код
                 orderby register.ДатаЗаполнения
                 select register.ДатаЗаполнения;
-            var dateList = dateQuery.Distinct().ToList();
+            var dateList = dateQuery.Distinct().ToList().Select(d => d.Date).Distinct().OrderBy(x => x).ToList();
             if (dateList.Count == 0) {
                 return false;
             } else {
@@ -56,11 +56,12 @@ namespace Grader.grades {
                     var cell = dateCells.GetResize(1, 1);
                     var totalDateGrades = new List<int>();
                     var subunitSummaryGrades = new List<int>();
+                    DateTime dateEnd = date.AddDays(1);
                     var gradeQuery =
                         from g in subjectGradeQuery
                         from register in et.Ведомость
                         where g.КодВедомости == register.Код
-                        where register.ДатаЗаполнения == date
+                        where register.ДатаЗаполнения >= date && register.ДатаЗаполнения <= dateEnd
                         select g;
                     foreach (var subunitGrades in gradeQuery.ToList().GroupBy(g => g.КодПодразделения)) {
                         var grades = subunitGrades.Select(g => (int) g.Значение).ToList();
