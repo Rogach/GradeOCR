@@ -179,25 +179,23 @@ namespace OCRUtil {
 
         private void AddDoubleClickListener() {
             this.MouseDoubleClick += new MouseEventHandler(delegate(object sender, MouseEventArgs e) {
-                if (e.Button == MouseButtons.Left) {
-                    Point pt;
-                    if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
-                        float dx = (this.Width - _Image.Width * zoom) / 2;
-                        float dy = (this.Height - _Image.Height * zoom) / 2;
-                        pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor((e.Y - dy) / zoom));
-                    } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
-                        float dx = (this.Width - _Image.Width * zoom - scrollBarWidth) / 2;
-                        pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
-                    } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
-                        float dy = (this.Height - _Image.Height * zoom - scrollBarWidth) / 2;
-                        pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor((e.Y - dy) / zoom));
-                    } else {
-                        pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
-                    }
-                    if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Height) {
-                        foreach (var listener in DoubleClickListeners) {
-                            listener.Invoke(pt, e);
-                        }
+                Point pt;
+                if (_Image.Width * zoom <= this.Width && _Image.Height * zoom <= this.Height) {
+                    float dx = (this.Width - _Image.Width * zoom) / 2;
+                    float dy = (this.Height - _Image.Height * zoom) / 2;
+                    pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor((e.Y - dy) / zoom));
+                } else if (_Image.Width * zoom <= this.Width - scrollBarWidth) {
+                    float dx = (this.Width - _Image.Width * zoom - scrollBarWidth) / 2;
+                    pt = new Point((int) Math.Floor((e.X - dx) / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
+                } else if (_Image.Height * zoom <= this.Height - scrollBarWidth) {
+                    float dy = (this.Height - _Image.Height * zoom - scrollBarWidth) / 2;
+                    pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor((e.Y - dy) / zoom));
+                } else {
+                    pt = new Point((int) Math.Floor(offsetX + e.X / zoom), (int) Math.Floor(offsetY + e.Y / zoom));
+                }
+                if (pt.X >= 0 && pt.X < _Image.Width && pt.Y >= 0 && pt.Y < _Image.Height) {
+                    foreach (var listener in DoubleClickListeners) {
+                        listener.Invoke(pt, e);
                     }
                 }
             });
