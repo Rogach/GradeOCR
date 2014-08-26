@@ -12,7 +12,7 @@ using OCRUtil;
 
 namespace GradeSorter {
     public partial class GradeViewForm : Form {
-        public string OcrData = "E:/Pronko/prj/Grader/ocr-data";
+        public string OcrData = "E:/Pronko/prj/Grader/ocr-data/test-data";
 
         private PictureView gradePV;
         private PictureView digestPV;

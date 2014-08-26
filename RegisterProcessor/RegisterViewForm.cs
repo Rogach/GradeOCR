@@ -15,7 +15,7 @@ using OCRUtil;
 
 namespace RegisterProcessor {
     public partial class RegisterViewForm : Form {
-        public static readonly string OcrData = "E:/Pronko/prj/Grader/ocr-data";
+        public static readonly string OcrData = "E:/Pronko/prj/Grader/ocr-data/test-data";
 
         public PictureView registerPV;
 
