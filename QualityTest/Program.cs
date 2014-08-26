@@ -124,21 +124,33 @@ namespace QualityTest {
                 }
             }
 
+            List<string> emptyGradeDigestFiles = new List<string>();
+
             Util.Timed("test digest loading", () => {
 
                 int c = 0;
                 foreach (var input in inputImages) {
                     if (c % 100 == 0) Console.WriteLine("Processed {0}/{1} images...", c, inputImages.Count);
 
-                    GradeOCR.Program.GetGradeDigest(ImageUtil.LoadImage(input.Item1)).ForEach(gd => {
+                    Option<GradeDigest> gdOpt = GradeOCR.Program.GetGradeDigest(ImageUtil.LoadImage(input.Item1));
+                    gdOpt.ForEach(gd => {
                         gd.grade = input.Item2;
                         gradeDigests.Add(new Tuple<string, GradeDigest>(input.Item1, gd));
                     });
+                    if (gdOpt.IsEmpty()) {
+                        emptyGradeDigestFiles.Add(input.Item1);
+                        
+                    }
 
                     c++;
                 }
 
             });
+
+            Console.WriteLine("Empty digests: " + emptyGradeDigestFiles.Count);
+            foreach (var emptyGD in emptyGradeDigestFiles) {
+                Console.WriteLine("empty digest at '{0}'", emptyGD);
+            }
 
             return gradeDigests;
         }
