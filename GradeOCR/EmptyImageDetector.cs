@@ -11,7 +11,7 @@ namespace GradeOCR {
     public static class EmptyImageDetector {
         public static bool IsImageEmpty(Bitmap image) {
             int imageArea = image.Size.Width * image.Size.Height;
-            if (imageArea < 400) {
+            if (imageArea < 200) {
                 return true;
             } else {
                 int whiteCount = 0;
