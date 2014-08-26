@@ -30,17 +30,6 @@ namespace Grader.gui {
             });
         }
 
-        public static Option<string> ShowDbConnectionDialog() {
-            var dcd = new DbConnectionDialog();
-            dcd.port_text.Text = "3306";
-
-            if (dcd.ShowDialog() == DialogResult.OK) {
-                return new Some<string>(dcd.ConnectionString);
-            } else {
-                return new None<string>();
-            }
-        }
-
         private void ok_button_Click(object sender, EventArgs e) {
             this.DialogResult = DialogResult.OK;
             this.Hide();
