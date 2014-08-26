@@ -12,6 +12,19 @@ namespace Grader.gui {
     public partial class DbConnectionDialog : Form {
         public DbConnectionDialog() {
             InitializeComponent();
+            KeyEventHandler inputFieldsKeyHandler = new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
+                if (e.KeyCode == Keys.Enter) {
+                    this.DialogResult = DialogResult.OK;
+                    this.Hide();
+                } else if (e.KeyCode == Keys.Escape) {
+                    this.DialogResult = DialogResult.Cancel;
+                    this.Hide();
+                }
+            });
+            this.server_text.KeyUp += inputFieldsKeyHandler;
+            this.port_text.KeyUp += inputFieldsKeyHandler;
+            this.user_text.KeyUp += inputFieldsKeyHandler;
+            this.password_text.KeyUp += inputFieldsKeyHandler;
         }
 
         public static Option<string> ShowDbConnectionDialog() {
