@@ -131,8 +131,6 @@ namespace Grader {
         string userSetting;
         string passwordSetting;
 
-        
-
         public DbConnectionStringSetting() { }
         public bool read(XmlDocument doc) {
             Option<string> serverSettingOpt = Settings.XmlValue(doc, "/settings/connection/server");

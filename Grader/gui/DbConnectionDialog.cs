@@ -21,10 +21,13 @@ namespace Grader.gui {
                     this.Hide();
                 }
             });
-            this.server_text.KeyUp += inputFieldsKeyHandler;
-            this.port_text.KeyUp += inputFieldsKeyHandler;
-            this.user_text.KeyUp += inputFieldsKeyHandler;
-            this.password_text.KeyUp += inputFieldsKeyHandler;
+
+            this.Shown += new EventHandler(delegate {
+                this.server_text.KeyDown += inputFieldsKeyHandler;
+                this.port_text.KeyDown += inputFieldsKeyHandler;
+                this.user_text.KeyDown += inputFieldsKeyHandler;
+                this.password_text.KeyDown += inputFieldsKeyHandler;
+            });
         }
 
         public static Option<string> ShowDbConnectionDialog() {
