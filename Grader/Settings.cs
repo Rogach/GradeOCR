@@ -150,6 +150,7 @@ namespace Grader {
                     return true;
                 } else {
                     dcd.User = userSettingOpt.Get();
+                    dcd.Password = "";
                     dcd.FocusOnPassword = true;
                     return ShowDbConnectionDialog(dcd);
                 }
@@ -208,7 +209,9 @@ namespace Grader {
                 if (credentials.Length == 2) {
                     dcd.User = credentials[0];
                     dcd.Password = credentials[1];
-                    if (ProbeConnection(dcd)) return true;
+                    try {
+                        if (ProbeConnection(dcd)) return true;
+                    } catch (Exception) { }
                 }
             }
             return false;
