@@ -20,55 +20,55 @@ namespace Grader.ocr {
         public static readonly int maxFinderCircleRadius = 70;
 
         public static void RecognizeRegisterImage(Entities et, Bitmap sourceImage, Action onSave) {
-            Bitmap bwImage = ImageUtil.ToBlackAndWhite(sourceImage);
-            var formOpts = new RegisterRecognitionForm.Options {
-                sourceImage = sourceImage,
-                debugImage = new Bitmap(bwImage),
-                minFinderCircleRadius = minFinderCircleRadius,
-                maxFinderCircleRadius = maxFinderCircleRadius,
-                onSave = onSave
-            };
-            bool cancel = false;
+            using (Bitmap bwImage = ImageUtil.ToBlackAndWhite(sourceImage)) {
+                var formOpts = new RegisterRecognitionForm.Options {
+                    sourceImage = sourceImage,
+                    debugImage = new Bitmap(bwImage),
+                    minFinderCircleRadius = minFinderCircleRadius,
+                    maxFinderCircleRadius = maxFinderCircleRadius,
+                    onSave = onSave
+                };
+                bool cancel = false;
 
-            ProgressDialogs.WithProgress(3, ph => {
-                Option<Tuple<ВедомостьДляРаспознавания, DataMatrixExtraction>> registerInfoOpt = 
-                    ARCodeUtil.ExtractCodeExt(sourceImage, minFinderCircleRadius, maxFinderCircleRadius)
-                    .FlatMap(t => {
-                        int registerCode = (int) t.Item1;
-                        // extract information from database
-                        Option<ВедомостьДляРаспознавания> registerInfoRow =
-                            et.ВедомостьДляРаспознавания.Where(v => v.Код == registerCode).ToList().HeadOption();
-                        return registerInfoRow.Map(ri => new Tuple<ВедомостьДляРаспознавания, DataMatrixExtraction>(ri, t.Item2));
-                    });
-                ph.Increment();
+                ProgressDialogs.WithProgress(3, ph => {
+                    Option<Tuple<ВедомостьДляРаспознавания, DataMatrixExtraction>> registerInfoOpt =
+                        ARCodeUtil.ExtractCodeExt(sourceImage, minFinderCircleRadius, maxFinderCircleRadius)
+                        .FlatMap(t => {
+                            int registerCode = (int) t.Item1;
+                            // extract information from database
+                            Option<ВедомостьДляРаспознавания> registerInfoRow =
+                                et.ВедомостьДляРаспознавания.Where(v => v.Код == registerCode).ToList().HeadOption();
+                            return registerInfoRow.Map(ri => new Tuple<ВедомостьДляРаспознавания, DataMatrixExtraction>(ri, t.Item2));
+                        });
+                    ph.Increment();
 
-                if (registerInfoOpt.NonEmpty() && registerInfoOpt.Get().Item1.ДатаВнесения.HasValue) {
-                    MessageBox.Show("Данная ведомость уже была внесена!", "Ошибка в распознавании", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
+                    if (registerInfoOpt.NonEmpty() && registerInfoOpt.Get().Item1.ДатаВнесения.HasValue) {
+                        MessageBox.Show("Данная ведомость уже была внесена!", "Ошибка в распознавании", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
 
-                if (registerInfoOpt.NonEmpty()) {
-                    ВедомостьДляРаспознавания registerInfo = registerInfoOpt.Get().Item1;
-                    DataMatrixExtraction dme = registerInfoOpt.Get().Item2;
-                    formOpts.registerInfoOpt = new Some<ВедомостьДляРаспознавания>(registerInfo);
-                    formOpts.dmeOpt = new Some<DataMatrixExtraction>(dme);
+                    if (registerInfoOpt.NonEmpty()) {
+                        ВедомостьДляРаспознавания registerInfo = registerInfoOpt.Get().Item1;
+                        DataMatrixExtraction dme = registerInfoOpt.Get().Item2;
+                        formOpts.registerInfoOpt = new Some<ВедомостьДляРаспознавания>(registerInfo);
+                        formOpts.dmeOpt = new Some<DataMatrixExtraction>(dme);
 
-                    dme.DrawPositioningDebug(formOpts.debugImage);
+                        dme.DrawPositioningDebug(formOpts.debugImage);
 
-                    List<int> subjectIds = registerInfo.СписокВоеннослужащих.Length > 0 ?
-                        registerInfo.СписокВоеннослужащих.Split(';').Select(sid => int.Parse(sid)).ToList() :
-                        new List<int>();
-                    List<int> skipSubjectIds = registerInfo.СписокНенужныхВоеннослужащих.Length > 0 ?
-                        registerInfo.СписокНенужныхВоеннослужащих.Split(';').Select(sid => int.Parse(sid)).ToList() :
-                        new List<int>();
+                        List<int> subjectIds = registerInfo.СписокВоеннослужащих.Length > 0 ?
+                            registerInfo.СписокВоеннослужащих.Split(';').Select(sid => int.Parse(sid)).ToList() :
+                            new List<int>();
+                        List<int> skipSubjectIds = registerInfo.СписокНенужныхВоеннослужащих.Length > 0 ?
+                            registerInfo.СписокНенужныхВоеннослужащих.Split(';').Select(sid => int.Parse(sid)).ToList() :
+                            new List<int>();
 
-                    List<RegisterRecord> records = subjectIds.Select(sid =>
-                        new RegisterRecord { 
-                            soldierId = sid, 
-                            soldier = et.Военнослужащий.Where(v => v.Код == sid).ToList().First(),
-                            marks = new List<Оценка>()
-                        }).ToList();
+                        List<RegisterRecord> records = subjectIds.Select(sid =>
+                            new RegisterRecord {
+                                soldierId = sid,
+                                soldier = et.Военнослужащий.Where(v => v.Код == sid).ToList().First(),
+                                marks = new List<Оценка>()
+                            }).ToList();
 
-                    Register reg = new Register {
+                        Register reg = new Register {
                             id = -1,
                             fillDate = DateTime.Now,
                             importDate = null,
@@ -80,98 +80,103 @@ namespace Grader.ocr {
                             subjectIds = new List<int>(),
                             records = records
                         };
-                    formOpts.registerOpt = new Some<Register>(reg);
+                        formOpts.registerOpt = new Some<Register>(reg);
 
-                    List<double> columnWidthsHint = registerInfo.ШириныСтолбцов.Length != 0 ?
-                        registerInfo.ШириныСтолбцов.Split(';').Select(w => double.Parse(w)).ToList() :
-                        new List<double>();
+                        List<double> columnWidthsHint = registerInfo.ШириныСтолбцов.Length != 0 ?
+                            registerInfo.ШириныСтолбцов.Split(';').Select(w => double.Parse(w)).ToList() :
+                            new List<double>();
 
-                    Option<Table> tableOpt = TableOCR.Program.RecognizeTable(sourceImage, columnWidthsHint);
+                        Option<Table> tableOpt = TableOCR.Program.RecognizeTable(sourceImage, columnWidthsHint);
 
-                    ph.Increment();
+                        ph.Increment();
 
-                    if (tableOpt.NonEmpty()) {
-                        formOpts.recognizedTable = tableOpt;
+                        if (tableOpt.NonEmpty()) {
+                            formOpts.recognizedTable = tableOpt;
 
-                        formOpts.recognizedTable.ForEach(table => {
-                            Graphics g = Graphics.FromImage(formOpts.debugImage);
-                            table.DrawTable(g, new Pen(Brushes.Red, 4));
-                            g.Dispose();
-                        });
-
-                        tableOpt.ForEach(table => {
-                            RegisterSpec registerSpec = RegisterSpec.FromSpecName(registerInfo.ТипВедомости);
-                            Graphics g = Graphics.FromImage(formOpts.debugImage);
-                            ProgressDialogs.ForEach(registerSpec.gradeLocations, gradeLocation => {
-                                int subjectId = et.subjectNameToId[gradeLocation.subjectName];
-                                reg.subjectIds.Add(subjectId);
-                                int row = 0;
-                                ProgressDialogs.ForEach(records, record => {
-                                    if (!skipSubjectIds.Contains(record.soldierId)) {
-                                        int cellX = gradeLocation.gradesLocation.X;
-                                        int cellY = gradeLocation.gradesLocation.Y + row;
-                                        table.GetCellImage(bwImage, cellX, cellY).ForEach(cellImage => {
-                                            Option<GradeDigest> digestOpt = GradeOCR.Program.GetGradeDigest(cellImage);
-
-                                            Color cellColor;
-                                            if (digestOpt.IsEmpty()) {
-                                                cellColor = Color.Red;
-                                            } else {
-                                                var recogResult = GradeDigestSet.staticInstance.FindBestMatch(digestOpt.Get());
-                                                cellColor = MatchConfidence.Sure(recogResult.ConfidenceScore) ? Color.Green : Color.Yellow;
-
-                                                record.marks.Add(new Оценка {
-                                                    Код = -1,
-                                                    КодПроверяемого = record.soldierId,
-                                                    КодПредмета = subjectId,
-                                                    ЭтоКомментарий = false,
-                                                    Значение = (sbyte) recogResult.Digest.grade,
-                                                    Текст = "",
-                                                    КодПодразделения = record.soldier.КодПодразделения,
-                                                    ВУС = record.soldier.ВУС,
-                                                    ТипВоеннослужащего = record.soldier.ТипВоеннослужащего,
-                                                    КодЗвания = record.soldier.КодЗвания,
-                                                    КодВедомости = -1
-                                                });
-                                            }
-                                            table.GetCellContour(cellX, cellY).ForEach(cellContour => {
-                                                g.FillPath(new SolidBrush(Color.FromArgb(50, cellColor)), cellContour);
-                                            });
-                                        });
-                                    }
-                                    row++;
-                                });
+                            formOpts.recognizedTable.ForEach(table => {
+                                Graphics g = Graphics.FromImage(formOpts.debugImage);
+                                table.DrawTable(g, new Pen(Brushes.Red, 4));
+                                g.Dispose();
                             });
-                            g.Dispose();
-                        });
+
+                            tableOpt.ForEach(table => {
+                                RegisterSpec registerSpec = RegisterSpec.FromSpecName(registerInfo.ТипВедомости);
+                                Graphics g = Graphics.FromImage(formOpts.debugImage);
+                                ProgressDialogs.ForEach(registerSpec.gradeLocations, gradeLocation => {
+                                    int subjectId = et.subjectNameToId[gradeLocation.subjectName];
+                                    reg.subjectIds.Add(subjectId);
+                                    int row = 0;
+                                    ProgressDialogs.ForEach(records, record => {
+                                        if (!skipSubjectIds.Contains(record.soldierId)) {
+                                            int cellX = gradeLocation.gradesLocation.X;
+                                            int cellY = gradeLocation.gradesLocation.Y + row;
+                                            table.GetCellImage(bwImage, cellX, cellY).ForEach(cellImage => {
+                                                Option<GradeDigest> digestOpt = GradeOCR.Program.GetGradeDigest(cellImage);
+
+                                                Color cellColor;
+                                                if (digestOpt.IsEmpty()) {
+                                                    cellColor = Color.Red;
+                                                } else {
+                                                    var recogResult = GradeDigestSet.staticInstance.FindBestMatch(digestOpt.Get());
+                                                    cellColor = MatchConfidence.Sure(recogResult.ConfidenceScore) ? Color.Green : Color.Yellow;
+
+                                                    record.marks.Add(new Оценка {
+                                                        Код = -1,
+                                                        КодПроверяемого = record.soldierId,
+                                                        КодПредмета = subjectId,
+                                                        ЭтоКомментарий = false,
+                                                        Значение = (sbyte) recogResult.Digest.grade,
+                                                        Текст = "",
+                                                        КодПодразделения = record.soldier.КодПодразделения,
+                                                        ВУС = record.soldier.ВУС,
+                                                        ТипВоеннослужащего = record.soldier.ТипВоеннослужащего,
+                                                        КодЗвания = record.soldier.КодЗвания,
+                                                        КодВедомости = -1
+                                                    });
+                                                }
+                                                table.GetCellContour(cellX, cellY).ForEach(cellContour => {
+                                                    g.FillPath(new SolidBrush(Color.FromArgb(50, cellColor)), cellContour);
+                                                });
+                                            });
+                                        }
+                                        row++;
+                                    });
+                                });
+                                g.Dispose();
+                            });
+                        } else {
+                            // failed to recognize the table, no grades will be filled into the register
+                            DialogResult dres = MessageBox.Show(
+                                "Не удалось распознать таблицу, оценки не будут распознаны",
+                                "Ошибка в распознавании",
+                                MessageBoxButtons.OKCancel,
+                                MessageBoxIcon.Error);
+
+                            if (dres != DialogResult.OK) {
+                                cancel = true;
+                            }
+                        }
                     } else {
-                        // failed to recognize the table, no grades will be filled into the register
+                        // no code was extracted from image, create empty register
                         DialogResult dres = MessageBox.Show(
-                            "Не удалось распознать таблицу, оценки не будут распознаны",
+                            "Не удалось распознать код ведомости",
                             "Ошибка в распознавании",
                             MessageBoxButtons.OKCancel,
                             MessageBoxIcon.Error);
-                    
+
                         if (dres != DialogResult.OK) {
                             cancel = true;
                         }
                     }
+                });
+
+                if (!cancel) {
+                    new RegisterRecognitionForm(et, formOpts).Show();
                 } else {
-                    // no code was extracted from image, create empty register
-                    DialogResult dres = MessageBox.Show(
-                        "Не удалось распознать код ведомости",
-                        "Ошибка в распознавании", 
-                        MessageBoxButtons.OKCancel, 
-                        MessageBoxIcon.Error);
-
-                    if (dres != DialogResult.OK) {
-                        cancel = true;
-                    }
+                    formOpts.sourceImage.Dispose();
+                    formOpts.debugImage.Dispose();
                 }
-            });
-
-            if (!cancel)
-                new RegisterRecognitionForm(et, formOpts).Show();
+            }
         }
     }
 }

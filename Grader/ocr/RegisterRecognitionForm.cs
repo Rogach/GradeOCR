@@ -30,62 +30,76 @@ namespace Grader.ocr {
 
         private PictureView ocrImagePV;
         private RegisterEditor registerEditor;
+        private Options formOpts;
 
         public RegisterRecognitionForm(Entities et, Options formOpts) {
-                InitializeComponent();
+            this.formOpts = formOpts;
+            InitializeComponent();
             
-                ocrImagePV = PictureView.InsertIntoPanel(ocrImagePanel);
+            ocrImagePV = PictureView.InsertIntoPanel(ocrImagePanel);
 
-                registerEditor = new RegisterEditor(et);
-                registerEditor.InsertIntoPanel(registerEditorPanel);
-                if (formOpts.registerOpt.NonEmpty()) {
-                    registerEditor.SetRegister(formOpts.registerOpt.Get());
-                } else {
-                    registerEditor.SetRegister(registerEditor.GetEmptyRegister());
-                }
+            registerEditor = new RegisterEditor(et);
+            registerEditor.InsertIntoPanel(registerEditorPanel);
+            if (formOpts.registerOpt.NonEmpty()) {
+                registerEditor.SetRegister(formOpts.registerOpt.Get());
+            } else {
+                registerEditor.SetRegister(registerEditor.GetEmptyRegister());
+            }
 
-                this.Shown += new EventHandler(delegate { 
-                    ocrImagePV.Image = formOpts.debugImage;
-                });
+            this.Shown += new EventHandler(delegate { 
+                ocrImagePV.Image = formOpts.debugImage;
+            });
 
-                formOpts.recognizedTable.ForEach(table => {
-                    Bitmap bwImage = ImageUtil.ToBlackAndWhite(formOpts.sourceImage);
+            formOpts.recognizedTable.ForEach(table => {
+                Bitmap bwImage = ImageUtil.ToBlackAndWhite(formOpts.sourceImage);
 
-                    this.ocrImagePV.AddDoubleClickListener((pt, e) => {
-                        Option<Point> cellOpt = table.GetCellAtPoint(pt.X, pt.Y);
-                        cellOpt.ForEach(cell => {
-                            table.GetCellImage(bwImage, cell.X, cell.Y).ForEach(cellImage => {
-                                new GradeRecognitionDebugView(cellImage, "<>").ShowDialog();
-                            });
+                this.ocrImagePV.AddDoubleClickListener((pt, e) => {
+                    Option<Point> cellOpt = table.GetCellAtPoint(pt.X, pt.Y);
+                    cellOpt.ForEach(cell => {
+                        table.GetCellImage(bwImage, cell.X, cell.Y).ForEach(cellImage => {
+                            new GradeRecognitionDebugView(cellImage, "<>").ShowDialog();
                         });
                     });
                 });
+            });
 
-                this.debugARCodeOCRbutton.Click += new EventHandler(delegate {
-                    new FinderCircleDebugView(
-                        formOpts.sourceImage, 
-                        formOpts.minFinderCircleRadius, 
-                        formOpts.maxFinderCircleRadius, 
-                        0, applyNoise: false).ShowDialog();
-                });
+            this.debugARCodeOCRbutton.Click += new EventHandler(delegate {
+                new FinderCircleDebugView(
+                    formOpts.sourceImage, 
+                    formOpts.minFinderCircleRadius, 
+                    formOpts.maxFinderCircleRadius, 
+                    0, applyNoise: false).ShowDialog();
+            });
 
-                this.debugTableOCRbutton.Click += new EventHandler(delegate {
-                    new TableRecognitionDebugView(formOpts.sourceImage).ShowDialog();
-                });
+            this.debugTableOCRbutton.Click += new EventHandler(delegate {
+                new TableRecognitionDebugView(formOpts.sourceImage).ShowDialog();
+            });
 
-                this.cancelButton.Click += new EventHandler(delegate {
-                    this.Hide();
-                });
+            this.cancelButton.Click += new EventHandler(delegate {
+                this.Hide();
+                this.Dispose();
+            });
 
-                this.saveRegisterButton.Click += new EventHandler(delegate {
-                    RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et);
-                    formOpts.registerInfoOpt.ForEach(registerInfo => {
-                        registerInfo.ДатаВнесения = DateTime.Now;
-                        et.SaveChanges();
-                    });
-                    this.Hide();
-                    formOpts.onSave.Invoke();
+            this.FormClosing += new FormClosingEventHandler(delegate {
+                this.Dispose();
+            });
+
+            this.saveRegisterButton.Click += new EventHandler(delegate {
+                RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et);
+                formOpts.registerInfoOpt.ForEach(registerInfo => {
+                    registerInfo.ДатаВнесения = DateTime.Now;
+                    et.SaveChanges();
                 });
+                this.Hide();
+                formOpts.onSave.Invoke();
+                this.Dispose();
+            });
+
+            this.Disposed += new EventHandler(delegate {
+                formOpts.sourceImage.Dispose();
+                formOpts.sourceImage.Dispose();
+                System.GC.Collect();
+            });
         }
 
     }

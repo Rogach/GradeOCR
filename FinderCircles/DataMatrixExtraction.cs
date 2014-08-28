@@ -12,7 +12,6 @@ namespace ARCode {
 
     public class DataMatrixExtraction {
 
-        private Bitmap sourceImage;
         private FinderPatternPair fpp;
 
         double angX;
@@ -25,7 +24,6 @@ namespace ARCode {
         public bool[] extractedData;
 
         public DataMatrixExtraction(Bitmap sourceImage, FinderPatternPair fpp) {
-            this.sourceImage = sourceImage;
             this.fpp = fpp;
 
             PointF p1 = fpp.p1.X < fpp.p2.X ? fpp.p1.ToF() : fpp.p2.ToF();
@@ -90,12 +88,6 @@ namespace ARCode {
             g.DrawLine(gp, topRight, topLeft);
             g.Dispose();
 
-        }
-
-        public Bitmap PositioningDebugImage() {
-            Bitmap res = new Bitmap(sourceImage);
-            DrawPositioningDebug(res);
-            return res;
         }
 
         public Bitmap RecognitionDebugImage() {

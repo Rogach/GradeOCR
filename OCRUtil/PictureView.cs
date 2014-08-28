@@ -17,7 +17,11 @@ namespace OCRUtil {
             }
             set {
                 Bitmap copy = new Bitmap((Bitmap) value);
+                
                 this.Invoke(new EventHandler(delegate {
+                    if (_Image != null) {
+                        _Image.Dispose();
+                    }
                     _Image = copy;
                     this.Invalidate();
                     this.ZoomToFit();
@@ -32,6 +36,9 @@ namespace OCRUtil {
         public void SetImageKeepZoom(Image img) {
             Bitmap copy = new Bitmap((Bitmap) img);
             this.Invoke(new EventHandler(delegate {
+                if (_Image != null) {
+                    _Image.Dispose();
+                }
                 _Image = copy;
                 this.Invalidate();
             }));
@@ -224,12 +231,8 @@ namespace OCRUtil {
             });
         }
 
-        public static Image placeholderImage = null;
         public static Image LoadPlaceholder() {
-            if (placeholderImage == null) {
-                placeholderImage = Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("OCRUtil.hourglass.png"));
-            }
-            return placeholderImage;
+            return Image.FromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("OCRUtil.hourglass.png"));
         }
 
         protected override void OnLayout(LayoutEventArgs e) {
@@ -336,6 +339,13 @@ namespace OCRUtil {
 
         public void RemoveDoubleClickListener(Action<Point, MouseEventArgs> listener) {
             DoubleClickListeners.Remove(listener);
+        }
+
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+            if (_Image != null) {
+                _Image.Dispose();
+            }
         }
     }
 }

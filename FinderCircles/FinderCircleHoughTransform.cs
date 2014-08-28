@@ -30,11 +30,12 @@ namespace ARCode {
          */
         public static List<Point3> LocateFinderCircles(Bitmap img, int minPatternRadius, int maxPatternRadius, int patternCount) {
             int scaleFactor = GetScaleFactor(minPatternRadius);
-            Bitmap downscaledImage = ImageScaling.ScaleDown(img, scaleFactor);
-            int[,,] hough = HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor);
-            List<Point3> roughPeaks = LocatePeaks(hough, patternCount, minPatternRadius / scaleFactor).ConvertAll(p =>
-                new Point3(p.X * scaleFactor, p.Y * scaleFactor, p.Z * scaleFactor + minPatternRadius));
-            return roughPeaks.ConvertAll(peak => TunePeak(img, minPatternRadius, maxPatternRadius, peak));
+            using (Bitmap downscaledImage = ImageScaling.ScaleDown(img, scaleFactor)) {
+                int[, ,] hough = HoughTransform(downscaledImage, minPatternRadius / scaleFactor, maxPatternRadius / scaleFactor);
+                List<Point3> roughPeaks = LocatePeaks(hough, patternCount, minPatternRadius / scaleFactor).ConvertAll(p =>
+                    new Point3(p.X * scaleFactor, p.Y * scaleFactor, p.Z * scaleFactor + minPatternRadius));
+                return roughPeaks.ConvertAll(peak => TunePeak(img, minPatternRadius, maxPatternRadius, peak));
+            }
         }
 
         /*
@@ -55,14 +56,15 @@ namespace ARCode {
             wx = Math.Min(img.Width - wSize, Math.Max(0, wx));
             wy = Math.Min(img.Height - wSize, Math.Max(0, wy));
 
-            Bitmap window = ImageScaling.ScaleDown(img, tuneScaleFactor, new Rectangle(wx, wy, wSize, wSize));
-            int[, ,] hough = HoughTransform(window, minPatternRadius / tuneScaleFactor, maxPatternRadius / tuneScaleFactor);
+            using (Bitmap window = ImageScaling.ScaleDown(img, tuneScaleFactor, new Rectangle(wx, wy, wSize, wSize))) {
+                int[, ,] hough = HoughTransform(window, minPatternRadius / tuneScaleFactor, maxPatternRadius / tuneScaleFactor);
 
-            Point3 tunedPeak = LocatePeak(hough);
-            return new Point3(
-                tunedPeak.X * tuneScaleFactor + wx, 
-                tunedPeak.Y * tuneScaleFactor + wy, 
-                tunedPeak.Z * tuneScaleFactor + minPatternRadius);
+                Point3 tunedPeak = LocatePeak(hough);
+                return new Point3(
+                    tunedPeak.X * tuneScaleFactor + wx,
+                    tunedPeak.Y * tuneScaleFactor + wy,
+                    tunedPeak.Z * tuneScaleFactor + minPatternRadius);
+            }
         }
 
         /*

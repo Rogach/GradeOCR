@@ -87,7 +87,9 @@ namespace ARCode {
             fpp.size2 = tunedPeaks[1].Z;
 
             DataMatrixExtraction dme = new DataMatrixExtraction(noiseImage, fpp);
-            dataMatrixLocationPV.Image = dme.PositioningDebugImage();
+            Bitmap positioningDebugImage = new Bitmap(noiseImage);
+            dme.DrawPositioningDebug(positioningDebugImage);
+            dataMatrixLocationPV.Image = positioningDebugImage;
             rotatedDataMatrixPV.Image = dme.rotatedMatrix;
             recognizedDataMatrixPV.Image = dme.RecognitionDebugImage();
             Option<uint> extractedCode = DataMarshaller.UnMarshallInt(dme.extractedData);
