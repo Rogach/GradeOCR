@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Data.Linq;
 using Grader.grades;
 using Grader.enums;
+using LibUtil;
 
 namespace Grader.gui {
     public class GradeAnalysisTab : TabPage {
@@ -547,6 +548,8 @@ namespace Grader.gui {
             DateTime stt = DateTime.Now;
             try {
                 analysis.Invoke();
+            } catch (WorkAbortedException) {
+                Console.WriteLine("task aborted");
             } finally {
                 DateTime end = DateTime.Now;
                 Console.WriteLine("Analysis '{0}' took {1} ms", name, (end - stt).TotalMilliseconds);

@@ -77,7 +77,11 @@ namespace Grader.gui {
             generateRegisterButton = layout.AddFullRow(new Button());
             generateRegisterButton.Text = "создать ведомость";
             generateRegisterButton.Click += new EventHandler(delegate {
-                GenerateRegister();
+                try {
+                    GenerateRegister();
+                } catch (WorkAbortedException) {
+                    Console.WriteLine("task aborted");
+                }
             });
 
             layout.PerformLayout();
