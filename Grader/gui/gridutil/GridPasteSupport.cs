@@ -10,6 +10,7 @@ namespace Grader.gui.gridutil {
         public static void AddPasteSupport(DataGridView dataGridView) {
             dataGridView.KeyDown += new KeyEventHandler(delegate(object sender, KeyEventArgs e) {
                 if (e.KeyCode == Keys.V && e.Control) {
+
                     int minX = Int32.MaxValue;
                     int minY = Int32.MaxValue;
                     foreach (DataGridViewCell sc in dataGridView.SelectedCells) {
@@ -18,7 +19,7 @@ namespace Grader.gui.gridutil {
                     }
 
                     List<List<string>> copiedData =
-                        Clipboard.GetText(TextDataFormat.UnicodeText)
+                        Clipboard.GetText(TextDataFormat.UnicodeText).TrimEnd('\n')
                         .Split(new char[] { '\n' })
                         .Select(line => line.Split(new char[] { '\t' }).ToList())
                         .ToList();
@@ -26,14 +27,21 @@ namespace Grader.gui.gridutil {
                     int clipX = copiedData.Select(line => line.Count).Max();
                     int clipY = copiedData.Count;
 
+                    DataTable dataTable = ((DataSet) dataGridView.DataSource).Tables[0];
                     for (int row = 0; row < clipY; row++) {
-                        if (row >= dataGridView.Rows.Count - 1) {
-                            DataTable dataTable = ((DataSet) dataGridView.DataSource).Tables[0];
-                            dataTable.Rows.Add(new object[] { });
-                        }
-                        for (int col = 0; col < clipX; col++) {
-                            if (minX + col < dataGridView.Columns.Count) {
-                                dataGridView.Rows[minY + row].Cells[minX + col].Value = copiedData[row][col];
+                        if (row >= dataTable.Rows.Count && dataGridView.AllowUserToAddRows) {
+                            object[] rowData = new object[dataGridView.ColumnCount];
+                            dataTable.Rows.Add(rowData);
+                            for (int col = 0; col < clipX; col++) {
+                                if (minX + col < dataGridView.ColumnCount) {
+                                    dataGridView.Rows[minY + row].Cells[minX + col].Value = copiedData[row][col];
+                                }
+                            }
+                        } else if (row < dataTable.Rows.Count) {
+                            for (int col = 0; col < clipX; col++) {
+                                if (minX + col < dataGridView.ColumnCount) {
+                                    dataGridView.Rows[minY + row].Cells[minX + col].Value = copiedData[row][col];
+                                }
                             }
                         }
                     }
