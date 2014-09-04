@@ -98,7 +98,7 @@ namespace Grader.grades {
                                 c.GetOffset(2, 0).Value = g;
                             });
                         } else {
-                            GradeCalcGroup.ОбщаяОценка(et, gradeQuery, subjectName, cadetsSelected).ForEach(g => {
+                            GradeCalcGroup.ОбщаяОценка(et, Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код), subjectName, cadetsSelected).ForEach(g => {
                                 c.GetOffset(2, 0).Value = g;
                             });
                         }
