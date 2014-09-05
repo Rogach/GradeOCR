@@ -129,7 +129,10 @@ namespace Grader.gui {
             tags = layout2.Add("Тэги", new TextBox());
             tags.TextChanged += new EventHandler(delegate {
                 errorProvider.SetError(tags, null);
+                settings.gradeAnalysisTags.SetValue(tags.Text);
+                settings.Save();
             });
+            tags.Text = settings.gradeAnalysisTags.GetValue();
             
             List<string> ranks = 
                 et.Звание
@@ -544,7 +547,7 @@ namespace Grader.gui {
         }
 
 
-        public static void TimeAnalysis(string name, Action analysis) {
+        public void TimeAnalysis(string name, Action analysis) {
             DateTime stt = DateTime.Now;
             try {
                 analysis.Invoke();

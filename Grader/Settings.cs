@@ -16,6 +16,7 @@ namespace Grader {
         public DbConnectionStringSetting dbConnectionString = new DbConnectionStringSetting();
         public DirSetting templatesLocation = new DirSetting("templatesLocation", "Расположение шаблонов");
         public StringSetting gradeViewTags = new StringSetting("gradeViewTags");
+        public StringSetting gradeAnalysisTags = new StringSetting("gradeAnalysisTags");
 
         public string GetTemplateLocation(string templateName) {
             return templatesLocation.GetValue() + "/" + templateName;
@@ -27,7 +28,8 @@ namespace Grader {
             settings = new List<Setting<object>> {
                 dbConnectionString,
                 templatesLocation,
-                gradeViewTags
+                gradeViewTags,
+                gradeAnalysisTags
             };
         }
 
