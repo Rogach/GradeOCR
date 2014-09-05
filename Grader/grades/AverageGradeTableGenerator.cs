@@ -48,6 +48,7 @@ namespace Grader.grades {
                                 et, subj.Название);
                             if (grades.Count > 0) {
                                 c.Value = grades.Mean();
+                                c.NumberFormat = "0.00";
                                 subunitCount++;
                             }
                             c = c.GetOffset(0, 1);
@@ -93,6 +94,7 @@ namespace Grader.grades {
                     } else {
                         c.Value = subunit.ИмяКраткое;
                         c.GetOffset(1, 0).Value = grades.Mean();
+                        c.GetOffset(1, 0).NumberFormat = "0.00";
                         if (byVus && cadetsSelected) {
                             GradeCalcGroup.КурсантыПоПредметуЗаЦикл(et, gradeQuery, subunit.Код, subjectName).ForEach(g => {
                                 c.GetOffset(2, 0).Value = g;
