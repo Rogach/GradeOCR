@@ -60,7 +60,6 @@ namespace Grader.gui {
 
             selectCadets = layout.Add("", new CheckBox(), thin: true);
             selectCadets.Text = "Курсанты?";
-            selectCadets.Checked = true;
 
             selectPermanent = layout.Add("", new CheckBox(), thin: true);
             selectPermanent.Text = "Постоянные срочники?";
