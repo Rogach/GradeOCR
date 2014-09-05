@@ -93,12 +93,18 @@ namespace Grader.grades {
                     } else {
                         c.Value = subunit.ИмяКраткое;
                         c.GetOffset(1, 0).Value = grades.Mean();
-                        if (byVus) {
+                        if (byVus && cadetsSelected) {
                             GradeCalcGroup.КурсантыПоПредметуЗаЦикл(et, gradeQuery, subunit.Код, subjectName).ForEach(g => {
                                 c.GetOffset(2, 0).Value = g;
                             });
                         } else {
-                            GradeCalcGroup.ОбщаяОценка(et, Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код), subjectName, cadetsSelected).ForEach(g => {
+                            GradeCalcGroup.ОбщаяОценка(
+                                et,
+                                Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код),
+                                subunit,
+                                subjectName,
+                                cadetsSelected,
+                                selectRelatedSubunits: true).ForEach(g => {
                                 c.GetOffset(2, 0).Value = g;
                             });
                         }
