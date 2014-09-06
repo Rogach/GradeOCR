@@ -21,7 +21,7 @@ namespace ARCode {
         private PictureView rotatedDataMatrixPV;
         private PictureView recognizedDataMatrixPV;
 
-        public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue, bool applyNoise) {
+        public FinderCircleDebugView(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue, NoiseFilter noiseFilter) {
             InitializeComponent();
 
             this.inputImagePV = PictureView.InsertIntoPanel(inputImagePanel);
@@ -36,20 +36,20 @@ namespace ARCode {
             this.Shown += new EventHandler(delegate {
                 Util.NewThread(() => {
                     Util.Timed("full AR-code OCR", () => {
-                        RunOCR(sourceImage, minPatternRadius, maxPatternRadius, inputValue, applyNoise);
+                        RunOCR(sourceImage, minPatternRadius, maxPatternRadius, inputValue, noiseFilter);
                     });
                 });
             });
         }
 
-        private void RunOCR(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue, bool applyNoise) {
+        private void RunOCR(Bitmap sourceImage, int minPatternRadius, int maxPatternRadius, uint inputValue, NoiseFilter noiseFilter) {
             this.inputDataLabel.Text = inputValue.ToString();
 
             Bitmap grayImage = ImageUtil.ToGrayscale(sourceImage);
             this.inputImagePV.Image = grayImage;
 
-            Bitmap noiseImage = applyNoise ? Program.GetTestNoiseFilter().Apply(sourceImage) : sourceImage;
-            if (applyNoise) {
+            Bitmap noiseImage = noiseFilter.Apply(sourceImage);
+            if (noiseFilter.GetType() != typeof(EmptyFilter)) {
                 this.noiseImagePV.Image = noiseImage;
             }
 

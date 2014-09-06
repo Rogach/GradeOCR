@@ -13,17 +13,29 @@ namespace ARCode {
     class Program {
         [STAThread]
         static void Main(string[] args) {
-            //Util.Timed("stress test", () => {
-            //    StressTest();
-            //});
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            OpenFileDialog fd = new OpenFileDialog();
+            fd.Title = "Выберите изображение ведомости";
+            if (fd.ShowDialog() == DialogResult.OK) {
+                Bitmap sourceImage = ImageUtil.LoadImage(fd.FileName);
+                Application.Run(new FinderCircleDebugView(sourceImage, 50, 70, inputValue: 0, noiseFilter: new EmptyFilter()));
+            }
+        }
+
+        public static NoiseFilter GetTestNoiseFilter() {
+            return new FilterSeq(
+                        new RandomBlots(0.2),
+                        new RandomNoise(0.2),
+                        new RandomStripes(0.05, 20)
+                    );
+        }
+
+        static void RandomTest() {
             Random r = new Random();
             uint value = (uint) r.Next();
-            //uint value = 777777777;
-
+            
             int patternRadius = 60;
 
             Bitmap sourceImage = new Bitmap(1000, 1000, PixelFormat.Format32bppArgb);
@@ -40,18 +52,7 @@ namespace ARCode {
 
             g.Dispose();
 
-            //Bitmap sourceImage = ImageUtil.LoadImage("E:/arcode-scan3.jpg");
-            //sourceImage.Save("E:/arcodeScan.png");
-
-            Application.Run(new FinderCircleDebugView(sourceImage, 50, 70, value, applyNoise: true));
-        }
-
-        public static NoiseFilter GetTestNoiseFilter() {
-            return new FilterSeq(
-                        new RandomBlots(0.2),
-                        new RandomNoise(0.2),
-                        new RandomStripes(0.05, 20)
-                    );
+            Application.Run(new FinderCircleDebugView(sourceImage, 50, 70, value, noiseFilter: GetTestNoiseFilter()));
         }
 
         static void StressTest() {

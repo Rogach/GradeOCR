@@ -68,7 +68,8 @@ namespace Grader.ocr {
                     formOpts.sourceImage, 
                     formOpts.minFinderCircleRadius, 
                     formOpts.maxFinderCircleRadius, 
-                    0, applyNoise: false).ShowDialog();
+                    inputValue: 0,
+                    noiseFilter: new EmptyFilter()).ShowDialog();
             });
 
             this.debugTableOCRbutton.Click += new EventHandler(delegate {
