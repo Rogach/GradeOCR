@@ -13,14 +13,14 @@ namespace QualityTest {
         public static readonly string TestOcrData = "E:/Pronko/prj/Grader/ocr-data/test-data";
 
         static void Main(string[] args) {
-            List<Tuple<string, GradeDigest>> testDigests = LoadTestDigests();
+            List<GradeDigest> testDigests = GradeFS.LoadDigests(TestOcrData);
             var gradePairs = new List<Tuple<GradeDigest, RecognitionResult>>();
             Util.Timed("compare with database", () => {
                 int c = 0;
                 foreach (var gd in testDigests) {
                     if (c % 100 == 0) Console.WriteLine("Processed {0}/{1} digests...", c, testDigests.Count);
 
-                    gradePairs.Add(new Tuple<GradeDigest, RecognitionResult>(gd.Item2, GradeDigestSet.staticInstance.FindBestMatch(gd.Item2)));
+                    gradePairs.Add(new Tuple<GradeDigest, RecognitionResult>(gd, GradeDigestSet.staticInstance.FindBestMatch(gd)));
 
                     c++;
                 }
@@ -102,57 +102,8 @@ namespace QualityTest {
 
             Console.WriteLine("Recognition failures:");
             gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Digest.grade).ToList().ForEach(gp => {
-                Console.WriteLine("file: " + testDigests.Find(gd => gd.Item2 == gp.Item1).Item1 + ", confidence = " + gp.Item2.ConfidenceScore);
+                Console.WriteLine("file: " + testDigests.Find(gd => gd == gp.Item1).fileName + ", confidence = " + gp.Item2.ConfidenceScore);
             });
-        }
-
-        public static List<Tuple<string, GradeDigest>> LoadTestDigests() {
-            List<Tuple<string, GradeDigest>> gradeDigests = new List<Tuple<string, GradeDigest>>();
-
-            List<Tuple<string, byte>> gradeGroups = new List<Tuple<string, byte>> {
-                new Tuple<string, byte>(TestOcrData + "/grade-2/", 2),
-                new Tuple<string, byte>(TestOcrData + "/grade-3/", 3),
-                new Tuple<string, byte>(TestOcrData + "/grade-4/", 4),
-                new Tuple<string, byte>(TestOcrData + "/grade-5/", 5)
-            };
-
-            List<Tuple<string, byte>> inputImages = new List<Tuple<string, byte>>();
-            foreach (var gg in gradeGroups) {
-                string[] imageFiles = Directory.GetFiles(gg.Item1);
-                foreach (var imageFile in imageFiles) {
-                    inputImages.Add(new Tuple<string, byte>(imageFile, gg.Item2));
-                }
-            }
-
-            List<string> emptyGradeDigestFiles = new List<string>();
-
-            Util.Timed("test digest loading", () => {
-
-                int c = 0;
-                foreach (var input in inputImages) {
-                    if (c % 100 == 0) Console.WriteLine("Processed {0}/{1} images...", c, inputImages.Count);
-
-                    Option<GradeDigest> gdOpt = GradeOCR.Program.GetGradeDigest(ImageUtil.LoadImage(input.Item1));
-                    gdOpt.ForEach(gd => {
-                        gd.grade = input.Item2;
-                        gradeDigests.Add(new Tuple<string, GradeDigest>(input.Item1, gd));
-                    });
-                    if (gdOpt.IsEmpty()) {
-                        emptyGradeDigestFiles.Add(input.Item1);
-                        
-                    }
-
-                    c++;
-                }
-
-            });
-
-            Console.WriteLine("Empty digests: " + emptyGradeDigestFiles.Count);
-            foreach (var emptyGD in emptyGradeDigestFiles) {
-                Console.WriteLine("empty digest at '{0}'", emptyGD);
-            }
-
-            return gradeDigests;
         }
     }
 }

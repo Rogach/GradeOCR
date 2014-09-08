@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
+using LibUtil;
 
 namespace GradeOCR {
     public class GradeDigest {
@@ -12,6 +13,7 @@ namespace GradeOCR {
 
         public ulong[] data = new ulong[digestSize * digestSize / 64];
         public byte grade = 0;
+        public Option<string> fileName = new None<string>();
 
         public GradeDigest() { }
 

@@ -43,12 +43,7 @@ namespace GradeOCR {
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
-                    List<string> images = new List<string>();
-                    images.AddRange(Directory.GetFiles(OcrData + "/grade-unsort"));
-                    images.AddRange(Directory.GetFiles(OcrData + "/grade-2"));
-                    images.AddRange(Directory.GetFiles(OcrData + "/grade-3"));
-                    images.AddRange(Directory.GetFiles(OcrData + "/grade-4"));
-                    images.AddRange(Directory.GetFiles(OcrData + "/grade-5"));
+                    List<string> images = GradeFS.GetGradeFileNames(OcrData);
 
                     // shuffle images
                     Random r = new Random();
