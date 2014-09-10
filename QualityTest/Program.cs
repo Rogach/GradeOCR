@@ -96,7 +96,8 @@ namespace QualityTest {
 
             Console.WriteLine("Recognition failures:");
             gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Grade).ToList().ForEach(gp => {
-                Console.WriteLine("file: " + testDigests.Find(gd => gd == gp.Item1).fileName);
+                GradeDigest failedDigest = testDigests.Find(gd => gd == gp.Item1);
+                Console.WriteLine("file: " + failedDigest.fileName + ", confident: " + gp.Item2.Confident);
             });
         }
     }
