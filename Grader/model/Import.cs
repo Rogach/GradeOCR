@@ -13,11 +13,11 @@ namespace Grader.model {
                 var r = sh.GetRange("A2");
                 while (r.Value != null) {
                     et.Военнослужащий.AddObject(new Военнослужащий {
-                        Фамилия = field(r, "фамилия"),
-                        Имя = field(r, "имя"),
-                        Отчество = field(r, "отчество"),
-                        КодЗвания = et.rankNameToId[field(r, "звание")],
-                        КодПодразделения = et.subunitShortNameToId[field(r, "подразделение")],
+                        Фамилия = field(r, "фамилия").Trim(),
+                        Имя = field(r, "имя").Trim(),
+                        Отчество = field(r, "отчество").Trim(),
+                        КодЗвания = et.rankNameToId[field(r, "звание").Trim()],
+                        КодПодразделения = et.subunitShortNameToId[field(r, "подразделение").Trim()],
                         ТипВоеннослужащего = "курсант"
                     });
                     r = r.GetOffset(1, 0);
@@ -33,11 +33,11 @@ namespace Grader.model {
                 var r = sh.GetRange("A2");
                 while (r.Value != null) {
                     et.Военнослужащий.AddObject(new Военнослужащий {
-                        Фамилия = field(r, "фамилия"),
-                        Имя = field(r, "имя"),
-                        Отчество = field(r, "отчество"),
-                        КодЗвания = et.rankNameToId[field(r, "звание").ToLower()],
-                        КодПодразделения = et.subunitShortNameToId[field(r, "подразделение")],
+                        Фамилия = field(r, "фамилия").Trim(),
+                        Имя = field(r, "имя").Trim(),
+                        Отчество = field(r, "отчество").Trim(),
+                        КодЗвания = et.rankNameToId[field(r, "звание").ToLower().Trim()],
+                        КодПодразделения = et.subunitShortNameToId[field(r, "подразделение").Trim()],
                         ТипВоеннослужащего = "постоянный срочник"
                     });
                     r = r.GetOffset(1, 0);
