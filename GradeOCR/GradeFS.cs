@@ -70,5 +70,11 @@ namespace GradeOCR {
 
             return gradeDigests;
         }
+
+        public static void PackDatabase(string fsPath) {
+            List<GradeDigest> gradeDigests = GradeFS.LoadDigests(fsPath);
+            GradeDigestSet digestSet = new GradeDigestSet(gradeDigests);
+            digestSet.Save(fsPath + "/grade-digests.db");
+        }
     }
 }
