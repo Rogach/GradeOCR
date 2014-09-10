@@ -34,10 +34,7 @@ namespace GradeOCR {
                     bestIndex = q;
                 }
             }
-            return new RecognitionResult(
-                bestDigest,
-                MatchConfidence.GetConfidenceScoreSymmetric(digest, bestDigest),
-                bestIndex);
+            throw new NotImplementedException();
         }
 
         public double MatchDigests(GradeDigest gd1, GradeDigest gd2) {

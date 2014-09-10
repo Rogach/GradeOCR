@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GradeImageMove", "GradeImag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AR-Code", "FinderCircles\AR-Code.csproj", "{C15B0676-F887-482C-999D-87494F197B7D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetworkTraining", "NeuralNetworkTraining\NeuralNetworkTraining.csproj", "{CE157C17-B6EF-4689-BAB3-FD4D4A8F3D05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetwork", "NeuralNetwork\NeuralNetwork.csproj", "{86373B31-D697-4596-B725-68B3A3DB7F77}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -79,6 +83,14 @@ Global
 		{C15B0676-F887-482C-999D-87494F197B7D}.Debug|x86.Build.0 = Debug|x86
 		{C15B0676-F887-482C-999D-87494F197B7D}.Release|x86.ActiveCfg = Release|x86
 		{C15B0676-F887-482C-999D-87494F197B7D}.Release|x86.Build.0 = Release|x86
+		{CE157C17-B6EF-4689-BAB3-FD4D4A8F3D05}.Debug|x86.ActiveCfg = Debug|x86
+		{CE157C17-B6EF-4689-BAB3-FD4D4A8F3D05}.Debug|x86.Build.0 = Debug|x86
+		{CE157C17-B6EF-4689-BAB3-FD4D4A8F3D05}.Release|x86.ActiveCfg = Release|x86
+		{CE157C17-B6EF-4689-BAB3-FD4D4A8F3D05}.Release|x86.Build.0 = Release|x86
+		{86373B31-D697-4596-B725-68B3A3DB7F77}.Debug|x86.ActiveCfg = Debug|x86
+		{86373B31-D697-4596-B725-68B3A3DB7F77}.Debug|x86.Build.0 = Debug|x86
+		{86373B31-D697-4596-B725-68B3A3DB7F77}.Release|x86.ActiveCfg = Release|x86
+		{86373B31-D697-4596-B725-68B3A3DB7F77}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

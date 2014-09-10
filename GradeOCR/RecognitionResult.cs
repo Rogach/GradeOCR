@@ -5,14 +5,12 @@ using System.Text;
 
 namespace GradeOCR {
     public class RecognitionResult {
-        public GradeDigest Digest { get; set; }
-        public int ConfidenceScore { get; set; }
-        public int MatchIndex { get; set; }
+        public int Grade { get; set; }
+        public bool Confident { get; set; }
 
-        public RecognitionResult(GradeDigest gd, int confidenceScore, int matchIndex) {
-            this.Digest = gd;
-            this.ConfidenceScore = confidenceScore;
-            this.MatchIndex = matchIndex;
+        public RecognitionResult(int grade, bool confident) {
+            this.Grade = grade;
+            this.Confident = confident;
         }
     }
 }

@@ -86,7 +86,6 @@
     <Compile Include="GradeDigest.cs" />
     <Compile Include="GradeDigestSet.cs" />
     <Compile Include="GradeFS.cs" />
-    <Compile Include="MatchConfidence.cs" />
     <Compile Include="RecognitionResult.cs" />
     <Compile Include="WhitespaceCropper.cs" />
     <Compile Include="GradeRecognitionDebugView.cs">
@@ -111,6 +110,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NeuralNetwork\NeuralNetwork.csproj">
+      <Project>{86373B31-D697-4596-B725-68B3A3DB7F77}</Project>
+      <Name>NeuralNetwork</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OCRUtil\OCRUtil.csproj">
       <Project>{AED92FEE-AE6E-46C3-8DED-B22539DFBC81}</Project>
       <Name>OCRUtil</Name>
@@ -118,6 +121,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="grade-digests.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="grade-recognition.nn">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Include="GradeOCR_TemporaryKey.pfx" />

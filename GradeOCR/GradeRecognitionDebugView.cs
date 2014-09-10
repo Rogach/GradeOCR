@@ -17,8 +17,6 @@ namespace GradeOCR {
         public PictureView noiseRemovalPV;
         public PictureView croppedPV;
         public PictureView digestPV;
-        public PictureView bestMatchPV;
-        public PictureView differencePV;
 
         public GradeRecognitionDebugView(Bitmap inputImage, string imageName) {
             InitializeComponent();
@@ -30,8 +28,6 @@ namespace GradeOCR {
             noiseRemovalPV = PictureView.InsertIntoPanel(noiseRemovalPanel);
             croppedPV = PictureView.InsertIntoPanel(croppedPanel);
             digestPV = PictureView.InsertIntoPanel(digestPanel);
-            bestMatchPV = PictureView.InsertIntoPanel(bestMatchPanel);
-            differencePV = PictureView.InsertIntoPanel(differencePanel);
 
             this.Shown += new EventHandler(delegate {
                 Thread worker = new Thread(new ThreadStart(delegate {
@@ -60,19 +56,10 @@ namespace GradeOCR {
                 digestPV.Image = digestImage;
 
                 GradeDigest digest = GradeDigest.FromImage(digestImage);
-                RecognitionResult recognitionResult = Util.Timed("digest matching", () => GradeDigestSet.staticInstance.FindBestMatch(digest));
-                Console.WriteLine("best-match digest index: {0}", recognitionResult.MatchIndex);
-                Bitmap bestMatchImage = recognitionResult.Digest.DigestImage();
-                bestMatchPV.Image = bestMatchImage;
-                recognizedGradeLabel.Text = recognitionResult.Digest.grade.ToString();
-                if (MatchConfidence.Sure(recognitionResult.ConfidenceScore)) {
-                    recognitionConfidenceLabel.Text = String.Format("sure, {0} pt", recognitionResult.ConfidenceScore);
-                } else {
-                    recognitionConfidenceLabel.Text = String.Format("unsure, {0} pt", recognitionResult.ConfidenceScore);
-                }
+                RecognitionResult recognitionResult = GradeOCR.Program.RecognizeGrade(digest);
 
-                Bitmap differenceImage = DigestDifference.GenerateDifferenceImage(digest, recognitionResult.Digest);
-                differencePV.Image = differenceImage;
+                recognizedGradeLabel.Text = recognitionResult.Grade.ToString();
+                recognitionConfidenceLabel.Text = recognitionResult.Confident ? "sure" : "unsure";
             }
         }
     }

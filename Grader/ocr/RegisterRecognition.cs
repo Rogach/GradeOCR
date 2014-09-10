@@ -117,15 +117,15 @@ namespace Grader.ocr {
                                                 if (digestOpt.IsEmpty()) {
                                                     cellColor = Color.Red;
                                                 } else {
-                                                    var recogResult = GradeDigestSet.staticInstance.FindBestMatch(digestOpt.Get());
-                                                    cellColor = MatchConfidence.Sure(recogResult.ConfidenceScore) ? Color.Green : Color.Yellow;
+                                                    var recogResult = GradeOCR.Program.RecognizeGrade(digestOpt.Get());
+                                                    cellColor = recogResult.Confident ? Color.Green : Color.Yellow;
 
                                                     record.marks.Add(new Оценка {
                                                         Код = -1,
                                                         КодПроверяемого = record.soldierId,
                                                         КодПредмета = subjectId,
                                                         ЭтоКомментарий = false,
-                                                        Значение = (sbyte) recogResult.Digest.grade,
+                                                        Значение = (sbyte) recogResult.Grade,
                                                         Текст = "",
                                                         КодПодразделения = record.soldier.КодПодразделения,
                                                         ВУС = record.soldier.ВУС,

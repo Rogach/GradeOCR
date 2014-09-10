@@ -20,7 +20,7 @@ namespace QualityTest {
                 foreach (var gd in testDigests) {
                     if (c % 100 == 0) Console.WriteLine("Processed {0}/{1} digests...", c, testDigests.Count);
 
-                    gradePairs.Add(new Tuple<GradeDigest, RecognitionResult>(gd, GradeDigestSet.staticInstance.FindBestMatch(gd)));
+                    gradePairs.Add(new Tuple<GradeDigest, RecognitionResult>(gd, GradeOCR.Program.RecognizeGrade(gd)));
 
                     c++;
                 }
@@ -29,10 +29,10 @@ namespace QualityTest {
             // output results
 
             Func<byte, int> rights = g => gradePairs.Count(gp =>
-                gp.Item1.grade == gp.Item2.Digest.grade && 
+                gp.Item1.grade == gp.Item2.Grade && 
                 gp.Item1.grade == g);
             Func<byte, int> wrongs = g => gradePairs.Count(gp =>
-                gp.Item1.grade != gp.Item2.Digest.grade && 
+                gp.Item1.grade != gp.Item2.Grade && 
                 gp.Item1.grade == g);
             
 
@@ -48,8 +48,8 @@ namespace QualityTest {
     
             Console.WriteLine("RESULTS:\n");
 
-            int rightTotal = gradePairs.Count(gp => gp.Item1.grade == gp.Item2.Digest.grade);
-            int wrongTotal = gradePairs.Count(gp => gp.Item1.grade != gp.Item2.Digest.grade);
+            int rightTotal = gradePairs.Count(gp => gp.Item1.grade == gp.Item2.Grade);
+            int wrongTotal = gradePairs.Count(gp => gp.Item1.grade != gp.Item2.Grade);
 
             Console.WriteLine("Total (r/w): {0}/{1}, {2:F1}/{3:F1} %", 
                 rightTotal, wrongTotal, 
@@ -63,24 +63,24 @@ namespace QualityTest {
             Console.WriteLine();
 
             Func<byte, int> sureRights = g => gradePairs.Count(gp =>
-                    gp.Item1.grade == gp.Item2.Digest.grade &&
+                    gp.Item1.grade == gp.Item2.Grade &&
                     gp.Item1.grade == g &&
-                    MatchConfidence.Sure(gp.Item2.ConfidenceScore));
+                    gp.Item2.Confident);
             Func<byte, int> sureWrongs = g => gradePairs.Count(gp =>
-                gp.Item1.grade != gp.Item2.Digest.grade &&
+                gp.Item1.grade != gp.Item2.Grade &&
                 gp.Item1.grade == g &&
-                MatchConfidence.Sure(gp.Item2.ConfidenceScore));
+                gp.Item2.Confident);
             Func<byte, int> unsure = g => gradePairs.Count(gp =>
                 gp.Item1.grade == g &&
-                !MatchConfidence.Sure(gp.Item2.ConfidenceScore));
+                !gp.Item2.Confident);
 
             int sureRightTotal = gradePairs.Count(gp =>
-                gp.Item1.grade == gp.Item2.Digest.grade &&
-                MatchConfidence.Sure(gp.Item2.ConfidenceScore));
+                gp.Item1.grade == gp.Item2.Grade &&
+                gp.Item2.Confident);
             int sureWrongTotal = gradePairs.Count(gp =>
-                gp.Item1.grade != gp.Item2.Digest.grade &&
-                MatchConfidence.Sure(gp.Item2.ConfidenceScore));
-            int unsureTotal = gradePairs.Count(gp => !MatchConfidence.Sure(gp.Item2.ConfidenceScore));
+                gp.Item1.grade != gp.Item2.Grade &&
+                gp.Item2.Confident);
+            int unsureTotal = gradePairs.Count(gp => !gp.Item2.Confident);
 
             Console.WriteLine("Total (r/w/u): {0}/{1}/{2}, {3:F1}/{4:F1}/{5:F1} %",
                 sureRightTotal, sureWrongTotal, unsureTotal,
@@ -94,15 +94,9 @@ namespace QualityTest {
 
             Console.WriteLine();
 
-            int minFailureConfidenceScore =
-                gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Digest.grade).Select(t => t.Item2.ConfidenceScore).Min();
-            Console.WriteLine("min confidence score in recognition failures: {0}", minFailureConfidenceScore);
-            Console.WriteLine("successes with score above min failure score: {0}",
-                gradePairs.Where(gp => gp.Item1.grade == gp.Item2.Digest.grade).Where(t => t.Item2.ConfidenceScore > minFailureConfidenceScore).Count());
-
             Console.WriteLine("Recognition failures:");
-            gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Digest.grade).ToList().ForEach(gp => {
-                Console.WriteLine("file: " + testDigests.Find(gd => gd == gp.Item1).fileName + ", confidence = " + gp.Item2.ConfidenceScore);
+            gradePairs.Where(gp => gp.Item1.grade != gp.Item2.Grade).ToList().ForEach(gp => {
+                Console.WriteLine("file: " + testDigests.Find(gd => gd == gp.Item1).fileName);
             });
         }
     }

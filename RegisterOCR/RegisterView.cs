@@ -178,9 +178,9 @@ namespace RegisterOCR {
                                 table.GetCellImage(originalImage, x, y).ForEach(cellImage => {
                                     Option<GradeDigest> digestOpt = GradeOCR.Program.GetGradeDigest(cellImage);
                                     digestOpt.ForEach(gd => {
-                                        RecognitionResult res = GradeDigestSet.staticInstance.FindBestMatch(gd);
-                                        str += res.Digest.grade;
-                                        if (MatchConfidence.Sure(res.ConfidenceScore)) {
+                                        RecognitionResult res = GradeOCR.Program.RecognizeGrade(gd);
+                                        str += res.Grade;
+                                        if (res.Confident) {
                                             g.FillPath(recognitionBrush, table.GetCellContour(x, y).Get());
                                         } else {
                                             g.FillPath(unsureBrush, table.GetCellContour(x, y).Get());
