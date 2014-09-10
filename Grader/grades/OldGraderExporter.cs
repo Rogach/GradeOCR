@@ -91,7 +91,14 @@ namespace Grader.grades {
         };
 
         static List<ExportUnit> ursExports = new List<ExportUnit> {
-            new ExportUnit { subunitName = "УРС", exactSubunit = false, sheetName = "УРС", rangeName = "insert_URS" }
+            new ExportUnit { subunitName = "УРС1", exactSubunit = false, sheetName = "1 взв", rangeName = "insert_1" },
+            new ExportUnit { subunitName = "УРС2", exactSubunit = false, sheetName = "2 взв", rangeName = "insert_2" },
+            new ExportUnit { subunitName = "УРС3", exactSubunit = false, sheetName = "3 взв", rangeName = "insert_3" },
+            new ExportUnit { subunitName = "УРС4", exactSubunit = false, sheetName = "4 взв", rangeName = "insert_4" },
+            new ExportUnit { subunitName = "УРС5", exactSubunit = false, sheetName = "5 взв", rangeName = "insert_5" },
+            new ExportUnit { subunitName = "УРС6", exactSubunit = false, sheetName = "6 взв", rangeName = "insert_6" },
+            new ExportUnit { subunitName = "УРС221", exactSubunit = false, sheetName = "221 взв", rangeName = "insert_221" },
+            new ExportUnit { subunitName = "УРС222", exactSubunit = false, sheetName = "222 взв", rangeName = "insert_222" }
         };
 
         public static void ExportToOldGrader(
@@ -116,7 +123,6 @@ namespace Grader.grades {
                         if (gs.First().ВУС != 0) {
                             rng.GetOffset(0, -1).Value = gs.First().ВУС;
                         }
-                        rng.GetOffset(0, -2).Value = et.subunitIdToShortName[gs.First().КодПодразделения][3].ToString();
                     });
             } else if (selectCadets) {
                 DoExport(
