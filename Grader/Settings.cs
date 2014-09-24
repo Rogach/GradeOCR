@@ -199,7 +199,8 @@ namespace Grader {
                 conn.Open();
                 conn.Close();
                 return true;
-            } catch (Exception) {
+            } catch (Exception e) {
+                Console.WriteLine(e);
                 return false;
             }
         }
