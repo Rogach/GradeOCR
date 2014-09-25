@@ -19,7 +19,11 @@ namespace Grader {
         public StringSetting gradeAnalysisTags = new StringSetting("gradeAnalysisTags");
 
         public string GetTemplateLocation(string templateName) {
-            return templatesLocation.GetValue() + "/" + templateName;
+            string location = templatesLocation.GetValue() + "/" + templateName;
+            if (!File.Exists(location)) {
+                throw new Exception(String.Format("Template file not found: '{0}'", location));
+            }
+            return location;
         }
 
         private List<Setting<object>> settings;
