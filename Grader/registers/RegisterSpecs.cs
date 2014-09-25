@@ -38,6 +38,7 @@ namespace Grader.registers {
                 case "ОГН": return new ВедомостьОГН();
                 case "ОВУ": return new GenericRegister("ОВУ");
                 case "СП": return new ВедомостьСП();
+                case "СПТП": return new ВедомостьСПТП();
                 case "СТР": return new ВедомостьСТР();
                 case "ТП": return new ВедомостьТП();
                 case "ФП": return new ВедомостьФП();
@@ -64,6 +65,7 @@ namespace Grader.registers {
             new ВедомостьОГН(),
             new GenericRegister("ОВУ"),
             new ВедомостьСП(),
+            new ВедомостьСПТП(),
             new ВедомостьСТР(),
             new ВедомостьТП(),
             new ВедомостьФП(),
@@ -266,6 +268,35 @@ namespace Grader.registers {
             };
         }
         public override string ToString() { return "сводная"; }
+    }
+    public class ВедомостьСПТП : ВедомостьПолныеИмена {
+        public ВедомостьСПТП() {
+            specName = "сводная";
+            templateName = "ведомость_курсанты_СПТП.xlsx";
+            gradeColumnCount = 5;
+            tableLastColumn = 8;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("СП", new Point(3, 0)),
+                new GradeLocation("ТП", new Point(4, 0))
+            };
+        }
+        public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
+            base.Format(et, sh, settings);
+            List<int> vuses = settings.soldiers.Select(s => s.ВУС).Distinct().ToList();
+            if (vuses.Count == 1 && vuses.First() != 0) {
+                ExcelTemplates.AppendRange(sh, "ВУС", vuses.First());
+            } else {
+                ExcelTemplates.DeleteRow(sh, "ВУС");
+            }
+            var teachers = Querying.GetPostsForSubunit(et, settings.subunit.Код, "преподаватель").ToList();
+            if (settings.subunit.Тип == "взвод" && teachers.Count > 0) {
+                ExcelTemplates.AppendRange(sh, "Преподаватели",
+                    teachers.Select(c => c.GetFullName(et)).MkString());
+            } else {
+                ExcelTemplates.DeleteRow(sh, "Преподаватели");
+            }
+        }
+        public override string ToString() { return "СПТП"; }
     }
     public class СводнаяНевыносимыеПредметыВедомость : ВедомостьПолныеИмена {
         public СводнаяНевыносимыеПредметыВедомость() {
