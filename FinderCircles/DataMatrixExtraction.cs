@@ -53,7 +53,7 @@ namespace ARCode {
                 GraphicsUnit.Pixel);
             rotG.Dispose();
 
-            int[,] cellSum = new int[DataMatrixDrawer.rowCount, DataMatrixDrawer.columnCount];
+            int[] cellSum = new int[DataMatrixDrawer.rowCount * DataMatrixDrawer.columnCount];
             unsafe {
                 BitmapData bd = rotatedMatrix.LockBits(ImageLockMode.ReadOnly);
                 byte* ptr = (byte*) bd.Scan0.ToPointer();
@@ -62,19 +62,17 @@ namespace ARCode {
                     for (int x = 0; x < rotatedMatrix.Width; x++) {
                         int cx = (int) Math.Floor((float) x * DataMatrixDrawer.columnCount / rotatedMatrix.Width);
                         int cy = (int) Math.Floor((float) y * DataMatrixDrawer.rowCount / rotatedMatrix.Height);
-                        cellSum[cy, cx] += *ptr;
+                        cellSum[cy * DataMatrixDrawer.columnCount + cx] += *ptr;
                         ptr += 4;
                     }
                 }
 
                 rotatedMatrix.UnlockBits(bd);
             }
-            int threshold = (rotatedMatrix.Width * rotatedMatrix.Height) / (DataMatrixDrawer.columnCount * DataMatrixDrawer.rowCount) / 2 * 256;
+            double threshold = ValueClustering.DivThreshold(cellSum);
             extractedData = new bool[DataMatrixDrawer.rowCount * DataMatrixDrawer.columnCount];
-            for (int y = 0; y < DataMatrixDrawer.rowCount; y++) {
-                for (int x = 0; x < DataMatrixDrawer.columnCount; x++) {
-                    extractedData[y * DataMatrixDrawer.columnCount + x] = cellSum[y, x] < threshold;
-                }
+            for (int q = 0; q < DataMatrixDrawer.rowCount * DataMatrixDrawer.columnCount; q++) {
+                extractedData[q] = cellSum[q] < threshold;
             }
         }
 
