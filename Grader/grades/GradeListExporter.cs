@@ -78,38 +78,43 @@ namespace Grader.grades {
             ProgressDialogs.ForEach(exports, e => {
                 ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                 var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
-                List<Оценка> gradeList = (e.exactSubunit ?
-                    Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
-                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId)).ToList();
 
-                var gradeSets = gradeList.GroupBy(g => g.КодПроверяемого)
-                    .OrderBy(gl => et.soldierIdToName[gl.Key])
-                    .OrderByDescending(gl => et.rankIdToOrder[gl.First().КодЗвания])
-                    .OrderByDescending(gl => et.soldierIdToSortWeight[gl.Key]);
-                
+                var soldiers = e.exactSubunit ?
+                    Querying.GetSubunitSoldiersExact(et, subunitId, soldierQuery) :
+                    Querying.GetSubunitSoldiers(et, subunitId, soldierQuery);
+                var grades = (e.exactSubunit ?
+                    Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
+                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId))
+                    .ToList()
+                    .GroupBy(g => g.КодПроверяемого)
+                    .ToDictionary(t => t.Key, t => t.ToList());
+
                 int c = 1;
-                ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), gradeSets, displayProgress: true,
-                    format: (gl, rng) => {
+                List<Военнослужащий> realSoldiers = soldiers.ToList().Where(s => s.КодЗвания != et.rankNameToId["ГП"]).ToList();
+                ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), realSoldiers, displayProgress: true,
+                    format: (s, rng) => {
                         var r = rng;
                         r.GetOffset(0, -1).Value = c++;
-                        r.Value = et.rankIdToName[gl.First().КодЗвания];
-                        r.GetOffset(0, 1).Value = et.soldierIdToName[gl.First().КодПроверяемого];
-                        r = r.GetOffset(0, 2);
-                        GradeSet gs = new GradeSet(null, null, et.subunitIdToInstance[gl.First().КодПодразделения], DateTime.Now);
-                        foreach (string subj in subjects) {
-                            gl.ToList().FindOption(g => g.КодПредмета == et.subjectNameToId[subj]).ForEach(g => {
-                                if (g.ЭтоКомментарий) {
-                                    r.Value = g.Текст;
-                                } else {
-                                    r.Value = g.Значение;
-                                    gs.AddGrade(subj, g.Значение);
-                                }
+                        r.Value = et.rankIdToName[s.КодЗвания];
+                        r.GetOffset(0, 1).Value = s.ФИО();
+
+                        grades.GetOption(s.Код).ForEach(gl => {
+                            r = r.GetOffset(0, 2);
+                            GradeSet gs = new GradeSet(null, null, et.subunitIdToInstance[gl.First().КодПодразделения], DateTime.Now);
+                            foreach (string subj in subjects) {
+                                gl.FindOption(g => g.КодПредмета == et.subjectNameToId[subj]).ForEach(g => {
+                                    if (g.ЭтоКомментарий) {
+                                        r.Value = g.Текст;
+                                    } else {
+                                        r.Value = g.Значение;
+                                        gs.AddGrade(subj, g.Значение);
+                                    }
+                                });
+                                r = r.GetOffset(0, 1);
+                            }
+                            GradeCalcIndividual.ОценкаКонтрактникиОБЩ(gs).ForEach(summGrade => {
+                                r.Value = summGrade;
                             });
-                            r = r.GetOffset(0, 1);
-                        }
-                        
-                        GradeCalcIndividual.ОценкаКонтрактникиОБЩ(gs).ForEach(summGrade => {
-                            r.Value = summGrade;
                         });
                         return true;
                 });
@@ -118,3 +123,4 @@ namespace Grader.grades {
         }
     }
 }
+
