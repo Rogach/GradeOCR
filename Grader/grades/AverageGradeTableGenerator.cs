@@ -27,7 +27,40 @@ namespace Grader.grades {
 
             var sh = ExcelTemplates.CreateEmptyExcelTable();
 
-            if (forAllSubjects) {
+            if (forAllSubjects && subunitType == "взвод") {
+                List<Оценка> gradeList = gradeQuery.ToList();
+                var subjects = et.Предмет.ToList();
+                var subunits = Querying.GetSubunitsByType(et, subunitType).ToList();
+                ProgressDialogs.WithProgress(subjects.Count * subunits.Count, pd => {
+                    var subunitNameCell = sh.GetRange("B1");
+                    foreach (var subunit in subunits) {
+                        subunitNameCell.Value = subunit.ИмяКраткое;
+                        subunitNameCell = subunitNameCell.GetOffset(0, 1);
+                    }
+                    var subjectNameCell = sh.GetRange("A2");
+                    foreach (var subj in subjects) {
+                        var c = subjectNameCell.GetOffset(0, 1);
+                        int subunitCount = 0;
+                        foreach (var subunit in subunits) {
+                            List<int> grades = 
+                                gradeList
+                                .Where(g => g.КодПодразделения == subunit.Код && g.КодПредмета == subj.Код && !g.ЭтоКомментарий)
+                                .Select(g => (int) g.Значение).ToList();
+                            if (grades.Count > 0) {
+                                c.Value = grades.Mean();
+                                c.NumberFormat = "0.00";
+                                subunitCount++;
+                            }
+                            c = c.GetOffset(0, 1);
+                            pd.Increment();
+                        }
+                        if (subunitCount > 0) {
+                            subjectNameCell.Value = subj.Название;
+                            subjectNameCell = subjectNameCell.GetOffset(1, 0);
+                        }
+                    }
+                });
+            } else if (forAllSubjects) {
                 var subjects = et.Предмет.ToList();
                 var subunits = Querying.GetSubunitsByType(et, subunitType).ToList();
                 ProgressDialogs.WithProgress(subjects.Count * subunits.Count, pd => {
