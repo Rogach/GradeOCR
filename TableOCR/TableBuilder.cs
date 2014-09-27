@@ -136,6 +136,7 @@ namespace TableOCR {
 
             rows = rows.GetRange(clusterStart, clusterEnd - clusterStart + 1);
             rows = HealRows(rows, horizLines, leftEdgeX, rightEdgeX);
+            rows = MergeNarrowRows(rows);
 
             this.table = new Some<Table>(new Table());
             this.table.ForEach(table => {
@@ -308,6 +309,39 @@ namespace TableOCR {
                     return new List<RowInfo> { row };
                 }
             }).ToList();
+        }
+
+        /**
+         * Merges smaller rows by searching for adjacent narrow rows
+         * that can be merged to make one normal row.
+         */
+        private List<RowInfo> MergeNarrowRows(List<RowInfo> rows) {
+            List<float> rowHeights = rows.Select(row => RowHeight(row)).OrderBy(h => h).ToList();
+            float medianRowHeight = rowHeights[rowHeights.Count / 2];
+
+            List<RowInfo> mergedRows = new List<RowInfo>();
+
+            for (int q = 0; q < rows.Count; q++) {
+                if (q < rows.Count - 1) {
+                    RowInfo r1 = rows[q];
+                    RowInfo r2 = rows[q + 1];
+                    float rowsHeight = RowHeight(r1) + RowHeight(r2);
+                    if (rowsHeight * 0.9 < medianRowHeight && rowsHeight * 1.1 > medianRowHeight) {
+                        mergedRows.Add(new RowInfo {
+                            topLine = r1.topLine,
+                            bottomLine = r2.bottomLine,
+                            dividers = new List<float>()
+                        });
+                        q += 1;
+                    } else {
+                        mergedRows.Add(r1);
+                    }
+                } else {
+                    mergedRows.Add(rows[q]);
+                }
+            }
+
+            return mergedRows;
         }
 
         /* 

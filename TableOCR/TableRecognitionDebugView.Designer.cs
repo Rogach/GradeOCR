@@ -189,7 +189,7 @@
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(85, 13);
             this.label9.TabIndex = 10;
-            this.label9.Text = "table recognition";
+            this.label9.Text = "recognized table";
             // 
             // label10
             // 
@@ -223,7 +223,7 @@
             this.label11.TabIndex = 12;
             this.label11.Text = "Rotated edge points";
             // 
-            // LineRecognitionDebugForm
+            // TableRecognitionDebugView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -250,7 +250,7 @@
             this.Controls.Add(this.bwImagePanel);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.sourceImagePanel);
-            this.Name = "LineRecognitionDebugForm";
+            this.Name = "TableRecognitionDebugView";
             this.Text = "LineRecognitionDebugForm";
             this.ResumeLayout(false);
             this.PerformLayout();
