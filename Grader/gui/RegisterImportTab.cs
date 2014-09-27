@@ -52,7 +52,7 @@ namespace Grader.gui {
             newRegisterButton = new Button();
             newRegisterButton.Text = "Новая ведомость";
             newRegisterButton.Location = new Point(3, 3);
-            newRegisterButton.Size = new Size(200, 25);
+            newRegisterButton.Size = new Size(300, 25);
             newRegisterButton.Click += new EventHandler(delegate {
                 if (CheckForUnsavedChanges()) {
                     AskForRegisterInit().ForEach(register => {
@@ -68,7 +68,7 @@ namespace Grader.gui {
             recognizeRegisterButton = new Button();
             recognizeRegisterButton.Text = "Распознать ведомость";
             recognizeRegisterButton.Location = new Point(3, 30);
-            recognizeRegisterButton.Size = new Size(200, 25);
+            recognizeRegisterButton.Size = new Size(300, 25);
             recognizeRegisterButton.Click += new EventHandler(delegate {
                 if (CheckForUnsavedChanges()) {
                     OpenFileDialog ofd = new OpenFileDialog();
@@ -93,7 +93,7 @@ namespace Grader.gui {
             registerList.MultiSelect = false;
             registerList.FullRowSelect = true;
             registerList.Location = new Point(3, 57);
-            registerList.Size = new Size(200, 743);
+            registerList.Size = new Size(300, 743);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
 
             ColumnHeader ch = new ColumnHeader();
@@ -144,14 +144,14 @@ namespace Grader.gui {
             UpdateRegisterList();
 
             Separator sep = new Separator(Separator.Direction.Vertical);
-            sep.Location = new Point(210, 0);
+            sep.Location = new Point(310, 0);
             sep.Size = new Size(4, 800);
             sep.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
             this.Controls.Add(sep);
 
             registerEditor = new RegisterEditor(et);
-            registerEditor.Location = new Point(220, 0);
-            registerEditor.Size = new Size(970, 770);
+            registerEditor.Location = new Point(320, 0);
+            registerEditor.Size = new Size(870, 770);
             registerEditor.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             registerEditor.RegisterEdited.AddEventListener(() => {
                 changesPending = true;
@@ -160,7 +160,7 @@ namespace Grader.gui {
             
             saveRegister = new Button();
             saveRegister.Text = "Сохранить";
-            saveRegister.Location = new Point(220, 775);
+            saveRegister.Location = new Point(320, 775);
             saveRegister.Size = new Size(100, 25);
             saveRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
             saveRegister.Click += new EventHandler(delegate {
@@ -176,7 +176,7 @@ namespace Grader.gui {
 
             cancelRegister = new Button();
             cancelRegister.Text = "Отменить";
-            cancelRegister.Location = new Point(330, 775);
+            cancelRegister.Location = new Point(430, 775);
             cancelRegister.Size = new Size(100, 25);
             cancelRegister.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
             cancelRegister.Click += new EventHandler(delegate {
