@@ -21,6 +21,14 @@ namespace Grader.grades {
                 select g;
         }
 
+        public static IEnumerable<Оценка> GetGradesForSubunit(Entities et, IEnumerable<Оценка> gradeList, int subunitId) {
+            return
+                from g in gradeList
+                join subunitRel in et.subunitRelCache on g.КодПодразделения equals subunitRel.КодПодразделения
+                where subunitRel.КодСтаршегоПодразделения == subunitId
+                select g;
+        }
+
         public static IQueryable<Оценка> GetGradesForSubunitExact(Entities et, IQueryable<Оценка> gradeQuery, int subunitId) {
             return
                 from g in gradeQuery
@@ -32,6 +40,14 @@ namespace Grader.grades {
             return
                 from g in gradeQuery
                 join vusRel in et.ВусНаЦикле on g.ВУС equals vusRel.ВУС
+                where vusRel.КодЦикла == cycleId
+                select g;
+        }
+
+        public static IEnumerable<Оценка> GetGradesOnCycle(Entities et, IEnumerable<Оценка> gradeList, int cycleId) {
+            return
+                from g in gradeList
+                join vusRel in et.cycleVusCache on g.ВУС equals vusRel.ВУС
                 where vusRel.КодЦикла == cycleId
                 select g;
         }

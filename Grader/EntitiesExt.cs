@@ -18,6 +18,7 @@ namespace Grader {
         }
 
         public List<ПодразделениеПодчинение> subunitRelCache;
+        public List<ВусНаЦикле> cycleVusCache;
         public List<Звание> rankCache;
         public List<Подразделение> subunitCache;
 
@@ -43,6 +44,7 @@ namespace Grader {
 
         private void initCache() {
             subunitRelCache = ПодразделениеПодчинение.ToList();
+            cycleVusCache = ВусНаЦикле.ToList();
             rankCache = Звание.ToList();
             subunitCache = Подразделение.ToList();
             subjectNameToId = Предмет.Select(s => new { id = s.Код, name = s.Название }).ToList().ToDictionary(s => s.name, s => s.id);
