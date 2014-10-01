@@ -26,6 +26,7 @@ namespace Grader.gui {
         private RegisterEditor registerEditor;
         private Button newRegisterButton;
         private Button recognizeRegisterButton;
+        private TextBox registerFilter;
         private Button saveRegister;
         private Button cancelRegister;
         public EventManager RegisterSaved = new EventManager();
@@ -86,14 +87,22 @@ namespace Grader.gui {
             });
             this.Controls.Add(recognizeRegisterButton);
 
+            registerFilter = new TextBox();
+            registerFilter.Location = new Point(3, 60);
+            registerFilter.Size = new Size(300, 25);
+            registerFilter.TextChanged += new EventHandler(delegate {
+                UpdateRegisterList();
+            });
+            this.Controls.Add(registerFilter);
+
             registerList = new ListView();
             registerList.View = View.Details;
             
             registerList.HeaderStyle = ColumnHeaderStyle.None;
             registerList.MultiSelect = false;
             registerList.FullRowSelect = true;
-            registerList.Location = new Point(3, 57);
-            registerList.Size = new Size(300, 743);
+            registerList.Location = new Point(3, 85);
+            registerList.Size = new Size(300, 715);
             registerList.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
 
             ColumnHeader ch = new ColumnHeader();
@@ -219,6 +228,12 @@ namespace Grader.gui {
                      virt = r.Виртуальная,
                      enabled = r.Включена
                  }).ToList();
+            string searchTerm = registerFilter.Text.Trim().ToLower();
+            if (searchTerm != "") {
+                unsortedRegisters = unsortedRegisters.Where(reg => {
+                    return reg.name.ToLower().Contains(searchTerm);
+                }).ToList();
+            }
             unsortedRegisters.OrderBy(r => r.name).OrderByDescending(r => r.fillDate.Date).ToList()
                  .ForEach(rd => {
                      ListViewItem item = new ListViewItem(rd.ToString());
