@@ -31,6 +31,7 @@ namespace Grader.gui {
         private DateTimePicker dateTo;
         private PersonSelector personSelector;
         private TextBox tags;
+        private TextBox subjectList;
         private Button showGrades;
         private Button saveChanges;
         private Button cancelChanges;
@@ -91,9 +92,20 @@ namespace Grader.gui {
             tags.Size = new Size(152, 20);
             tags.Text = settings.gradeViewTags.GetValue();
             this.Controls.Add(tags);
+
+            Label subjectListLabel = new Label { Text = "Предметы" };
+            subjectListLabel.Location = new Point(3, layout.GetY() + 5 + personSelector.Height + 5 + tags.Height + 10 + 2);
+            subjectListLabel.Size = new Size(90, 20);
+            this.Controls.Add(subjectListLabel);
+
+            subjectList = new TextBox();
+            subjectList.Location = new Point(95, layout.GetY() + 5 + personSelector.Height + 5 + tags.Height + 10);
+            subjectList.Size = new Size(152, 20);
+            subjectList.Text = settings.gradeViewSubjects.GetValue();
+            this.Controls.Add(subjectList);
             
             showGrades = new Button { Text = "Показать оценки" };
-            showGrades.Location = new Point(3, layout.GetY() + 5 + personSelector.Height + 10 + 30);
+            showGrades.Location = new Point(3, layout.GetY() + 5 + personSelector.Height + 10 + 60);
             showGrades.Size = new Size(245, 25);
             showGrades.Click += new EventHandler(showGrades_Click);
             this.Controls.Add(showGrades);
@@ -223,6 +235,12 @@ namespace Grader.gui {
             originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
 
             List<GradeDesc> grades = gradeQuery.ToList();
+
+            List<int> selectedSubjectsIds = subjectList.Text.Split(new char[] { ' ', ',', ';' })
+                .Where(s => s.Trim().Length > 0)
+                .Select(s => et.subjectNameToId[s.ToUpper()])
+                .ToList();
+
             foreach (var gd in grades) {
                 gd.soldier = idToSoldierDesc[gd.grade.КодПроверяемого];
             }
@@ -246,10 +264,12 @@ namespace Grader.gui {
             gradeViewDataTable.Columns.Add(new DataColumn("Фамилия И.О."));
 
             subjectIds = 
-                grades.Select(gd => gd.grade.КодПредмета)
-                .Distinct()
-                .OrderBy(s => et.subjectIdToName[s])
-                .ToList();
+                selectedSubjectsIds.Count != 0 ? 
+                    selectedSubjectsIds :
+                    grades.Select(gd => gd.grade.КодПредмета)
+                    .Distinct()
+                    .OrderBy(s => et.subjectIdToName[s])
+                    .ToList();
             foreach (int subjectId in subjectIds) {
                 gradeViewDataTable.Columns.Add(new DataColumn(et.subjectIdToName[subjectId]));
             }
@@ -303,6 +323,7 @@ namespace Grader.gui {
             saveChanges.Enabled = true;
             cancelChanges.Enabled = true;
             settings.gradeViewTags.SetValue(tags.Text);
+            settings.gradeViewSubjects.SetValue(subjectList.Text);
             settings.Save();
         }
 
@@ -318,21 +339,41 @@ namespace Grader.gui {
             if (grades.Count == 0) {
                 gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = "";
             } else {
-                GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierIds[rowIndex]).First().Value;
+                IEnumerable<GradeDesc> soldierGrades = originalGrades.Where(kv => kv.Key.Item1 == soldierIds[rowIndex]).Select(kv => kv.Value);
+                if (soldierGrades.Count() > 0) {
+                    GradeDesc someGradeDesc = soldierGrades.First();
+                    GradeSet gs = new GradeSet() { grades = grades, subunit = et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
 
-                GradeSet gs = new GradeSet() { grades = grades, subunit = et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения] };
+                    Option<int> summaryGrade =
+                        GradeCalcIndividual.ОценкаОБЩ(
+                            gs,
+                            et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
+                            someGradeDesc.grade.ТипВоеннослужащего
+                        );
+                    summaryGrade.ForEach(sg => {
+                        gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
+                    });
+                    if (summaryGrade.IsEmpty()) {
+                        gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = "";
+                    }
+                } else {
+                    int soldierId = soldierIds[rowIndex];
+                    Военнослужащий soldier = et.Военнослужащий.Where(s => s.Код == soldierId).First();
 
-                Option<int> summaryGrade =
-                    GradeCalcIndividual.ОценкаОБЩ(
-                        gs,
-                        et.subunitIdToInstance[someGradeDesc.grade.КодПодразделения].ТипОбучения,
-                        someGradeDesc.grade.ТипВоеннослужащего
-                    );
-                summaryGrade.ForEach(sg => {
-                    gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
-                });
-                if (summaryGrade.IsEmpty()) {
-                    gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = "";
+                    GradeSet gs = new GradeSet() { grades = grades, subunit = et.subunitIdToInstance[soldier.КодПодразделения] };
+
+                    Option<int> summaryGrade =
+                        GradeCalcIndividual.ОценкаОБЩ(
+                            gs,
+                            et.subunitIdToInstance[soldier.КодПодразделения].ТипОбучения,
+                            soldier.ТипВоеннослужащего
+                        );
+                    summaryGrade.ForEach(sg => {
+                        gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = sg.ToString();
+                    });
+                    if (summaryGrade.IsEmpty()) {
+                        gradeView.Rows[rowIndex].Cells[gradeView.ColumnCount - 1].Value = "";
+                    }
                 }
             }
         }
