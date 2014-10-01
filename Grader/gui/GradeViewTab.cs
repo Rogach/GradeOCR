@@ -423,29 +423,56 @@ namespace Grader.gui {
                     } else if (gdOpt.IsEmpty()) {
                         // new grade was added
                         List<Оценка> grades = editedGrades.GetOrElseInsertAndGet(soldierId, () => new List<Оценка>());
-                        GradeDesc someGradeDesc = originalGrades.Where(kv => kv.Key.Item1 == soldierId).Select(kv => kv.Value).First();
-                        Оценка g = new Оценка {
-                            Код = -1,
-                            КодВедомости = -1,
-                            КодПроверяемого = soldierId,
-                            ВУС = someGradeDesc.grade.ВУС,
-                            КодЗвания = someGradeDesc.grade.КодЗвания,
-                            КодПодразделения = someGradeDesc.grade.КодПодразделения,
-                            КодПредмета = subjectId,
-                            ТипВоеннослужащего = someGradeDesc.grade.ТипВоеннослужащего
-                        };
-                        Util.ParseInt(v).Map(vv => {
-                            g.ЭтоКомментарий = false;
-                            g.Значение = (sbyte) vv;
-                            g.Текст = "";
-                            return true;
-                        }).GetOrElse(() => {
-                            g.ЭтоКомментарий = true;
-                            g.Текст = v;
-                            g.Значение = 0;
-                            return true;
-                        });
-                        grades.Add(g);
+                        IEnumerable<GradeDesc> originalSoldierGrades = originalGrades.Where(kv => kv.Key.Item1 == soldierId).Select(kv => kv.Value);
+                        if (originalSoldierGrades.Count() > 0) {
+                            GradeDesc someGradeDesc = originalSoldierGrades.First();
+                            Оценка g = new Оценка {
+                                Код = -1,
+                                КодВедомости = -1,
+                                КодПроверяемого = soldierId,
+                                ВУС = someGradeDesc.grade.ВУС,
+                                КодЗвания = someGradeDesc.grade.КодЗвания,
+                                КодПодразделения = someGradeDesc.grade.КодПодразделения,
+                                КодПредмета = subjectId,
+                                ТипВоеннослужащего = someGradeDesc.grade.ТипВоеннослужащего
+                            };
+                            Util.ParseInt(v).Map(vv => {
+                                g.ЭтоКомментарий = false;
+                                g.Значение = (sbyte) vv;
+                                g.Текст = "";
+                                return true;
+                            }).GetOrElse(() => {
+                                g.ЭтоКомментарий = true;
+                                g.Текст = v;
+                                g.Значение = 0;
+                                return true;
+                            });
+                            grades.Add(g);
+                        } else {
+                            Военнослужащий soldier = et.Военнослужащий.Where(s => s.Код == soldierId).First();
+                            Оценка g = new Оценка {
+                                Код = -1,
+                                КодВедомости = -1,
+                                КодПроверяемого = soldierId,
+                                ВУС = soldier.ВУС,
+                                КодЗвания = soldier.КодЗвания,
+                                КодПодразделения = soldier.КодПодразделения,
+                                КодПредмета = subjectId,
+                                ТипВоеннослужащего = soldier.ТипВоеннослужащего
+                            };
+                            Util.ParseInt(v).Map(vv => {
+                                g.ЭтоКомментарий = false;
+                                g.Значение = (sbyte) vv;
+                                g.Текст = "";
+                                return true;
+                            }).GetOrElse(() => {
+                                g.ЭтоКомментарий = true;
+                                g.Текст = v;
+                                g.Значение = 0;
+                                return true;
+                            });
+                            grades.Add(g);
+                        }
                     } else {
                         GradeDesc gd = gdOpt.Get();
                         if (v == "") {
