@@ -97,6 +97,11 @@ namespace Grader.grades {
                     .GroupBy(g => g.КодПроверяемого)
                     .ToDictionary(t => t.Key, t => t.ToList());
 
+                Dictionary<int, Ведомость> registerCache =
+                    (from g in allGradesQuery
+                     join r in et.Ведомость on g.КодВедомости equals r.Код
+                     select r).Distinct().ToList().ToDictionary(r => r.Код);
+
                 int c = 1;
                 List<Военнослужащий> realSoldiers = soldiers.ToList().Where(s => s.КодЗвания != et.rankNameToId["ГП"]).ToList();
                 ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), realSoldiers, displayProgress: true,
@@ -111,11 +116,16 @@ namespace Grader.grades {
                             GradeSet gs = new GradeSet(null, null, et.subunitIdToInstance[gl.First().КодПодразделения], DateTime.Now);
                             foreach (string subj in subjects) {
                                 gl.Where(g => g.КодПредмета == et.subjectNameToId[subj]).ToList().LastOption().ForEach(g => {
-                                    if (g.ЭтоКомментарий) {
-                                        r.Value = g.Текст;
-                                    } else {
-                                        r.Value = g.Значение;
-                                        gs.AddGrade(subj, g.Значение);
+                                    if (!g.ЭтоКомментарий || g.Текст != "_") {
+                                        if (g.ЭтоКомментарий) {
+                                            r.Value = g.Текст;
+                                        } else {
+                                            r.Value = g.Значение;
+                                            gs.AddGrade(subj, g.Значение);
+                                        }
+                                        if (registerCache[g.КодВедомости].Виртуальная) {
+                                            r.BackgroundColor = ExcelEnums.Color.PaleVioletRed;
+                                        }
                                     }
                                 });
                                 r = r.GetOffset(0, 1);
