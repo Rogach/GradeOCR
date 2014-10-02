@@ -34,7 +34,7 @@ namespace Grader.grades {
                 int gCount = grades.Where(c => c == g).Count();
                 resultBox.Text += String.Format("«{0}»{1}- {2}\t({3:F1}%)\n", 
                                     ReadableTextUtil.HumanReadableGrade(g), 
-                                    g == 5 ? "\t" : "\t\t", 
+                                    "\t\t",
                                     gCount, 
                                     (float) gCount / grades.Count * 100);
             }
