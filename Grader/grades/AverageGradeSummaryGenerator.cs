@@ -16,8 +16,9 @@ namespace Grader.grades {
 
             resultBox.Clear();
 
+            List<GradeSet> gradeSets = Grades.GradeSets(et, gradeQuery);
             ProgressDialogs.ForEach(et.Предмет.ToList(), subj => {
-                List<int> grades = Grades.GetSubjectGrades(gradeQuery, et, subj.Название);
+                List<int> grades = gradeSets.GetSubjectGrades(subj.Название);
                 if (grades.Count > 0) {
                     double avgGrade = averageGrades.GetOrElseInsertAndGet(subj.Название, () => grades.Average());
                     resultBox.Text += String.Format("- по {0} средний балл составил {1:F2}.\n", subj.НазваниеДательный, avgGrade);
