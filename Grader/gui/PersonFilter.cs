@@ -101,6 +101,9 @@ namespace Grader.gui {
                     (grade.ТипВоеннослужащего == "постоянный срочник" && selectPermanent.Checked) ||
                     (grade.ТипВоеннослужащего == "контрактник" && selectContract.Checked)
                 where vusIsEmpty || grade.ВУС == vusNum
+
+                join register in et.Ведомость on grade.КодВедомости equals register.Код
+                orderby register.ДатаЗаполнения
                 select grade;
 
             return gradeQuery;

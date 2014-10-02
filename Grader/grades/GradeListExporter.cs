@@ -82,9 +82,17 @@ namespace Grader.grades {
                 var soldiers = e.exactSubunit ?
                     Querying.GetSubunitSoldiersExact(et, subunitId, soldierQuery) :
                     Querying.GetSubunitSoldiers(et, subunitId, soldierQuery);
-                var grades = (e.exactSubunit ?
+                IQueryable<Оценка> allGradesQuery =
+                    (e.exactSubunit ?
                     Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
-                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId))
+                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId));
+                allGradesQuery = 
+                    from g in allGradesQuery
+                    join r in et.Ведомость on g.КодВедомости equals r.Код
+                    orderby r.ДатаЗаполнения
+                    select g;
+                
+                var grades = allGradesQuery
                     .ToList()
                     .GroupBy(g => g.КодПроверяемого)
                     .ToDictionary(t => t.Key, t => t.ToList());
@@ -102,14 +110,16 @@ namespace Grader.grades {
                             r = r.GetOffset(0, 2);
                             GradeSet gs = new GradeSet(null, null, et.subunitIdToInstance[gl.First().КодПодразделения], DateTime.Now);
                             foreach (string subj in subjects) {
-                                gl.FindOption(g => g.КодПредмета == et.subjectNameToId[subj]).ForEach(g => {
+                                var subjGrades = gl.Where(g => g.КодПредмета == et.subjectNameToId[subj]);
+                                if (subjGrades.Count() > 0) {
+                                    var g = subjGrades.Last();
                                     if (g.ЭтоКомментарий) {
                                         r.Value = g.Текст;
                                     } else {
                                         r.Value = g.Значение;
                                         gs.AddGrade(subj, g.Значение);
                                     }
-                                });
+                                }
                                 r = r.GetOffset(0, 1);
                             }
                             GradeCalcIndividual.ОценкаКонтрактникиОБЩ(gs).ForEach(summGrade => {
