@@ -110,16 +110,14 @@ namespace Grader.grades {
                             r = r.GetOffset(0, 2);
                             GradeSet gs = new GradeSet(null, null, et.subunitIdToInstance[gl.First().КодПодразделения], DateTime.Now);
                             foreach (string subj in subjects) {
-                                var subjGrades = gl.Where(g => g.КодПредмета == et.subjectNameToId[subj]);
-                                if (subjGrades.Count() > 0) {
-                                    var g = subjGrades.Last();
+                                gl.Where(g => g.КодПредмета == et.subjectNameToId[subj]).ToList().LastOption().ForEach(g => {
                                     if (g.ЭтоКомментарий) {
                                         r.Value = g.Текст;
                                     } else {
                                         r.Value = g.Значение;
                                         gs.AddGrade(subj, g.Значение);
                                     }
-                                }
+                                });
                                 r = r.GetOffset(0, 1);
                             }
                             GradeCalcIndividual.ОценкаКонтрактникиОБЩ(gs).ForEach(summGrade => {

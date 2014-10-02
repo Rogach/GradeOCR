@@ -168,9 +168,16 @@ namespace Grader.grades {
                     ExcelRange c = sh.GetRange(e.rangeName);
                     var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
 
-                    List<Оценка> gradeList = (e.exactSubunit ?
-                    Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
-                    Grades.GetGradesForSubunit(et, gradeQuery, subunitId)).ToList();
+                    IEnumerable<Оценка> localGradeQuery = e.exactSubunit ?
+                        Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
+                        Grades.GetGradesForSubunit(et, gradeQuery, subunitId);
+                    localGradeQuery =
+                        from g in localGradeQuery
+                        join r in et.Ведомость on g.КодВедомости equals r.Код
+                        orderby r.ДатаЗаполнения
+                        select g;
+
+                    List<Оценка> gradeList = localGradeQuery.ToList();
 
                     var gradeSets = gradeList.GroupBy(g => g.КодПроверяемого)
                         .OrderBy(gl => et.soldierIdToName[gl.Key])
@@ -184,7 +191,7 @@ namespace Grader.grades {
                         r.GetOffset(0, 1).Value = et.soldierIdToName[gs.Key];
                         r = r.GetOffset(0, 2);
                         foreach (string subj in subjects) {
-                            gs.ToList().FindOption(g => g.КодПредмета == et.subjectNameToId[subj]).ForEach(g => {
+                            gs.Where(g => g.КодПредмета == et.subjectNameToId[subj]).ToList().LastOption().ForEach(g => {
                                 if (!g.ЭтоКомментарий) {
                                     r.Value = g.Значение;
                                 }
