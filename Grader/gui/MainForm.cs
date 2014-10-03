@@ -17,6 +17,7 @@ namespace Grader.gui {
         public MainForm(Settings settings, ApplicationContext context) {
             this.settings = settings;
             this.et = Entities.CreateEntities(settings);
+            Grader.Program.ReportEvent("Loaded entities");
             this.context = context;
             this.InitializeComponent();
         }
