@@ -101,10 +101,15 @@ namespace Grader.registers {
 
             var codeRange = sh.GetRange("OCRCode");
 
-            float imageWidth = 168;
+            ExcelRange printArea = sh.GetRange("Область_печати");
+            float xScale = Math.Max((float) printArea.Width / ((21.0f - 2f) / 2.51f * 72), 1.0f);
+            float yScale = Math.Max((float) printArea.Height / ((29.7f - 3f) / 2.51f * 72), 1.0f);
+            float scaleFactor = Math.Max(xScale, yScale);
+
+            float imageWidth = 168 * scaleFactor;
 
             // 1.1f is a fix for known Office bug, where image heights are scaled when printing
-            float imageHeight = 28 * 1.1f;
+            float imageHeight = 28 * 1.1f * scaleFactor;
 
             sh.AddPicture(
                 tempFileName,
