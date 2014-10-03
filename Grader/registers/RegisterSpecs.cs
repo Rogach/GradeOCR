@@ -133,10 +133,10 @@ namespace Grader.registers {
                 Querying.GetSubunitCommander(et, settings.subunit.Код).ForEach(commander => {
                     soldiers.Add(commander);
                 });
-                Querying.GetPostForSubunit(et, settings.subunit.Код, "ЗКВ").ForEach(zkv => {
+                Querying.GetPostsForSubunit(et, settings.subunit.Код, "ЗКВ").ToList().ForEach(zkv => {
                     soldiers.Add(zkv);
                 });
-                Querying.GetPostForSubunit(et, settings.subunit.Код, "КО").ForEach(ko => {
+                Querying.GetPostsForSubunit(et, settings.subunit.Код, "КО").ToList().ForEach(ko => {
                     soldiers.Add(ko);
                 });
                 soldiers.AddRange(settings.soldiers);
@@ -216,7 +216,7 @@ namespace Grader.registers {
                 case "ОЗГТ": return "основам защиты государственной тайны";
                 case "ЭО": return "экологическому обучению";
                 case "ОГП": return "общественно-государственной подготовке";
-                case "ИНЖ": return "и   нженерной подготовке";
+                case "ИНЖ": return "инженерной подготовке";
                 case "ВМП": return "военно-медицинской подготовке";
                 case "ТСП": return "тактико-специальной подготовке";
                 case "ТОП": return "топографической подготовке";
