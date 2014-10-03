@@ -10,8 +10,11 @@ namespace Grader.util {
             ManagementObjectSearcher theSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive WHERE InterfaceType='USB'");
             List<string> serialNumbers = new List<string>();
             foreach (ManagementObject currentObject in theSearcher.Get()) {
-                ManagementObject serialNumberQuery = new ManagementObject("Win32_PhysicalMedia.Tag='" + currentObject["DeviceID"] + "'");
-                serialNumbers.Add(serialNumberQuery["SerialNumber"].ToString());
+                string pnpId = currentObject["PNPDeviceID"].ToString();
+                string[] idParts = pnpId.Split('\\', '&');
+                if (idParts.Length > 0) {
+                    serialNumbers.Add(idParts[idParts.Length - 2]);
+                }
             }
             return serialNumbers;
         }
