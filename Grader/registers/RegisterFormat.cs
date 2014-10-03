@@ -43,7 +43,7 @@ namespace Grader.registers {
                     if (soldier.КМН) {
                         strike.Value = "Представлен на экзамен в составе уч. гр. кандидатов на должности МК";
                     } else if (soldier.НетДопускаНаЭкзамен) {
-                        strike.Value = "Не допущен решением УМС. Протокол № 5 от 11 апреля 2014 года";
+                        strike.Value = "Не допущен решением УМС. Протокол № 11 от 3 октября 2014 года";
                     }
                     strike.HorizontalAlignment = ExcelEnums.ExcelConstants.Center;
                     strike.Font.Size = 8;
