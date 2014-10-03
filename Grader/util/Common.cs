@@ -13,5 +13,7 @@ namespace Grader.util {
             Звание rank = et.rankCache.Find(r => r.Код == v.КодЗвания);
             return rank.Название + " " + v.ФИО();
         }
+
+        
     }
 }

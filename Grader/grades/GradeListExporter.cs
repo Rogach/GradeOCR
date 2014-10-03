@@ -75,6 +75,10 @@ namespace Grader.grades {
                 List<string> subjects, List<ExportUnit> exports) {
 
             var wb = ExcelTemplates.LoadExcelTemplate(settings.GetTemplateLocation(templateName));
+
+            ExcelWorksheet mainSheet = wb.Worksheets.Find(s => s.Name == "Главная");
+            mainSheet.GetRange("CURRENT_YEAR").Value = DateTime.Now.Year;
+            mainSheet.GetRange("CURRENT_MONTH").Value = ReadableTextUtil.GetMonthName(DateTime.Now);
             ProgressDialogs.ForEach(exports, e => {
                 ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                 var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
