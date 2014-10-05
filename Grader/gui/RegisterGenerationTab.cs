@@ -182,13 +182,14 @@ namespace Grader.gui {
 
             var rwb = ExcelTemplates.LoadExcelTemplate(GetExcel(), this.settings.GetTemplateLocation(spec.templateName));
             ExcelWorksheet templateSheet = rwb.Worksheets.First();
+            bool isPredefinedList = personSelector.IsPredefinedList();
             ProgressDialogs.ForEach(soldiers.GroupBy(grouping.keySelector).OrderBy(group => group.Key), group => {
                 templateSheet.Copy(After: rwb.Worksheets.Last());
                 ExcelWorksheet rsh = rwb.Worksheets.Last();
                 rsh.Name = grouping.registerName(group.Key);
                 settings.soldiers = group.ToList();
                 settings.subunit = grouping.subunit(settings.soldiers);
-                if (personSelector.IsPredefinedList()) {
+                if (isPredefinedList) {
                     settings.subunitName = personSelector.predefinedPersonLists.GetRegisterName();
                 }
                 spec.Format(et, rsh, settings);
