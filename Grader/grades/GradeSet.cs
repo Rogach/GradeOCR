@@ -33,4 +33,28 @@ namespace Grader.grades {
             return sb.ToString();
         }
     }
+
+    public class ExtendedGradeSet {
+        public Dictionary<int, Оценка> grades;
+        
+        public ExtendedGradeSet() { }
+
+        public void AddGrade(Оценка grade) {
+            grades.AddOrReplace(grade.КодПредмета, grade);
+        }
+
+        public override string ToString() {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("GradeSet( ");
+            foreach (var g in grades) {
+                if (g.Value.ЭтоКомментарий) {
+                    sb.Append(String.Format("{0} = {1} ", g.Key, g.Value.Текст));
+                } else {
+                    sb.Append(String.Format("{0} = {1} ", g.Key, g.Value.Значение));
+                }
+            }
+            sb.Append(")");
+            return sb.ToString();
+        }
+    }
 }

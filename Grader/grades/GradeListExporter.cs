@@ -83,9 +83,9 @@ namespace Grader.grades {
                 ExcelWorksheet sh = wb.Worksheets.ToList().Find(s => s.Name == e.sheetName);
                 var subunitId = (from s in et.Подразделение where s.ИмяКраткое == e.subunitName select s.Код).First();
 
-                var soldiers = e.exactSubunit ?
+                var soldiers = (e.exactSubunit ?
                     Querying.GetSubunitSoldiersExact(et, subunitId, soldierQuery) :
-                    Querying.GetSubunitSoldiers(et, subunitId, soldierQuery);
+                    Querying.GetSubunitSoldiers(et, subunitId, soldierQuery)).ToList();
                 IQueryable<Оценка> allGradesQuery =
                     (e.exactSubunit ?
                     Grades.GetGradesForSubunitExact(et, gradeQuery, subunitId) :
@@ -100,6 +100,15 @@ namespace Grader.grades {
                     .ToList()
                     .GroupBy(g => g.КодПроверяемого)
                     .ToDictionary(t => t.Key, t => t.ToList());
+
+                List<int> gradeSoldierIds = grades.Keys.Where(id => soldiers.Find(v => v.Код == id) == default(Военнослужащий)).ToList();
+                List<Военнослужащий> gradeSoldiers = et.Военнослужащий.Where(v => gradeSoldierIds.Contains(v.Код)).ToList();
+                soldiers.AddRange(gradeSoldiers);
+                soldiers = (
+                    from s in soldiers
+                    orderby s.sortWeight descending, et.rankIdToOrder[s.КодЗвания] descending, s.Фамилия, s.Имя, s.Отчество
+                    select s
+                ).ToList();
 
                 Dictionary<int, Ведомость> registerCache =
                     (from g in allGradesQuery

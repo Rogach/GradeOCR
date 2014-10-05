@@ -91,6 +91,22 @@ namespace Grader.grades {
             return gradeSets.Values.ToList();
         }
 
+        public static List<ExtendedGradeSet> ExtendedGradeSets(Entities et, IQueryable<Оценка> gradeQuery) {
+            var query =
+                from g in gradeQuery
+
+                join register in et.Ведомость on g.КодВедомости equals register.Код
+
+                orderby register.ДатаЗаполнения
+
+                select g;
+            var gradeSets = new Dictionary<int, ExtendedGradeSet>();
+            foreach (var g in query) {
+                var gradeSet = gradeSets.GetOrElseInsertAndGet(g.КодПроверяемого, () => new ExtendedGradeSet());
+                gradeSet.AddGrade(g);
+            }
+            return gradeSets.Values.ToList();
+        }
     }
 
 

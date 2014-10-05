@@ -192,23 +192,11 @@ namespace Grader.gui {
             this.ResumeLayout(false);
         }
 
-        private void showGrades_Click(object sender, EventArgs e) {
+        private List<GradeDesc> FetchGrades() {
             List<string> selectedTags = RegisterEditor.SplitTags(tags.Text);
 
             DateTime dtFrom = dateFrom.Value.Date;
             DateTime dtTo = dateTo.Value.Date.AddDays(1);
-
-            List<SoldierDesc> soldiers = personSelector.GetPersonList().ConvertAll(v => 
-                new SoldierDesc { 
-                    rank = et.rankIdToName[v.КодЗвания], 
-                    soldierId = v.Код, 
-                    ФИО = 
-                        v.Фамилия + " " + 
-                        (v.Имя.Length > 0 ? v.Имя.Substring(0,1) : " ") + "." + 
-                        (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + "."
-                });
-            soldierIds = soldiers.Select(v => v.soldierId).ToList();
-            Dictionary<int, SoldierDesc> idToSoldierDesc = soldiers.ToDictionary(sd => sd.soldierId, sd => sd);
 
             IQueryable<int> registerIdQuery =
                 (from t in et.ВедомостьТег
@@ -221,10 +209,9 @@ namespace Grader.gui {
             List<int> registerIds = registerIdQuery.ToList();
 
             IQueryable<GradeDesc> gradeQuery =
-                from g in et.Оценка
+                from g in personSelector.GetGradeQuery()
                 join r in et.Ведомость on g.КодВедомости equals r.Код
                 where registerIds.Contains(r.Код)
-                where soldierIds.Contains(g.КодПроверяемого)
                 orderby r.ДатаЗаполнения
                 select new GradeDesc {
                     grade = g,
@@ -232,18 +219,52 @@ namespace Grader.gui {
                     virt = r.Виртуальная
                 };
 
-            originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
+            return gradeQuery.ToList();
+        }
 
-            List<GradeDesc> grades = gradeQuery.ToList();
+        private List<SoldierDesc> FetchSoldiers(List<GradeDesc> grades) {
+            List<Военнослужащий> selectedPersons = personSelector.GetPersonList();
+            List<int> selectedPersonIds = personSelector.GetPersonList().ConvertAll(v => v.Код);
+            List<int> gradePersonIds = grades.Select(g => g.grade.КодПроверяемого).Distinct().Where(gid => !selectedPersonIds.Contains(gid)).ToList();
+            if (!personSelector.IsPredefinedList()) {
+                selectedPersonIds.AddRange(gradePersonIds);
 
-            List<int> selectedSubjectsIds = subjectList.Text.Split(new char[] { ' ', ',', ';' })
-                .Where(s => s.Trim().Length > 0)
-                .Select(s => et.subjectNameToId[s.ToUpper()])
-                .ToList();
+                IQueryable<Военнослужащий> personQuery =
+                    from v in et.Военнослужащий
+                    where selectedPersonIds.Contains(v.Код)
+                    join r in et.Звание on v.КодЗвания equals r.Код
+                    orderby v.sortWeight descending, r.order descending, v.Фамилия, v.Имя, v.Отчество
+                    select v;
 
-            foreach (var gd in grades) {
-                gd.soldier = idToSoldierDesc[gd.grade.КодПроверяемого];
+                selectedPersons = personQuery.ToList();
+            } else {
+                IQueryable<Военнослужащий> personQuery =
+                    from v in et.Военнослужащий
+                    where gradePersonIds.Contains(v.Код)
+                    join r in et.Звание on v.КодЗвания equals r.Код
+                    orderby v.sortWeight descending, r.order descending, v.Фамилия, v.Имя, v.Отчество
+                    select v;
+                selectedPersons.AddRange(personQuery.ToList());
             }
+            return selectedPersons.ConvertAll(v =>
+                new SoldierDesc {
+                    rank = et.rankIdToName[v.КодЗвания],
+                    soldierId = v.Код,
+                    ФИО =
+                        v.Фамилия + " " +
+                        (v.Имя.Length > 0 ? v.Имя.Substring(0, 1) : " ") + "." +
+                        (v.Отчество.Length > 0 ? v.Отчество.Substring(0, 1) : " ") + "."
+                });
+        }
+
+        private void showGrades_Click(object sender, EventArgs e) {
+            List<GradeDesc> grades = FetchGrades();
+            List<SoldierDesc> soldiers = FetchSoldiers(grades);
+
+            soldierIds = soldiers.Select(v => v.soldierId).ToList();
+            Dictionary<int, SoldierDesc> idToSoldierDesc = soldiers.ToDictionary(sd => sd.soldierId, sd => sd);
+
+            originalGrades = new Dictionary<Tuple<int, int>, GradeDesc>();
 
             foreach (GradeDesc gd in grades) {
                 if (gd.grade.ЭтоКомментарий && gd.grade.Текст == "_") {
@@ -254,6 +275,10 @@ namespace Grader.gui {
                 }
             }
 
+            foreach (var gd in grades) {
+                gd.soldier = idToSoldierDesc[gd.grade.КодПроверяемого];
+            }
+
             gradeViewDataSet = new DataSet("gradeView");
             gradeViewDataTable = new DataTable("gradeView");
             gradeViewDataSet.Tables.Add(gradeViewDataTable);
@@ -262,6 +287,11 @@ namespace Grader.gui {
             gradeViewDataTable.Columns.Add(new DataColumn("ID"));
             gradeViewDataTable.Columns.Add(new DataColumn("Звание"));
             gradeViewDataTable.Columns.Add(new DataColumn("Фамилия И.О."));
+
+            List<int> selectedSubjectsIds = subjectList.Text.Split(new char[] { ' ', ',', ';' })
+                .Where(s => s.Trim().Length > 0)
+                .Select(s => et.subjectNameToId[s.ToUpper()])
+                .ToList();
 
             subjectIds = 
                 selectedSubjectsIds.Count != 0 ? 
