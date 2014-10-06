@@ -420,7 +420,6 @@ namespace Grader.gui {
             registerTags.AutoCompleteSource = AutoCompleteSource.CustomSource;
             registerTags.AutoCompleteCustomSource = new AutoCompleteStringCollection();
             registerTags.AutoCompleteCustomSource.AddRange(et.ВедомостьТег.Select(t => t.Тег).Distinct().ToArray());
-
         }
     }
 }

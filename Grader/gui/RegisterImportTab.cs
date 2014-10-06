@@ -14,11 +14,14 @@ using OCRUtil;
 namespace Grader.gui {
     class RegisterImportTab : TabPage {
         private Entities et;
+        private RegisterIndex registerIndex;
 
         private static string TAB_NAME = "Внесение ведомостей";
 
         public RegisterImportTab(Entities et) {
             this.et = et;
+            registerIndex = new RegisterIndex();
+            registerIndex.InitIndex(et);
             this.InitializeComponent();
         }
 
@@ -176,6 +179,7 @@ namespace Grader.gui {
                 SetRegisterPanelEnabled(false);
                 Register register = Util.Timed<Register>("get register", () => registerEditor.GetRegister());
                 Util.Timed("save register", () => RegisterMarshaller.SaveRegister(register, et));
+                registerIndex.UpdateIndex(et, register);
                 UpdateRegisterList();
                 registerEditor.SetRegister(registerEditor.GetEmptyRegister());
                 changesPending = false;
@@ -228,10 +232,11 @@ namespace Grader.gui {
                      virt = r.Виртуальная,
                      enabled = r.Включена
                  }).ToList();
-            string searchTerm = registerFilter.Text.Trim().ToLower();
-            if (searchTerm != "") {
+            string searchString = registerFilter.Text.Trim().ToLower();
+            if (searchString != "") {
+                HashSet<int> filteredRegisters = registerIndex.Search(searchString);
                 unsortedRegisters = unsortedRegisters.Where(reg => {
-                    return reg.name.ToLower().Contains(searchTerm);
+                    return filteredRegisters.Contains(reg.id);
                 }).ToList();
             }
             unsortedRegisters.OrderBy(r => r.name).OrderByDescending(r => r.fillDate.Date).ToList()

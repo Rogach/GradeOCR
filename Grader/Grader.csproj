@@ -163,6 +163,7 @@
     <Compile Include="gui\RegisterImportTab.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="model\RegisterIndex.cs" />
     <Compile Include="ocr\RegisterRecognition.cs" />
     <Compile Include="ocr\RegisterRecognitionForm.cs">
       <SubType>Form</SubType>

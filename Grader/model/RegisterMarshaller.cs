@@ -61,7 +61,7 @@ namespace Grader.model {
 
                 // save the register
 
-                et.Ведомость.AddObject(new Ведомость {
+                Ведомость r2 = new Ведомость {
                     Код = rid,
                     Название = register.name,
                     ДатаЗаполнения = register.fillDate,
@@ -69,8 +69,8 @@ namespace Grader.model {
                     ДатаИзменения = register.editDate.Value,
                     Виртуальная = register.virt,
                     Включена = register.enabled
-                });
-
+                };
+                et.Ведомость.AddObject(r2);
 
                 foreach (string tag in register.tags) {
                     et.ВедомостьТег.AddObject(new ВедомостьТег {
@@ -106,6 +106,8 @@ namespace Grader.model {
 
                 et.SaveChanges();
                 transaction.Commit();
+
+                register.id = r2.Код;
             } catch (Exception e) {
                 transaction.Rollback();
                 throw e;
