@@ -177,7 +177,7 @@ namespace Grader.grades {
                         orderby r.ДатаЗаполнения
                         select g;
 
-                    List<Оценка> gradeList = localGradeQuery.ToList();
+                    List<Оценка> gradeList = localGradeQuery.ToList().ApplyOverriding();
 
                     var gradeSets = gradeList.GroupBy(g => g.КодПроверяемого)
                         .OrderBy(gl => et.soldierIdToName[gl.Key])

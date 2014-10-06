@@ -91,21 +91,17 @@ namespace Grader.grades {
             return gradeSets.Values.ToList();
         }
 
-        public static List<ExtendedGradeSet> ExtendedGradeSets(Entities et, IQueryable<Оценка> gradeQuery) {
-            var query =
-                from g in gradeQuery
-
-                join register in et.Ведомость on g.КодВедомости equals register.Код
-
-                orderby register.ДатаЗаполнения
-
-                select g;
-            var gradeSets = new Dictionary<int, ExtendedGradeSet>();
-            foreach (var g in query) {
-                var gradeSet = gradeSets.GetOrElseInsertAndGet(g.КодПроверяемого, () => new ExtendedGradeSet());
-                gradeSet.AddGrade(g);
+        public static List<Оценка> ApplyOverriding(this List<Оценка> grades) {
+            Dictionary<Tuple<int, int>, Оценка> gradeDict = new Dictionary<Tuple<int, int>, Оценка>();
+            foreach (Оценка g in grades) {
+                var t = new Tuple<int, int>(g.КодПроверяемого, g.КодПредмета);
+                if (g.ЭтоКомментарий && g.Текст == "_") {
+                    gradeDict.Remove(t);
+                } else {
+                    gradeDict.AddOrReplace(t, g);
+                }
             }
-            return gradeSets.Values.ToList();
+            return gradeDict.Values.ToList();
         }
     }
 

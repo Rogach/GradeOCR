@@ -208,18 +208,26 @@ namespace Grader.gui {
                  select r.Код).Distinct();
             List<int> registerIds = registerIdQuery.ToList();
 
-            IQueryable<GradeDesc> gradeQuery =
+            IQueryable<Оценка> gradeQuery =
                 from g in personSelector.GetGradeQuery()
                 join r in et.Ведомость on g.КодВедомости equals r.Код
                 where registerIds.Contains(r.Код)
                 orderby r.ДатаЗаполнения
-                select new GradeDesc {
-                    grade = g,
-                    registerId = r.Код,
-                    virt = r.Виртуальная
-                };
+                select g;
+            List<Оценка> grades = gradeQuery.ToList().ApplyOverriding();
 
-            return gradeQuery.ToList();
+            Dictionary<int, Ведомость> registerCache =
+                (from r in et.Ведомость
+                 where registerIds.Contains(r.Код)
+                 select r).Distinct().ToList().ToDictionary(r => r.Код);
+
+            return grades.ConvertAll(g => {
+                return new GradeDesc {
+                    grade = g,
+                    registerId = g.КодВедомости,
+                    virt = registerCache[g.КодВедомости].Виртуальная
+                };
+            });
         }
 
         private List<SoldierDesc> FetchSoldiers(List<GradeDesc> grades) {

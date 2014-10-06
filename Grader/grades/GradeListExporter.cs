@@ -98,6 +98,7 @@ namespace Grader.grades {
                 
                 var grades = allGradesQuery
                     .ToList()
+                    .ApplyOverriding()
                     .GroupBy(g => g.КодПроверяемого)
                     .ToDictionary(t => t.Key, t => t.ToList());
 
@@ -129,16 +130,14 @@ namespace Grader.grades {
                             GradeSet gs = new GradeSet(null, null, et.subunitIdToInstance[gl.First().КодПодразделения], DateTime.Now);
                             foreach (string subj in subjects) {
                                 gl.Where(g => g.КодПредмета == et.subjectNameToId[subj]).ToList().LastOption().ForEach(g => {
-                                    if (!g.ЭтоКомментарий || g.Текст != "_") {
-                                        if (g.ЭтоКомментарий) {
-                                            r.Value = g.Текст;
-                                        } else {
-                                            r.Value = g.Значение;
-                                            gs.AddGrade(subj, g.Значение);
-                                        }
-                                        if (registerCache[g.КодВедомости].Виртуальная) {
-                                            r.BackgroundColor = ExcelEnums.Color.PaleVioletRed;
-                                        }
+                                    if (g.ЭтоКомментарий) {
+                                        r.Value = g.Текст;
+                                    } else {
+                                        r.Value = g.Значение;
+                                        gs.AddGrade(subj, g.Значение);
+                                    }
+                                    if (registerCache[g.КодВедомости].Виртуальная) {
+                                        r.BackgroundColor = ExcelEnums.Color.PaleVioletRed;
                                     }
                                 });
                                 r = r.GetOffset(0, 1);
