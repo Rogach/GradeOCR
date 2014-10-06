@@ -224,7 +224,7 @@ namespace Grader.gui {
 
         private List<SoldierDesc> FetchSoldiers(List<GradeDesc> grades) {
             List<Военнослужащий> selectedPersons = personSelector.GetPersonList();
-            List<int> selectedPersonIds = personSelector.GetPersonList().ConvertAll(v => v.Код);
+            List<int> selectedPersonIds = personSelector.GetPersonList().Where(v => !v.Убыл).ToList().ConvertAll(v => v.Код);
             List<int> gradePersonIds = grades.Select(g => g.grade.КодПроверяемого).Distinct().Where(gid => !selectedPersonIds.Contains(gid)).ToList();
             if (!personSelector.IsPredefinedList()) {
                 selectedPersonIds.AddRange(gradePersonIds);

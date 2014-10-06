@@ -62,9 +62,18 @@ namespace Grader.grades {
                         from register in et.Ведомость
                         where g.КодВедомости == register.Код
                         where register.ДатаЗаполнения >= date && register.ДатаЗаполнения <= dateEnd
+                        orderby register.ДатаЗаполнения
                         select g;
                     foreach (var subunitGrades in gradeQuery.ToList().GroupBy(g => g.КодПодразделения)) {
-                        var grades = subunitGrades.Select(g => (int) g.Значение).ToList();
+                        Dictionary<int, int> gradeDict = new Dictionary<int, int>();
+                        foreach (var g in subunitGrades) {
+                            if (g.ЭтоКомментарий && g.Текст == "_") {
+                                gradeDict.Remove(g.КодПроверяемого);
+                            } else if (!g.ЭтоКомментарий) {
+                                gradeDict.AddOrReplace(g.КодПроверяемого, (int) g.Значение);
+                            }
+                        }
+                        var grades = gradeDict.Values.ToList();
                         totalDateGrades.AddRange(grades);
                         GradeCalcGroup.ФормулаКурсантыПоПредмету(grades).ForEach(subjectGrade => {
                             subunitSummaryGrades.Add(subjectGrade);
