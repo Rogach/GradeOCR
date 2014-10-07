@@ -29,8 +29,6 @@ namespace Grader.gui {
         private ComboBox maxRankSelector;
         private ComboBox subjectSelector;
 
-        private Button gradeListButton;
-
         private Button gradeSummaryButton;
         private CheckBox withSummaryGrade;
 
@@ -70,9 +68,9 @@ namespace Grader.gui {
 
             this.SuspendLayout();
 
-            LayoutFilter();
-            LayoutAnalysis();
-            LayoutResults();
+            this.LayoutFilter();
+            this.LayoutAnalysis();
+            this.LayoutResults();
 
             this.ResumeLayout(false);
         }
@@ -225,20 +223,6 @@ namespace Grader.gui {
 
         private void LayoutAnalysis() {
             FormLayout layout = new FormLayout(this, x: 300, maxLabelWidth: 50);
-
-            gradeListButton = layout.AddFullRow(new Button());
-            gradeListButton.Text = "Список оценок";
-            gradeListButton.Click += new EventHandler(delegate {
-                errorProvider.Clear();
-                if (subjectSelector.SelectedItem == null) {
-                    errorProvider.SetError(subjectSelector, "Выберите предмет!");
-                    return;
-                }
-
-                TimeAnalysis("список оценок", () => {
-                    GradeListGenerator.GenerateGradeList(et, GetGradeQuery(), (string) subjectSelector.SelectedItem);
-                });
-            });
 
             gradeSummaryButton = layout.AddFullRow(new Button());
             gradeSummaryButton.Text = "Сводка";
