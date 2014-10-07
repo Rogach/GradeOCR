@@ -65,15 +65,7 @@ namespace Grader.grades {
                         orderby register.ДатаЗаполнения
                         select g;
                     foreach (var subunitGrades in gradeQuery.ToList().GroupBy(g => g.КодПодразделения)) {
-                        Dictionary<int, int> gradeDict = new Dictionary<int, int>();
-                        foreach (var g in subunitGrades) {
-                            if (g.ЭтоКомментарий && g.Текст == "_") {
-                                gradeDict.Remove(g.КодПроверяемого);
-                            } else if (!g.ЭтоКомментарий) {
-                                gradeDict.AddOrReplace(g.КодПроверяемого, (int) g.Значение);
-                            }
-                        }
-                        var grades = gradeDict.Values.ToList();
+                        var grades = subunitGrades.ToList().ApplyOverriding().Where(g => !g.ЭтоКомментарий).Select(g => (int) g.Значение).ToList();
                         totalDateGrades.AddRange(grades);
                         GradeCalcGroup.ФормулаКурсантыПоПредмету(grades).ForEach(subjectGrade => {
                             subunitSummaryGrades.Add(subjectGrade);
