@@ -133,9 +133,17 @@ namespace Grader.ocr {
                                                         КодЗвания = record.soldier.КодЗвания,
                                                         КодВедомости = -1
                                                     });
+                                                    
+                                                    if (registerSpec.gradeLocations.Count == 1) {
+                                                        PointF textPos = table.GetTopLeftCellCorner(cellX + 1, cellY);
+                                                        textPos = PointOps.Add(textPos, new PointF(0, 0));
+                                                        float textSize = table.rowHeights.Average();
+                                                        g.DrawString(recogResult.Grade.ToString(), new Font("Arial", textSize * 0.8f), new SolidBrush(Color.Magenta), textPos);
+                                                    }
                                                 }
                                                 table.GetCellContour(cellX, cellY).ForEach(cellContour => {
                                                     g.FillPath(new SolidBrush(Color.FromArgb(50, cellColor)), cellContour);
+                                                    
                                                 });
                                             });
                                         }

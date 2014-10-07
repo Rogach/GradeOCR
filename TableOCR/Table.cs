@@ -55,7 +55,7 @@ namespace TableOCR {
         /* 
          * Locates top-left cell corner at `x` column and `y` row.
          */
-        private PointF GetTopLeftCellCorner(int x, int y) {
+        public PointF GetTopLeftCellCorner(int x, int y) {
             PointF p = origin;
             for (int q = 0; q < x; q++) {
                 p = PointOps.Add(p, PointOps.Mult(horizontalNormal, columnWidths[q]));
