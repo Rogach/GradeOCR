@@ -296,7 +296,7 @@ namespace Grader.gui {
             gradeViewDataTable.Columns.Add(new DataColumn("Звание"));
             gradeViewDataTable.Columns.Add(new DataColumn("Фамилия И.О."));
 
-            List<int> selectedSubjectsIds = subjectList.Text.Split(new char[] { ' ', ',', ';' })
+            List<int> selectedSubjectsIds = subjectList.Text.Split(new char[] { ' ', ',', ';', '\t' })
                 .Where(s => s.Trim().Length > 0)
                 .Select(s => et.subjectNameToId[s.ToUpper()])
                 .ToList();
