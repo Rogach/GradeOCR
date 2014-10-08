@@ -11,6 +11,7 @@ using LibUtil;
 
 namespace Grader.grades {
     public static class AverageGradeTableGenerator {
+
         public static void GenerateTableWithResultsBySubunitType(
                 Entities et,
                 IQueryable<Оценка> gradeQuery,
@@ -19,7 +20,16 @@ namespace Grader.grades {
                 bool byVus, 
                 bool forAllSubunits,
                 bool forAllSubjects,
-                bool cadetsSelected) {
+                bool cadetsSelected,
+                bool transposeTable) {
+            
+            Func<ExcelRange, int, int, ExcelRange> GetOffset2 = (rng, row, col) => {
+                if (transposeTable) {
+                    return rng.GetOffset(col, row);
+                } else {
+                    return rng.GetOffset(row, col);
+                }
+            };
 
             if (byVus && subunitType != "цикл") {
                 throw new Exception("expecting cycles for byVus calculation");
@@ -32,14 +42,14 @@ namespace Grader.grades {
                 var subjects = et.Предмет.ToList();
                 var subunits = Querying.GetSubunitsByType(et, subunitType).ToList();
                 ProgressDialogs.WithProgress(subjects.Count * subunits.Count, pd => {
-                    var subunitNameCell = sh.GetRange("B1");
+                    var subunitNameCell = GetOffset2(sh.GetRange("A1"), 1, 0);
                     foreach (var subunit in subunits) {
                         subunitNameCell.Value = subunit.ИмяКраткое;
-                        subunitNameCell = subunitNameCell.GetOffset(0, 1);
+                        subunitNameCell = GetOffset2(subunitNameCell, 1, 0);;
                     }
-                    var subjectNameCell = sh.GetRange("A2");
+                    var subjectNameCell = GetOffset2(sh.GetRange("A1"), 0, 1);
                     foreach (var subj in subjects) {
-                        var c = subjectNameCell.GetOffset(0, 1);
+                        var c = GetOffset2(subjectNameCell, 1, 0);
                         int subunitCount = 0;
                         foreach (var subunit in subunits) {
                             List<int> grades = 
@@ -53,21 +63,21 @@ namespace Grader.grades {
                                 c.NumberFormat = "0.00";
                                 subunitCount++;
                             }
-                            c = c.GetOffset(0, 1);
+                            c = GetOffset2(c, 1, 0);
                             pd.Increment();
                         }
                         if (subunitCount > 0) {
                             subjectNameCell.Value = subj.Название;
-                            subjectNameCell = subjectNameCell.GetOffset(1, 0);
+                            subjectNameCell = GetOffset2(subjectNameCell, 0, 1);
                         }
                     }
                 });
             } else {
                 var c = sh.GetRange("A1");
-                c.GetOffset(1, 0).Value = "средняя";
-                c.GetOffset(2, 0).Value = "общая";
-                c.GetOffset(3, 0).Value = "место";
-                c = c.GetOffset(0, 1);
+                GetOffset2(c, 0, 1).Value = "средняя";
+                GetOffset2(c, 0, 2).Value = "общая";
+                GetOffset2(c, 0, 3).Value = "место";
+                c = GetOffset2(c, 1, 0);
                 var subunits = Querying.GetSubunitsByType(et, subunitType).ToList();
                 var subunitGrades = ProgressDialogs.Map(subunits, subunit => 
                     new {
@@ -95,11 +105,11 @@ namespace Grader.grades {
                         }
                     } else {
                         c.Value = subunit.ИмяКраткое;
-                        c.GetOffset(1, 0).Value = grades.Mean();
-                        c.GetOffset(1, 0).NumberFormat = "0.00";
+                        GetOffset2(c, 0, 1).NumberFormat = "0.00";
+                        GetOffset2(c, 0, 1).Value = grades.Mean();
                         if (byVus && cadetsSelected) {
                             GradeCalcGroup.КурсантыПоПредметуЗаЦикл(et, gradeQuery, subunit.Код, subjectName).ForEach(g => {
-                                c.GetOffset(2, 0).Value = g;
+                                GetOffset2(c, 0, 2).Value = g;
                             });
                         } else {
                             GradeCalcGroup.ОбщаяОценка(
@@ -109,16 +119,16 @@ namespace Grader.grades {
                                 subjectName,
                                 cadetsSelected,
                                 selectRelatedSubunits: true).ForEach(g => {
-                                c.GetOffset(2, 0).Value = g;
+                                    GetOffset2(c, 0, 2).Value = g;
                             });
                         }
-                        c.GetOffset(3, 0).Value = subunitIds.IndexOf(subunit.Код) + 1;
+                        GetOffset2(c, 0, 3).Value = subunitIds.IndexOf(subunit.Код) + 1;
                         if (subunitIds.First() == subunit.Код) {
-                            c.GetOffset(3, 0).BackgroundColor = ExcelEnums.Color.Green;
+                            GetOffset2(c, 0, 3).BackgroundColor = ExcelEnums.Color.Green;
                         } else if (subunitIds.Last() == subunit.Код) {
-                            c.GetOffset(3, 0).BackgroundColor = ExcelEnums.Color.Red;
+                            GetOffset2(c, 0, 3).BackgroundColor = ExcelEnums.Color.Red;
                         }
-                        c = c.GetOffset(0, 1);
+                        c = GetOffset2(c, 1, 0);
                     }
                 });
             }

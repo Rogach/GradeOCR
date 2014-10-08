@@ -48,6 +48,7 @@ namespace Grader.gui {
         private Button gradesByCycleButton;
         private CheckBox displayAllSubunits;
         private CheckBox displayAllSubjects;
+        private CheckBox transposeTable;
 
         private Button analysisButton;
         private ComboBox analysisType;
@@ -428,6 +429,9 @@ namespace Grader.gui {
             displayAllSubjects = layout.AddFullRow(new CheckBox());
             displayAllSubjects.Text = "Все предметы?";
 
+            transposeTable = layout.AddFullRow(new CheckBox());
+            transposeTable.Text = "Траспонировать таблицу?";
+
             layout.AddSpacer(15);
 
             analysisButton = layout.AddFullRow(new Button());
@@ -519,7 +523,8 @@ namespace Grader.gui {
                 byVus,
                 displayAllSubunits.Checked,
                 displayAllSubjects.Checked,
-                personFilter.selectCadets.Checked
+                personFilter.selectCadets.Checked,
+                transposeTable.Checked
             );
         }
 
