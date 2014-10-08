@@ -4,6 +4,7 @@ bin/
 obj/
 *.suo
 ocr-data/
+ocr-data.zip
 *.pfx
 *.user
 publish/
