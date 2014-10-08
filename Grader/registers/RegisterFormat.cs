@@ -105,7 +105,7 @@ namespace Grader.registers {
             try {
                 ExcelRange printArea = sh.GetRange("Область_печати");
                 float xScale = Math.Max((float) printArea.Width / ((21.0f - 2f) / 2.51f * 72), 1.0f);
-                float yScale = Math.Max((float) printArea.Height / ((29.7f - 3f) / 2.51f * 72), 1.0f);
+                float yScale = Math.Max((float) printArea.Height / ((29.7f - 2f) / 2.51f * 72), 1.0f);
                 scaleFactor = Math.Max(xScale, yScale);
             } catch (Exception ex) {
                 Console.WriteLine("Failed to find 'Область_печати' range in template file - no size correction for AR-code is performed");
