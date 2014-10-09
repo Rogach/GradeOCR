@@ -119,6 +119,26 @@ namespace Grader.grades {
             }
         }
 
+        public static Option<int> ФормулаПостоянныйСоставПоФПСУправлением(Option<int> hqGrade, List<int> grades) {
+            if (grades.Count == 0) {
+                return new None<int>();
+            } else {
+                List<int> allGrades = new List<int>();
+                allGrades.AddRange(grades);
+                if (hqGrade.NonEmpty()) allGrades.Add(hqGrade.Get());
+                Func<int, float> countGrades = c => (float) allGrades.Where(g => g == c).Count() / allGrades.Count;
+                if (hqGrade.Map(g => g == 5).GetOrElse(true) && countGrades(5) >= 0.5 && countGrades(3) == 0 && countGrades(2) == 0) {
+                    return Options.Create(5);
+                } else if (hqGrade.Map(g => g >= 4).GetOrElse(true) && countGrades(5) + countGrades(4) >= 0.5 && countGrades(2) == 0) {
+                    return Options.Create(4);
+                } else if (hqGrade.Map(g => g >= 3).GetOrElse(true) && countGrades(2) < 0.5) {
+                    return Options.Create(3);
+                } else {
+                    return Options.Create(2);
+                }
+            }
+        }
+
         public static Option<int> ФормулаПостоянныйСоставПоПредметам(List<int> grades) {
             if (grades.Count == 0) {
                 return new None<int>();
@@ -233,14 +253,18 @@ namespace Grader.grades {
         }
 
         public static Option<int> БоеваяПодготовкаПоПредметуЗаБатальон(Entities et, IEnumerable<GradeSet> gradeQuery, int batallionId, string subjectName) {
-            Option<int> hqGrade = 
-                gradeQuery.Where(g => g.subunit.Код == batallionId)
-                .GetSubjectGrades(subjectName)
-                .ФормулаПостоянныйСоставПоПредмету();
-            List<int> subunitGrades =
-                Querying.GetSlaveSubunitsByType(et, "рота", batallionId).ToList()
-                .ConvertAll(subunit => БоеваяПодготовкаПоПредметуЗаПодразделение(et, gradeQuery, subunit.Код, subjectName)).Flatten();
-            return ФормулаПостоянныйСоставПоПредметуСУправлением(hqGrade, subunitGrades);
+            if (subjectName == "ФП") {
+                return gradeQuery.GetSubjectGrades("ФП").ФормулаПостоянныйСоставПоПредмету();
+            } else {
+                Option<int> hqGrade =
+                    gradeQuery.Where(g => g.subunit.Код == batallionId)
+                    .GetSubjectGrades(subjectName)
+                    .ФормулаПостоянныйСоставПоПредмету();
+                List<int> subunitGrades =
+                    Querying.GetSlaveSubunitsByType(et, "рота", batallionId).ToList()
+                    .ConvertAll(subunit => БоеваяПодготовкаПоПредметуЗаПодразделение(et, gradeQuery, subunit.Код, subjectName)).Flatten();
+                return ФормулаПостоянныйСоставПоПредметуСУправлением(hqGrade, subunitGrades);
+            }
         }
 
         public static Option<int> БоеваяПодготовкаПоПредметуЗаЧасть(Entities et, IEnumerable<GradeSet> gradeQuery, string subjectName) {
@@ -258,7 +282,11 @@ namespace Grader.grades {
                     (from s in et.Подразделение where s.Имя == "УРС" select s.Код).First(),
                     subjectName);
             List<int> subunitGrades = batallionGrades.Concat(ursGrade.ToList()).ToList();
-            return ФормулаПостоянныйСоставПоПредметуСУправлением(hqGrade, subunitGrades);
+            if (subjectName == "ФП") {
+                return ФормулаПостоянныйСоставПоФПСУправлением(hqGrade, subunitGrades);
+            } else {
+                return ФормулаПостоянныйСоставПоПредметуСУправлением(hqGrade, subunitGrades);
+            }
         }
 
 
