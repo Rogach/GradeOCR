@@ -282,6 +282,8 @@ namespace Grader.registers {
         }
         public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             base.Format(et, sh, settings);
+            // this must be done before calling base function, because base function
+            // can add commanders to soldiers and fuck up vus set
             List<int> vuses = settings.soldiers.Select(s => s.ВУС).Distinct().ToList();
             if (vuses.Count == 1 && vuses.First() != 0) {
                 ExcelTemplates.AppendRange(sh, "ВУС", vuses.First());
@@ -314,13 +316,15 @@ namespace Grader.registers {
     }
     public class ВедомостьОВПиВУС : ВедомостьОВП {
         public override void Format(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
-            base.Format(et, sh, settings);
+            // this must be done before calling base function, because base function
+            // can add commanders to soldiers and fuck up vus set
             List<int> vuses = settings.soldiers.Select(s => s.ВУС).Distinct().ToList();
-            if (vuses.Count == 1) {
+            if (vuses.Count == 1 && vuses.First() != 0) {
                 ExcelTemplates.AppendRange(sh, "ВУС", vuses.First());
             } else {
                 ExcelTemplates.DeleteRow(sh, "ВУС");
             }
+            base.Format(et, sh, settings);
         }
     }
 
