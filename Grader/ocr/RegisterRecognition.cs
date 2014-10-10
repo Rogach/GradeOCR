@@ -19,7 +19,7 @@ namespace Grader.ocr {
         public static readonly int minFinderCircleRadius = 50;
         public static readonly int maxFinderCircleRadius = 70;
 
-        public static void RecognizeRegisterImage(Entities et, Bitmap sourceImage, Action onSave) {
+        public static void RecognizeRegisterImage(Entities et, Bitmap sourceImage, Action<Register> onSave) {
             using (Bitmap bwImage = ImageUtil.ToBlackAndWhite(sourceImage)) {
                 var formOpts = new RegisterRecognitionForm.Options {
                     sourceImage = sourceImage,

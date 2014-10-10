@@ -25,7 +25,7 @@ namespace Grader.ocr {
             public Option<DataMatrixExtraction> dmeOpt = new None<DataMatrixExtraction>();
             public int minFinderCircleRadius;
             public int maxFinderCircleRadius;
-            public Action onSave;
+            public Action<Register> onSave;
         }
 
         private PictureView ocrImagePV;
@@ -86,13 +86,14 @@ namespace Grader.ocr {
             });
 
             this.saveRegisterButton.Click += new EventHandler(delegate {
-                RegisterMarshaller.SaveRegister(registerEditor.GetRegister(), et);
+                Register register = registerEditor.GetRegister();
+                RegisterMarshaller.SaveRegister(register, et);
                 formOpts.registerInfoOpt.ForEach(registerInfo => {
                     registerInfo.ДатаВнесения = DateTime.Now;
                     et.SaveChanges();
                 });
                 this.Hide();
-                formOpts.onSave.Invoke();
+                formOpts.onSave(register);
                 this.Dispose();
             });
 

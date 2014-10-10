@@ -81,7 +81,14 @@ namespace Grader.gui {
                     ofd.Filter = "Файлы изображений|*.jpg;*.png;*.bmp";
                     if (ofd.ShowDialog() == DialogResult.OK) {
                         try {
-                            RegisterRecognition.RecognizeRegisterImage(et, ImageUtil.LoadImage(ofd.FileName), onSave: () => UpdateRegisterList());
+                            RegisterRecognition.RecognizeRegisterImage(
+                                et, 
+                                ImageUtil.LoadImage(ofd.FileName), 
+                                onSave: (reg) => {
+                                    registerIndex.AddToIndex(et, reg);
+                                    UpdateRegisterList();
+                                }
+                            );
                         } catch (WorkAbortedException) {
                             Console.WriteLine("task aborted");
                         }
