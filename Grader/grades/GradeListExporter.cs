@@ -96,11 +96,8 @@ namespace Grader.grades {
                     orderby r.ДатаЗаполнения
                     select g;
                 
-                var grades = allGradesQuery
-                    .ToList()
-                    .ApplyOverriding()
-                    .GroupBy(g => g.КодПроверяемого)
-                    .ToDictionary(t => t.Key, t => t.ToList());
+                List<Оценка> allGrades = allGradesQuery.ToList().ApplyOverriding();
+                var grades = allGrades.GroupBy(g => g.КодПроверяемого).ToDictionary(t => t.Key, t => t.ToList());
 
                 List<int> gradeSoldierIds = grades.Keys.Where(id => soldiers.Find(v => v.Код == id) == default(Военнослужащий)).ToList();
                 List<Военнослужащий> gradeSoldiers = et.Военнослужащий.Where(v => gradeSoldierIds.Contains(v.Код)).ToList();
@@ -118,7 +115,11 @@ namespace Grader.grades {
 
                 int c = 1;
                 List<Военнослужащий> realSoldiers = soldiers.ToList().Where(s => s.КодЗвания != et.rankNameToId["ГП"]).ToList();
-                ExcelTemplates.WithTemplateRow(sh.GetRange(e.rangeName), realSoldiers, displayProgress: true,
+                ExcelRange exportRange = sh.GetRange(e.rangeName);
+                ExcelRange subjectRange = exportRange.GetOffset(0, 2).GetOffset(1, 0);
+                List<int> soldierSummaryGrades = new List<int>();
+                
+                ExcelTemplates.WithTemplateRow(exportRange, realSoldiers, displayProgress: true,
                     format: (s, rng) => {
                         var r = rng;
                         r.GetOffset(0, -1).Value = c++;
@@ -143,11 +144,38 @@ namespace Grader.grades {
                                 r = r.GetOffset(0, 1);
                             }
                             GradeCalcIndividual.ОценкаКонтрактникиОБЩ(gs).ForEach(summGrade => {
+                                soldierSummaryGrades.Add(summGrade);
                                 r.Value = summGrade;
                             });
                         });
                         return true;
                 });
+
+                Dictionary<string, int> subjectSummaryGrades = new Dictionary<string, int>();
+                foreach (string subj in subjects) {
+                    subjectRange.NumberFormat = "0.00";
+                    List<int> subjectGrades = allGrades
+                        .Where(g => g.КодПредмета == et.subjectNameToId[subj])
+                        .Where(g => !g.ЭтоКомментарий)
+                        .Select(g => (int) g.Значение)
+                        .ToList();
+                    if (subjectGrades.Count > 0) {
+                        subjectRange.Value = subjectGrades.Average();
+                        GradeCalcGroup.ФормулаПостоянныйСоставПоПредмету(subjectGrades).ForEach(summaryGrade => {
+                            subjectSummaryGrades.Add(subj, summaryGrade);
+                            subjectRange.GetOffset(1, 0).Value = summaryGrade;
+                        });
+                    }
+                    subjectRange = subjectRange.GetOffset(0, 1);
+                }
+
+                if (soldierSummaryGrades.Count > 0) {
+                    subjectRange.NumberFormat = "0.00";
+                    subjectRange.Value = soldierSummaryGrades.Average();
+                }
+                GradeCalcGroup.БоеваяПодготовкаЗаПодразделение(subjectSummaryGrades, et.subunitIdToInstance[subunitId]).ForEach(subunitSummaryGrade => {
+                    subjectRange.GetOffset(1, 0).Value = subunitSummaryGrade;
+                }); 
             });
             ExcelTemplates.ActivateExcel(wb);
         }

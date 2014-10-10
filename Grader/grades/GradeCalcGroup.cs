@@ -317,16 +317,20 @@ namespace Grader.grades {
                 Dictionary<string, int> grades =
                     subjects.Select(subj => new { subj = subj, grade = БоеваяПодготовкаПоПредметуЗаПодразделение(et, gradeQuery, subunitId, subj) })
                     .Where(g => g.grade.NonEmpty()).ToDictionary(g => g.subj, g => g.grade.Get());
-                List<string> importantSubjects;
-                if (subunit.ПодразделениеОхраны) {
-                    importantSubjects = new List<string> { "ТСП", "СП", "ТП", "ОГН", "РХБЗ" };
-                } else {
-                    importantSubjects = new List<string> { "ТСП", "СП", "ТП", "РХБЗ" };
-                }
-                Option<int> maxGrade = importantSubjects.ConvertAll(subj => grades.GetOption(subj)).Flatten().MinOption();
-                Option<int> summGrade = ФормулаПостоянныйСоставПоПредметам(grades.Values.ToList());
-                return maxGrade.ToList().Concat(summGrade.ToList()).MinOption();
+                return БоеваяПодготовкаЗаПодразделение(grades, subunit);
             }
+        }
+
+        public static Option<int> БоеваяПодготовкаЗаПодразделение(Dictionary<string, int> grades, Подразделение subunit) {
+            List<string> importantSubjects;
+            if (subunit.ПодразделениеОхраны) {
+                importantSubjects = new List<string> { "ТСП", "СП", "ТП", "ОГН", "РХБЗ" };
+            } else {
+                importantSubjects = new List<string> { "ТСП", "СП", "ТП", "РХБЗ" };
+            }
+            Option<int> maxGrade = importantSubjects.ConvertAll(subj => grades.GetOption(subj)).Flatten().MinOption();
+            Option<int> summGrade = ФормулаПостоянныйСоставПоПредметам(grades.Values.ToList());
+            return maxGrade.ToList().Concat(summGrade.ToList()).MinOption();
         }
 
         public static Option<int> БоеваяПодготовкаЗаБатальон(Entities et, IEnumerable<GradeSet> gradeQuery, int batallionId) {
