@@ -126,6 +126,7 @@ namespace Grader.gui {
             FormLayout layout2 = new FormLayout(this, maxLabelWidth: 87, y: layout.GetY() + 5 + personFilter.Height + 10);
 
             tags = layout2.Add("Тэги", new TextBox());
+            GuiUtils.SetToolTip(tags, "Тэг месяца или группы, по которому производится поиск ведомостей в базе например ОФ-КЗ-2015-07 или ПС-КЗ-2014-11");
             tags.TextChanged += new EventHandler(delegate {
                 errorProvider.SetError(tags, null);
                 settings.gradeAnalysisTags.SetValue(tags.Text);
@@ -226,7 +227,8 @@ namespace Grader.gui {
             FormLayout layout = new FormLayout(this, x: 300, maxLabelWidth: 50);
 
             gradeSummaryButton = layout.AddFullRow(new Button());
-            gradeSummaryButton.Text = "Сводка";
+            gradeSummaryButton.Text = "Сводка по предмету";
+            GuiUtils.SetToolTip(gradeSummaryButton,"Выводит 5,4,3 и 2 по заданному предмету количественно и в %.");
             gradeSummaryButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
                 bool errors = false;
@@ -264,6 +266,7 @@ namespace Grader.gui {
 
             averageGradesForAllSubjectsButton = layout.AddFullRow(new Button());
             averageGradesForAllSubjectsButton.Text = "Средние оценки по всем предметам";
+            GuiUtils.SetToolTip(averageGradesForAllSubjectsButton, "Средние оценки в текстовом формате по всем предметам");
             averageGradesForAllSubjectsButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
                 TimeAnalysis("средние оценки по всем предметам", () => {
@@ -346,6 +349,7 @@ namespace Grader.gui {
 
             dzdButton = layout.AddFullRow(new Button());
             dzdButton.Text = "День за днем";
+            GuiUtils.SetToolTip(dzdButton, "Вывод в Excel справки \"день за днём\"");
             dzdButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
@@ -361,6 +365,7 @@ namespace Grader.gui {
 
             gradesByBatallionButton = layout.AddFullRow(new Button());
             gradesByBatallionButton.Text = "Оценки по батальонам";
+            GuiUtils.SetToolTip(gradesByBatallionButton, "Вывод в Excel средних оценок по батальонам. \n Для всех предметов: \"Все предметы?\"- вкл \n Для одного предмета: \"Все предметы?\"- выкл");
             gradesByBatallionButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
@@ -376,6 +381,7 @@ namespace Grader.gui {
 
             gradesByCompanyButton = layout.AddFullRow(new Button());
             gradesByCompanyButton.Text = "Оценки по ротам";
+            GuiUtils.SetToolTip(gradesByCompanyButton, "Вывод в Excel средних оценок по ротам. \n Для всех предметов: \"Все предметы?\"- вкл \n Для одного предмета: \"Все предметы?\"- выкл");
             gradesByCompanyButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
@@ -391,6 +397,7 @@ namespace Grader.gui {
 
             gradesByPlatoonButton = layout.AddFullRow(new Button());
             gradesByPlatoonButton.Text = "Оценки по взводам";
+            GuiUtils.SetToolTip(gradesByPlatoonButton, "Вывод в Excel средних оценок по взводам. \n Для всех предметов: \"Все предметы?\"- вкл \n Для одного предмета: \"Все предметы?\"- выкл");
             gradesByPlatoonButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 
@@ -406,6 +413,7 @@ namespace Grader.gui {
 
             gradesByCycleButton = layout.AddFullRow(new Button());
             gradesByCycleButton.Text = "Оценки по циклам";
+            GuiUtils.SetToolTip(gradesByCycleButton, "Вывод в Excel средних оценок по циклам. \n Для всех предметов: \"Все предметы?\"- вкл \n Для одного предмета: \"Все предметы?\"- выкл");
             gradesByCycleButton.Click += new EventHandler(delegate {
                 errorProvider.Clear();
 

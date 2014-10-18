@@ -56,7 +56,7 @@ namespace Grader.gui {
             onlyKMN = layout.Add("Только КМН?", new CheckBox());
 
             strikeKMN = layout.Add("Пометить КМН", new CheckBox());
-            GuiUtils.SetToolTip(layout, strikeKMN, "\"Представлен на экзамен в составе уч. гр. кандидатов на должности МК\"");
+            GuiUtils.SetToolTip(layout, strikeKMN, "\"Представлен на экзамен в составе уч. гр. кандидатов на должности МК\"\n Учитывайте, что ОГН КМН-щики сдают в составе взвода и помечать их не нужно!");
 
             layout.AddSpacer(10);
 

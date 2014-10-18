@@ -55,6 +55,7 @@ namespace Grader.gui {
 
             newRegisterButton = new Button();
             newRegisterButton.Text = "Новая ведомость";
+            GuiUtils.SetToolTip(newRegisterButton, "Вызывает фильтр базы данных для ввода ведомости вручную");
             newRegisterButton.Location = new Point(3, 3);
             newRegisterButton.Size = new Size(300, 25);
             newRegisterButton.Click += new EventHandler(delegate {
@@ -71,6 +72,7 @@ namespace Grader.gui {
 
             recognizeRegisterButton = new Button();
             recognizeRegisterButton.Text = "Распознать ведомость";
+            GuiUtils.SetToolTip(recognizeRegisterButton, "Вызывает окно ввода отсканированной ведомости (используетются только ведомости оснащенные ПлатонКОД-ом)");
             recognizeRegisterButton.Location = new Point(3, 30);
             recognizeRegisterButton.Size = new Size(300, 25);
             recognizeRegisterButton.Click += new EventHandler(delegate {
