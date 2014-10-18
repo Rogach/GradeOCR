@@ -194,6 +194,8 @@ namespace Grader.gui {
             int minRankOrder = et.rankNameToOrder[(string) minRankSelector.SelectedItem];
             int maxRankOrder = et.rankNameToOrder[(string) maxRankSelector.SelectedItem];
 
+            bool dateFromChecked = dateFrom.Checked;
+            bool dateToChecked = dateTo.Checked;
             return
                 from grade in personFilter.GetGradeQuery()
 
@@ -205,8 +207,8 @@ namespace Grader.gui {
                 where grade.КодВедомости == r.Код
 
                 where r.Включена
-                where !dateFrom.Checked || r.ДатаЗаполнения >= dtFrom
-                where !dateTo.Checked || r.ДатаЗаполнения <= dtTo
+                where !dateFromChecked || r.ДатаЗаполнения >= dtFrom
+                where !dateToChecked || r.ДатаЗаполнения <= dtTo
 
                 where selectedTags.Count == 0 ||
                     (from t in et.ВедомостьТег

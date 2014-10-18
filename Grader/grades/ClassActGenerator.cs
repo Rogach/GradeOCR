@@ -24,7 +24,8 @@ namespace Grader.grades {
             var platoonIds =
                 Querying.GetSubunitsByType(et, "взвод")
                 .Where(s => s.ТипОбучения == "срочники")
-                .Select(s => s.Код);
+                .Select(s => s.Код)
+                .ToList();
             ProgressDialogs.ForEach(platoonIds, subunitId => {
                 templateSheet.Copy(After: wb.Worksheets.Last());
                 ExcelWorksheet rsh = wb.Worksheets.Last();
@@ -62,7 +63,6 @@ namespace Grader.grades {
                 new List<Func<Военнослужащий, string>> { s => et.rankIdToName[s.КодЗвания], s => s.ФИО() });
             ExcelTemplates.InsertPlainListMulti(sh, "СписокЧленов2", comissionMembers,
                 new List<Func<Военнослужащий, string>> { s => et.rankIdToName[s.КодЗвания], s => "", s => "", s => s.ФИО() });
-
             var gradeSets =
                 Grades.GradeSets(et, Grades.GetGradesForSubunit(et, gradeQuery, subunit.Код)).OrderBy(gs => gs.soldier.ФИО())
                 .Where(gs => GradeCalcIndividual.ДопускНаКлассностьКурсанты(gs));
