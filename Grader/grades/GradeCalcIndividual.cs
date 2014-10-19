@@ -79,8 +79,8 @@ namespace Grader.grades {
         public static Option<int> ОценкаКонтрактникиВАЖНЫЕ(GradeSet gradeSet) {
             List<string> importantSubjects =
                 gradeSet.subunit.ПодразделениеОхраны ?
-                new List<string> { "ТСП", "СП", "ТП ", "ФП", "РХБЗ", "МП", "ОГН" } :
-                new List<string> { "ТСП", "СП", "ТП", "ФП", "РХБЗ", "МП" };
+                new List<string> { "ТСП", "СП", "ТП", "ФП", "РХБЗ", "ОГН" } : // Платон не умеет писать комментарии, по этому его напишу я:)
+                new List<string> { "ТСП", "СП", "ТП", "ФП", "РХБЗ" };         // список основных предметов здесь.
             var importantGrades = importantSubjects.ConvertAll(s => gradeSet.grades.GetOption(s)).Flatten();
             var mobGrade = gradeSet.grades.GetOption("МОБ");
             if (mobGrade.Filter(mob => mob == 2).IsEmpty()) {

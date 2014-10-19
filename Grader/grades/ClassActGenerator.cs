@@ -42,7 +42,7 @@ namespace Grader.grades {
                 Подразделение subunit = et.subunitIdToInstance[subunitId];
                 var vusList = gradeSets.Select(gs => gs.soldier.ВУС).Distinct();
                 if (vusList.Count() > 1) {
-                    Console.WriteLine("Several possible vuses for {0}, won't generate act", subunit.ИмяКраткое);
+                    Console.WriteLine("Several possible VUSes for {0}, won't generate act", subunit.ИмяКраткое);
                 }
                 if (gradeSets.Count() > 0 && vusList.Count() == 1) {
                     templateSheet.Copy(After: wb.Worksheets.Last());
