@@ -101,7 +101,7 @@ namespace Grader.grades {
                     if (grades.Count == 0) {
                         if (forAllSubunits) {
                             c.Value = subunit.ИмяКраткое;
-                            c = c.GetOffset(0, 1);
+                            c = GetOffset2(c, 1, 0);
                         }
                     } else {
                         c.Value = subunit.ИмяКраткое;
