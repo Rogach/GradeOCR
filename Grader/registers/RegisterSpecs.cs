@@ -36,6 +36,7 @@ namespace Grader.registers {
                 case "сводная (невыносимые)": return new СводнаяНевыносимыеПредметыВедомость();
                 case "сверка": return new СверочнаяВедомость();
                 case "ОГН": return new ВедомостьОГН();
+                case "ОГН (урс)": return new ВедомостьОГН_урс();
                 case "ОВУ": return new GenericRegister("ОВУ");
                 case "СП": return new ВедомостьСП();
                 case "СПТП": return new ВедомостьСПТП();
@@ -63,6 +64,7 @@ namespace Grader.registers {
             new СводнаяНевыносимыеПредметыВедомость(),
             new СверочнаяВедомость(),
             new ВедомостьОГН(),
+            new ВедомостьОГН_урс(),
             new GenericRegister("ОВУ"),
             new ВедомостьСП(),
             new ВедомостьСПТП(),
@@ -234,13 +236,27 @@ namespace Grader.registers {
             specName = "ОГН";
             templateName = "ведомость_курсанты_ОГН.xlsx";
             gradeColumnCount = 13;
-            tableLastColumn = 15;
+            tableLastColumn = 16;
             gradeLocations = new List<GradeLocation> {
                 new GradeLocation("ОГН", new Point(12, 1))
             };
         }
         public override string ToString() { return "ОГН"; }
     }
+
+    public class ВедомостьОГН_урс : GeneralRegister {
+        public ВедомостьОГН_урс() {
+            specName = "ОГН (урс)";
+            templateName = "ведомость_урс_ОГН.xlsx";
+            gradeColumnCount = 12;
+            tableLastColumn = 14;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("ОГН", new Point(14, 1))
+            };
+        }
+        public override string ToString() { return "ОГН (урс)"; }
+    }
+
     public class ВедомостьПолныеИмена : GeneralRegister {
         override public void InsertSoldiers(Entities et, ExcelWorksheet sh, RegisterSettings settings) {
             RegisterFormat.InsertSoldierList(
