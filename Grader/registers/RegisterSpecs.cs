@@ -43,7 +43,7 @@ namespace Grader.registers {
                 case "СТР": return new ВедомостьСТР();
                 case "ТП": return new ВедомостьТП();
                 case "ФП": return new ВедомостьФП();
-                case "РХБЗ": return new ВедомостьФП();
+                case "РХБЗ": return new ВедомостьРХБЗ();
                 case "АВТ": return new GenericRegister("АВТ");
                 case "ОБВС": return new GenericRegister("ОБВС");
                 case "ОЗГТ": return new GenericRegister("ОЗГТ");
