@@ -75,6 +75,7 @@ namespace Grader.grades {
                 select new { 
                     grade = g.Значение,
                     isComment = g.ЭтоКомментарий,
+                    vus = g.ВУС,
                     soldier, 
                     rank, 
                     subunit, 
@@ -82,10 +83,20 @@ namespace Grader.grades {
                     subj = subj.Название 
                 };
             var gradeSets = new Dictionary<int, GradeSet>();
+            Dictionary<int, int> soldierVus = new Dictionary<int, int>(); 
             foreach (var g in query) {
                 if (!g.isComment) {
                     var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, g.date));
                     gradeSet.AddGrade(g.subj, g.grade);
+                }
+
+                Option<int> vus = soldierVus.GetOption(g.soldier.Код);
+                if (vus.NonEmpty()) {
+                    if (vus.Get() != g.vus) {
+                        Console.WriteLine("Several vuses for soldier #{0}", g.soldier.Код);
+                    }
+                } else {
+                    soldierVus.Add(g.soldier.Код, g.vus);
                 }
             }
             return gradeSets.Values.ToList();
