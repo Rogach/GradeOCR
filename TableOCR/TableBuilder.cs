@@ -97,6 +97,11 @@ namespace TableOCR {
                 rows.Add(new RowInfo { topLine = rowLines[r], bottomLine = rowLines[r + 1], dividers = new List<float>() });
             }
 
+            if (rows.Count == 0) {
+                Console.WriteLine("No rows were recognized in input image");
+                return;
+            }
+
             // calculate vertical row dividers
             foreach (var row in rows) {
                 foreach (var ln in vertLines) {
@@ -238,7 +243,11 @@ namespace TableOCR {
         private double RowDividerDifferenceScore(RowInfo r1, RowInfo r2) {
             HashSet<float> dividers1 = new HashSet<float>(r1.dividers);
             HashSet<float> dividers2 = new HashSet<float>(r2.dividers);
-            return 1 - (double) dividers1.Intersect(dividers2).Count() / dividers1.Union(dividers2).Count();
+            if (dividers1.Count > 0 && dividers2.Count > 0) {
+                return 1 - (double) dividers1.Intersect(dividers2).Count() / dividers1.Union(dividers2).Count();
+            } else {
+                return 0;
+            }
         }
 
         private float RowHeight(RowInfo r) {
