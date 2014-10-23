@@ -37,6 +37,9 @@ namespace Grader.gui {
         private Button allClassnostActsButton;
         private Button classnostListButton;
 
+        private Button releaseOrderTableButton;
+        private Button classnonstOrderButton;
+
         private Button currentSummaryButton;
 
         private Button dzdButton;
@@ -332,6 +335,28 @@ namespace Grader.gui {
 
                 TimeAnalysis("список с классностью", () => {
                     ClassListGenerator.GenerateClassList(et, GetGradeQuery());
+                });
+            });
+
+            layout.AddSpacer(15);
+
+            releaseOrderTableButton = layout.AddFullRow(new Button());
+            releaseOrderTableButton.Text = "В приказ на выпуск";
+            releaseOrderTableButton.Click += new EventHandler(delegate {
+                errorProvider.Clear();
+
+                TimeAnalysis("приказ на выпуск", () => {
+                    ReleaseOrderTableGenerator.GenerateReleaseOrderTable(et, GetGradeQuery());
+                });
+            });
+
+            classnonstOrderButton = layout.AddFullRow(new Button());
+            classnonstOrderButton.Text = "В приказ на классность";
+            classnonstOrderButton.Click += new EventHandler(delegate {
+                errorProvider.Clear();
+
+                TimeAnalysis("приказ на классность", () => {
+                    ReleaseOrderTableGenerator.GenerateClassnostOrderTable(et, GetGradeQuery());
                 });
             });
 
