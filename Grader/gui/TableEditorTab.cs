@@ -307,7 +307,7 @@ namespace Grader.gui {
             tableView.Location = new Point(3, 30);
             tableView.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
             tableView.AllowUserToOrderColumns = false;
-            tableView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            tableView.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             SetUpTableEventHandlers();
             this.Controls.Add(tableView);
 
