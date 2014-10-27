@@ -88,15 +88,18 @@ namespace Grader.grades {
                 if (!g.isComment) {
                     var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, g.date));
                     gradeSet.AddGrade(g.subj, g.grade);
-                }
 
-                Option<int> vus = soldierVus.GetOption(g.soldier.Код);
-                if (vus.NonEmpty()) {
-                    if (vus.Get() != g.vus) {
-                        Console.WriteLine("Several vuses for soldier #{0}", g.soldier.Код);
+                    Option<int> vus = soldierVus.GetOption(g.soldier.Код);
+                    if (vus.NonEmpty()) {
+                        if (vus.Get() != g.vus) {
+                            Console.WriteLine("Several vuses for soldier #{0}", g.soldier.Код);
+                        }
+                    } else {
+                        soldierVus.Add(g.soldier.Код, g.vus);
                     }
                 } else {
-                    soldierVus.Add(g.soldier.Код, g.vus);
+                    var gradeSet = gradeSets.GetOrElseInsertAndGet(g.soldier.Код, () => new GradeSet(g.soldier, g.rank, g.subunit, g.date));
+                    gradeSet.grades.Remove(g.subj);
                 }
             }
             return gradeSets.Values.ToList();
