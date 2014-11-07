@@ -324,9 +324,9 @@ namespace Grader.grades {
         public static Option<int> БоеваяПодготовкаЗаПодразделение(Dictionary<string, int> grades, Подразделение subunit) {
             List<string> importantSubjects;
             if (subunit.ПодразделениеОхраны) {
-                importantSubjects = new List<string> { "ТСП", "СП", "ТП", "ОГН", "РХБЗ" };
+                importantSubjects = new List<string> { "ТСП", "СП", "ТП", "ФП", "ОГН", "РХБЗ" };
             } else {
-                importantSubjects = new List<string> { "ТСП", "СП", "ТП", "РХБЗ" };
+                importantSubjects = new List<string> { "ТСП", "СП", "ТП", "ФП", "РХБЗ" };
             }
             Option<int> maxGrade = importantSubjects.ConvertAll(subj => grades.GetOption(subj)).Flatten().MinOption();
             Option<int> summGrade = ФормулаПостоянныйСоставПоПредметам(grades.Values.ToList());
