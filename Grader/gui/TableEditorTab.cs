@@ -128,11 +128,15 @@ namespace Grader.gui {
                                 }
                             },
                             (obj, value) => {
-                                string name = ((string) value).Trim();
-                                if (name.Length != 0 && et.soldierNameToId.ContainsKey(name)) {
-                                    ((Подразделение) obj).КодКомандира = et.soldierNameToId[name];
-                                } else {
+                                if (value == null || value.GetType() != typeof(string)) {
                                     ((Подразделение) obj).КодКомандира = null;
+                                } else {
+                                    string name = ((string) value).Trim();
+                                    if (name.Length != 0 && et.soldierNameToId.ContainsKey(name)) {
+                                        ((Подразделение) obj).КодКомандира = et.soldierNameToId[name];
+                                    } else {
+                                        ((Подразделение) obj).КодКомандира = null;
+                                    }
                                 }
                             },
                             et.soldierNameCache),
