@@ -53,7 +53,7 @@ namespace Grader.registers {
                 case "ВМП": return new GenericRegister("ВМП");
                 case "ТСП": return new GenericRegister("ТСП");
                 case "ТОП": return new GenericRegister("ТОП");
-                case "МП": return new GenericRegister("МП");
+                case "МП":  return new ВедомостьМП();
                 case "ТАК": return new GenericRegister("ТАК");
                 default: throw new ArgumentException("Unknown register spec: " + specName);
             }
@@ -81,9 +81,21 @@ namespace Grader.registers {
             new GenericRegister("ВМП"),
             new GenericRegister("ТСП"),
             new GenericRegister("ТОП"),
-            new GenericRegister("МП"),
+            new ВедомостьМП(),
             new GenericRegister("ТАК")
         };
+    }
+    public class ВедомостьМП : ВедомостьОВП {
+        public ВедомостьМП() {
+            specName = "МП";
+            templateName = "ведомость_МП.xlsx";
+            gradeColumnCount = 11;
+            tableLastColumn = 13;
+            gradeLocations = new List<GradeLocation> {
+                new GradeLocation("МП", new Point(13, 1))
+            };
+        }
+        public override string ToString() { return "МП"; }
     }
 
     public abstract class GeneralRegister : RegisterSpec {
