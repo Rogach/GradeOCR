@@ -115,7 +115,7 @@ namespace Grader.grades {
         }
 
         public static Option<int> ОценкаУрсВАЖНЫЕ(GradeSet gradeSet) {
-            var importantGrades = new List<string> { "CП", "ТП", "ФП", "РХБЗ", "МП" }.ConvertAll(s => gradeSet.grades.GetOption(s)).Flatten();
+            var importantGrades = new List<string> { "CП", "ТП", "ФП", "РХБЗ" }.ConvertAll(s => gradeSet.grades.GetOption(s)).Flatten();
             if (importantGrades.Count() == 0) {
                 return new None<int>();
             } else {
